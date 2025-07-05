@@ -115,6 +115,11 @@ class ProfileUpdate(ProfileBase):
     address: Optional[str] = None
     linkedin_url: Optional[str] = None
     summary: Optional[str] = None
+    
+    educations: Optional[List[EducationUpdate]] = []
+    experiences: Optional[List[ExperienceUpdate]] = []
+    skills: Optional[List[str]] = []  
+    certificates: Optional[List[CertificateUpdate]] = []
 
 class ProfileInDBBase(ProfileBase):
     id: int

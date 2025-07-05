@@ -25,6 +25,13 @@ class Profile(Base):
     address: Mapped[str] = mapped_column(String, nullable=True)
     linkedin_url: Mapped[str] = mapped_column(String, nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=True)
+    
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False
+    )
 
     user: Mapped["User"] = relationship(back_populates="profile")
     educations: Mapped[list["Education"]] = relationship(cascade="all, delete-orphan")
