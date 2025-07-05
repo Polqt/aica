@@ -18,7 +18,6 @@ class Profile(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
 
     # Personal Details
-
     first_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     last_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     professional_title: Mapped[str] = mapped_column(String, index=True, nullable=False)

@@ -11,3 +11,4 @@ passlib[bcrypt]
 python-jose[cryptography]
 
 pydantic-settings~=2.6.1
+python-multipart
