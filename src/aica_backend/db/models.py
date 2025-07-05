@@ -5,10 +5,10 @@ import datetime
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
 
     profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete-orphan")
 
@@ -30,7 +30,7 @@ class Profile(Base):
     user: Mapped["User"] = relationship(back_populates="profile")
     educations: Mapped[list["Education"]] = relationship(cascade="all, delete-orphan")
     experiences: Mapped[list["Experience"]] = relationship(cascade="all, delete-orphan")
-    skills: Mapped[list["Skill"]] = relationship(secondary="profile_skill_link")
+    skills: Mapped[list["Skill"]] = relationship(secondary="profile_skill_link", back_populates="profiles")
     certificates: Mapped[list["Certificate"]] = relationship(cascade="all, delete-orphan")
 
 class Education(Base):
@@ -57,6 +57,8 @@ class Skill(Base):
     __tablename__ = "skills"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    
+    profiles: Mapped[list["Profile"]] = relationship(secondary="profile_skill_link", back_populates="skills")
 
 class ProfileSkillLink(Base):
     __tablename__ = "profile_skill_link"
@@ -70,4 +72,3 @@ class Certificate(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     issuing_organization: Mapped[str] = mapped_column(String)
     issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
-
