@@ -1,15 +1,20 @@
 fastapi
 uvicorn[standard]
 
-sqlalchemy~=2.0.39
-psycopg2-binary~=2.9.10
+sqlalchemy
+psycopg2-binary
 
 pydantic[email]
 python-dotenv
 
 passlib[bcrypt]
-bcrypt<4.1.0 
+bcrypt
 python-jose[cryptography]
 
-pydantic-settings~=2.6.1
+pydantic-settings
 python-multipart
+
+celery[redis]
+crawl4ai
+sentence-transformers
+langchain
