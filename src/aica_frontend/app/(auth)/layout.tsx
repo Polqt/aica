@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from 'sonner';
 
 export default function AuthLayout({
@@ -6,9 +7,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <AuthProvider>
       <Toaster />
       {children}
-    </>
+    </AuthProvider>
   );
 }

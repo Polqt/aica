@@ -13,11 +13,9 @@ import {
 } from '@/components/ui/resizable-navbar';
 import { useState } from 'react';
 import { ModeToggle } from './ModeToggle';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export function Navbar() {
-  const router = useRouter();
-
   const navItems = [
     {
       name: 'About',
@@ -28,14 +26,6 @@ export function Navbar() {
       link: '/paper',
     },
   ];
-
-  const loginButton = () => {
-    router.push('/login');
-  }
-
-  const registerButton = () => {
-    router.push('/sign-up');
-  }
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -48,18 +38,12 @@ export function Navbar() {
           <NavItems items={navItems} />
           <div className="flex items-center gap-4 z-10">
             <ModeToggle />
-            <button
-              onClick={loginButton}
-              className="hidden md:block"
-            >
-              <NavbarButton variant="secondary">Login</NavbarButton>
-            </button>
-            <button
-              onClick={registerButton}
-              className="hidden md:block"
-            >
-              <NavbarButton variant="primary">Signup</NavbarButton>
-            </button>
+            <NavbarButton as={Link} href="/login" variant="secondary">
+              Login
+            </NavbarButton>
+            <NavbarButton as={Link} href="/sign-up" variant="primary">
+              Sign Up
+            </NavbarButton>
           </div>
         </NavBody>
 
@@ -90,19 +74,25 @@ export function Navbar() {
             ))}
             <div className="flex w-full flex-col gap-4">
               <NavbarButton
+                as={Link}
+                href="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
+                variant="secondary"
                 className="w-full"
               >
                 Login
               </NavbarButton>
-              <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
-                variant="primary"
-                className="w-full"
-              >
-                Register
-              </NavbarButton>
+              <Link href={'/sign-up'} className="w-full">
+                <NavbarButton
+                  as={Link}
+                  href="/sign-up"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  variant="primary"
+                  className="w-full"
+                >
+                  Sign Up
+                </NavbarButton>
+              </Link>
             </div>
           </MobileNavMenu>
         </MobileNav>

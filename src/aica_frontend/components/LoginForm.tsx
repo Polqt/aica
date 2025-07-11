@@ -1,12 +1,14 @@
 'use client';
 
 import z from 'zod';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 const loginFormSchema = z.object({
   email: z.email({ pattern: z.regexes.email }),
@@ -16,6 +18,9 @@ const loginFormSchema = z.object({
 });
 
 export default function LoginForm() {
+  const { login } = useAuth();
+  const router = useRouter();
+  const [apiError, setApiError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -24,8 +29,15 @@ export default function LoginForm() {
     },
   });
 
-  function loginOnSubmit(values: z.infer<typeof loginFormSchema>) {
-    console.log(values);
+  async function loginOnSubmit(values: z.infer<typeof loginFormSchema>) {
+    setApiError(null);
+
+    try {
+      await login(values.email, values.password);
+      router.push('/dashboard');
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 
   return (
@@ -38,7 +50,12 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="aica@example.com" {...field} />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="aica@example.com"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -50,12 +67,17 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input id="password" type="password" {...field} />
               </FormControl>
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        {apiError && (
+          <p className="text-sm font-medium text-destructive">{apiError}</p>
+        )}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
+        </Button>
       </form>
     </Form>
   );
