@@ -8,6 +8,7 @@ import {
   useMotionValueEvent,
 } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 
 import React, { useRef, useState } from "react";
 
@@ -232,18 +233,18 @@ export const MobileNavToggle = ({
 
 export const NavbarLogo = () => {
   return (
-    <a
-      href="#"
+    <Link
+      href="/"
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
       <Image
-        src="https://assets.aceternity.com/logo-dark.png"
+        src="/cat.jpg"
         alt="logo"
         width={30}
         height={30}
       />
       <span className="font-medium text-black dark:text-white">AI Career Assistant</span>
-    </a>
+    </Link>
   );
 };
 

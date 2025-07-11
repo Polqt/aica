@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Navbar as ResizableNavbar,
@@ -10,28 +10,35 @@ import {
   MobileNavHeader,
   MobileNavToggle,
   MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
-import { useState } from "react";
-import { ModeToggle } from "./ModeToggle";
- 
+} from '@/components/ui/resizable-navbar';
+import { useState } from 'react';
+import { ModeToggle } from './ModeToggle';
+import { useRouter } from 'next/navigation';
+
 export function Navbar() {
+  const router = useRouter();
+
   const navItems = [
     {
-      name: "Home",
-      link: "/",
+      name: 'About',
+      link: '/about',
     },
     {
-      name: "About",
-      link: "/about",
-    },
-    {
-      name: "Paper",
-      link: "/paper",
+      name: 'Paper',
+      link: '/paper',
     },
   ];
- 
+
+  const loginButton = () => {
+    router.push('/login');
+  }
+
+  const registerButton = () => {
+    router.push('/sign-up');
+  }
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
- 
+
   return (
     <div className="relative w-full">
       <ResizableNavbar>
@@ -39,13 +46,23 @@ export function Navbar() {
         <NavBody>
           <NavbarLogo />
           <NavItems items={navItems} />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 z-10">
             <ModeToggle />
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="primary">Signup</NavbarButton>
+            <button
+              onClick={loginButton}
+              className="hidden md:block"
+            >
+              <NavbarButton variant="secondary">Login</NavbarButton>
+            </button>
+            <button
+              onClick={registerButton}
+              className="hidden md:block"
+            >
+              <NavbarButton variant="primary">Signup</NavbarButton>
+            </button>
           </div>
         </NavBody>
- 
+
         {/* Mobile Navigation */}
         <MobileNav>
           <MobileNavHeader>
@@ -55,7 +72,7 @@ export function Navbar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             />
           </MobileNavHeader>
- 
+
           <MobileNavMenu
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
