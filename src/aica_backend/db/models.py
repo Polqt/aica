@@ -18,9 +18,9 @@ class Profile(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
 
     # Personal Details
-    first_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    last_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    professional_title: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(String, index=True, nullable=True)
+    last_name: Mapped[str] = mapped_column(String, index=True, nullable=True)
+    professional_title: Mapped[str] = mapped_column(String, index=True, nullable=True)
     contact_number: Mapped[str] = mapped_column(String, index=True, nullable=True)
     address: Mapped[str] = mapped_column(String, nullable=True)
     linkedin_url: Mapped[str] = mapped_column(String, nullable=True)
@@ -43,8 +43,8 @@ class Education(Base):
     __tablename__ = "educations"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
-    institution_name: Mapped[str] = mapped_column(String, nullable=False)
-    degree: Mapped[str] = mapped_column(String, nullable=False)
+    institution_name: Mapped[str] = mapped_column(String, nullable=True)
+    degree: Mapped[str] = mapped_column(String, nullable=True)
     field_of_study: Mapped[str] = mapped_column(String)
     start_date: Mapped[datetime.date] = mapped_column(Date)
     end_date: Mapped[datetime.date] = mapped_column(Date)
@@ -62,7 +62,7 @@ class Experience(Base):
 class Skill(Base):
     __tablename__ = "skills"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=True)
     
     profiles: Mapped[list["Profile"]] = relationship(secondary="profile_skill_link", back_populates="skills")
 
@@ -75,6 +75,6 @@ class Certificate(Base):
     __tablename__ = "certificates"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=True)
     issuing_organization: Mapped[str] = mapped_column(String)
     issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)

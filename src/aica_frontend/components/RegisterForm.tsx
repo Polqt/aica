@@ -86,7 +86,7 @@ export default function RegisterForm() {
           <p className="text-sm font-medium text-destructive">{apiError}</p>
         )}
         <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Registering...' : 'Submit'}
+          {form.formState.isSubmitting ? 'Registering...' : 'Continue'}
         </Button>
       </form>
     </Form>
