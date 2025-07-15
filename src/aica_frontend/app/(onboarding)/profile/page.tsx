@@ -100,7 +100,7 @@ export default function Profle() {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a professional title that suits to your skills" />
+                    <SelectValue  />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

@@ -1,84 +1,98 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Date, JSON
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from .base_class import Base
+from sqlalchemy import String, DateTime, Date, Text, ForeignKey, Boolean, JSON
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
+from .base_class import Base
 import datetime
+from typing import List
 
 class User(Base):
     __tablename__ = "users"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now)
 
-    profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete-orphan")
+    profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete-orphan", uselist=False)
 
 class Profile(Base):
     __tablename__ = "profiles"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
 
-    # Personal Details
-    first_name: Mapped[str] = mapped_column(String, index=True, nullable=True)
-    last_name: Mapped[str] = mapped_column(String, index=True, nullable=True)
-    professional_title: Mapped[str] = mapped_column(String, index=True, nullable=True)
-    contact_number: Mapped[str] = mapped_column(String, index=True, nullable=True)
-    address: Mapped[str] = mapped_column(String, nullable=True)
-    linkedin_url: Mapped[str] = mapped_column(String, nullable=True)
-    summary: Mapped[str] = mapped_column(Text, nullable=True)
-    
-    created_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime, default=datetime.datetime.utcnow, nullable=False
-    )
+    first_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    professional_title: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    contact_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    address: Mapped[str] = mapped_column(String, nullable=False)
+    linkedin_url: Mapped[str] = mapped_column(String, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    profile_picture: Mapped[str] = mapped_column(String, nullable=False)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now)
     updated_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False
+        default=datetime.datetime.now, onupdate=datetime.datetime.now
     )
 
     user: Mapped["User"] = relationship(back_populates="profile")
-    educations: Mapped[list["Education"]] = relationship(cascade="all, delete-orphan")
-    experiences: Mapped[list["Experience"]] = relationship(cascade="all, delete-orphan")
-    skills: Mapped[list["Skill"]] = relationship(secondary="profile_skill_link", back_populates="profiles")
-    certificates: Mapped[list["Certificate"]] = relationship(cascade="all, delete-orphan")
+
+    educations: Mapped[List["Education"]] = relationship(cascade="all, delete-orphan")
+    experiences: Mapped[List["Experience"]] = relationship(cascade="all, delete-orphan")
+    certificates: Mapped[List["Certificate"]] = relationship(cascade="all, delete-orphan")
+    skills: Mapped[List["Skill"]] = relationship(secondary="profile_skill_link", back_populates="profiles")
 
 class Education(Base):
     __tablename__ = "educations"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
-    institution_name: Mapped[str] = mapped_column(String, nullable=True)
-    degree: Mapped[str] = mapped_column(String, nullable=True)
-    field_of_study: Mapped[str] = mapped_column(String)
-    start_date: Mapped[datetime.date] = mapped_column(Date)
-    end_date: Mapped[datetime.date] = mapped_column(Date)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
+
+    institution_name: Mapped[str] = mapped_column(String, nullable=False)
+    degree: Mapped[str] = mapped_column(String, nullable=False)
+    field_of_study: Mapped[str] = mapped_column(String, nullable=False)
+    start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
 
 class Experience(Base):
     __tablename__ = "experiences"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
-    job_title: Mapped[str] = mapped_column(String, nullable=True)
-    company_name: Mapped[str] = mapped_column(String, nullable=True)
-    start_date: Mapped[datetime.date] = mapped_column(Date)
-    end_date: Mapped[datetime.date] = mapped_column(Date)
-    description: Mapped[list[str]] = mapped_column(JSON, nullable=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
+
+    job_title: Mapped[str] = mapped_column(String, nullable=False)
+    company_name: Mapped[str] = mapped_column(String, nullable=False)
+    start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    is_current: Mapped[bool] = mapped_column(Boolean, default=False)
+    description: Mapped[List[str]] = mapped_column(JSON, nullable=False)
 
 class Skill(Base):
     __tablename__ = "skills"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=True)
-    
-    profiles: Mapped[list["Profile"]] = relationship(secondary="profile_skill_link", back_populates="skills")
+    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+
+    profiles: Mapped[List["Profile"]] = relationship(secondary="profile_skill_link", back_populates="skills")
+
 
 class ProfileSkillLink(Base):
     __tablename__ = "profile_skill_link"
+
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
     skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), primary_key=True)
 
 class Certificate(Base):
     __tablename__ = "certificates"
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
-    name: Mapped[str] = mapped_column(String, nullable=True)
-    issuing_organization: Mapped[str] = mapped_column(String)
-    issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
+
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    issuing_organization: Mapped[str] = mapped_column(String, nullable=False)
+    issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    credential_url: Mapped[str] = mapped_column(String, nullable=False)
+    credential_id: Mapped[str] = mapped_column(String, nullable=False)
 
 class JobPosting(Base):
     __tablename__ = "job_postings"
@@ -90,10 +104,10 @@ class JobPosting(Base):
 
     job_title: Mapped[str] = mapped_column(String, nullable=True, index=True)
     company_name: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    extracted_skills = Mapped[list[str]] = mapped_column(JSON, nullable=True)
+    extracted_skills: Mapped[list[str]] = mapped_column(JSON, nullable=True)
 
     embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
     status: Mapped[str] = mapped_column(String, default="raw", index=True)
 
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
-    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

@@ -18,6 +18,7 @@ import z from 'zod';
 
 const educationFormSchema = z.object({
   institution_name: z.string().min(2, 'Institution name is required'), // TODO: Add institution validation
+  location: z.string().min(2, 'Location is required'),
   degree: z.string().min(2, 'Degree is required'), // TODO: Tech education only
   field_of_study: z.string().min(2, 'Field of study is required'),
   start_date: z.string(),
@@ -76,7 +77,7 @@ export default function Education() {
           name="degree"
           render={({ field }) => (
             <FormItem>
-              <FormLabel></FormLabel>
+              <FormLabel>Degree</FormLabel>
               <FormControl>
                 <Input placeholder="" {...field} />
               </FormControl>
@@ -89,7 +90,7 @@ export default function Education() {
           name="field_of_study"
           render={({ field }) => (
             <FormItem>
-              <FormLabel></FormLabel>
+              <FormLabel>Field of Study</FormLabel>
               <FormControl>
                 <Input placeholder="" {...field} />
               </FormControl>
