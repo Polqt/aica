@@ -1,10 +1,19 @@
 from celery import Celery
-import os
+from celery.schedules import crontab
 
-redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+from ..core.config import settings
 
-celery_app = Celery('workers', broker=redis_url, backend=redis_url, include=['aica_backend.workers.tasks.scraping_tasks', 'aica_backend.workers.tasks.enrichment_tasks'])
-
-celery_app.conf.update(
-    task_track_started = True,
+celery_app = Celery(
+    "workers",
+    broker=settings.REDIS_URL,
+    backend=settings.REDIS_URL,
+    include=["aica_backend.workers.tasks.data_pipeline_tasks"]
 )
+
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        crontab(hour=8, minute=0),
+        # run_full_job_pipeline.s(),
+        name='Run daily job scraping pipeline'
+    )

@@ -1,4 +1,4 @@
-import { ProfileUpdate } from '@/types/profile';
+import { ProfileUpdate } from '@/lib/types/profile';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 

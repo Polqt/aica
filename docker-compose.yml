@@ -16,6 +16,12 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: aica_redis
+    ports:
+      - "6379:6379"
+
   api:
     build: .
     container_name: aica_api
@@ -29,6 +35,29 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build: .
+    container_name: aica_worker
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+    command: celery -A aica_backend.workers.celery_app.celery_app worker --loglevel=info -P gevent
+    depends_on:
+      - redis
+      - postgres
+
+  scheduler:
+    build: .
+    container_name: aica_scheduler
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+    command: celery -A aica_backend.workers.celery_app.celery_app beat -l info --scheduler
 
 volumes:
   postgres_data:

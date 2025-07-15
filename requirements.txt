@@ -18,3 +18,5 @@ celery[redis]
 crawl4ai
 sentence-transformers
 langchain
+sentence-transformers
+pgvector

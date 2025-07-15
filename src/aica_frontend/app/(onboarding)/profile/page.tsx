@@ -9,7 +9,13 @@ import {
   FormLabel,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import apiClient from '@/lib/api';
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { apiClient } from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -46,10 +52,15 @@ export default function Profle() {
 
     try {
       const result = await apiClient.updateCurrentUserProfile(values);
+
+      if (result) {
+        router.push('/education');
+      }
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
     }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -61,6 +72,80 @@ export default function Profle() {
               <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input placeholder="Juan" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="last_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Dela Cruz" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* TODO: Change it to a with options that uses api for tech */}
+        <FormField
+          control={form.control}
+          name="professional_title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Professional Title</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a professional title that suits to your skills" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
+        {/* TODO: Change it to a api phone number for all country */}
+        <FormField
+          control={form.control}
+          name="contact_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contact Number</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. +1234567890" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Manila, Philippines" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="linkedin_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>LinkedIn URL</FormLabel>
+              <FormControl>
+                <Input {...field} />
               </FormControl>
             </FormItem>
           )}

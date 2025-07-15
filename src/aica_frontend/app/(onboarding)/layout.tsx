@@ -4,10 +4,11 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 
 const steps = [
-  { path: '/profile', name: 'Personal Details', step: 1 },
+  { path: '/profile', name: 'Personal Info', step: 1 },
   { path: '/education', name: 'Education', step: 2 },
   { path: '/experience', name: 'Work Experience', step: 3 },
   { path: '/skills', name: 'Skills & Summary', step: 4 },
+  { path: '/certifications', name: 'Certifications', step: 5},
 ];
 
 export default function OnboardingLayout({

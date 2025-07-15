@@ -1,6 +1,6 @@
 'use client';
 
-import apiClient from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextProps {

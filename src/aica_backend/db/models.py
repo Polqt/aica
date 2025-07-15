@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Date, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from .base_class import Base
+from pgvector.sqlalchemy import Vector
 import datetime
 
 class User(Base):
@@ -78,3 +79,21 @@ class Certificate(Base):
     name: Mapped[str] = mapped_column(String, nullable=True)
     issuing_organization: Mapped[str] = mapped_column(String)
     issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
+
+class JobPosting(Base):
+    __tablename__ = "job_postings"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    source_url = Mapped[str] = mapped_column(String, unique=True, index=True)
+    source_site = Mapped[str] = mapped_column(String, index=True)
+
+    full_text: Mapped[str] = mapped_column(Text, nullable=True)
+
+    job_title: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    company_name: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    extracted_skills = Mapped[list[str]] = mapped_column(JSON, nullable=True)
+
+    embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
+    status: Mapped[str] = mapped_column(String, default="raw", index=True)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)

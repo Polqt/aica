@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 const registerFormSchema = z.object({
