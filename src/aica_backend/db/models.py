@@ -49,10 +49,12 @@ class Education(Base):
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
 
     institution_name: Mapped[str] = mapped_column(String, nullable=False)
+    address: Mapped[str] = mapped_column(String, nullable=False)
     degree: Mapped[str] = mapped_column(String, nullable=False)
-    field_of_study: Mapped[str] = mapped_column(String, nullable=False)
+    field_of_study: Mapped[str] = mapped_column(String, nullable=True)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
 
 class Experience(Base):
     __tablename__ = "experiences"

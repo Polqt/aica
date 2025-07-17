@@ -15,25 +15,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { apiClient } from '@/lib/api';
+import { Textarea } from '@/components/ui/textarea';
+import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import Image from 'next/image';
 
 const profileFormSchema = z.object({
   first_name: z.string().min(2, 'First name is required'),
   last_name: z.string().min(2, 'Last name is required'),
   professional_title: z.string().min(2, 'Professional title is required'),
-  contact_number: z.string().optional(),
-  location: z.string().optional(),
+  contact_number: z.string().min(7, 'Invalid contact number'),
+  address: z.string().min(3, 'Address is required'),
   linkedin_url: z.string().url('Enter a valid LinkedIn URL').optional(),
+  summary: z.string().min(20, 'Tell us a little more about you'),
+  profile_picture: z.string().optional(),
 });
 
 export default function Profle() {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
+  const { updateData } = useOnboarding();
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -42,8 +49,10 @@ export default function Profle() {
       last_name: '',
       professional_title: '',
       contact_number: '',
-      location: '',
+      address: '',
       linkedin_url: '',
+      summary: '',
+      profile_picture: '',
     },
   });
 
@@ -51,11 +60,8 @@ export default function Profle() {
     setApiError(null);
 
     try {
-      const result = await apiClient.updateCurrentUserProfile(values);
-
-      if (result) {
-        router.push('/education');
-      }
+      updateData(values);
+      router.push('/education');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
     }
@@ -100,18 +106,15 @@ export default function Profle() {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue  />
+                    <SelectValue />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  
-                </SelectContent>
+                <SelectContent></SelectContent>
               </Select>
             </FormItem>
           )}
         />
 
-        {/* TODO: Change it to a api phone number for all country */}
         <FormField
           control={form.control}
           name="contact_number"
@@ -119,7 +122,13 @@ export default function Profle() {
             <FormItem>
               <FormLabel>Contact Number</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. +1234567890" {...field} />
+                <PhoneInput
+                  country={'ph'}
+                  value={field.value}
+                  onChange={field.onChange}
+                  containerClass="!w-full"
+                  inputClass="!w-full !bg-background !text-foreground !border-border"
+                />
               </FormControl>
             </FormItem>
           )}
@@ -127,7 +136,7 @@ export default function Profle() {
 
         <FormField
           control={form.control}
-          name="location"
+          name="address"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Address</FormLabel>
@@ -146,6 +155,58 @@ export default function Profle() {
               <FormLabel>LinkedIn URL</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="summary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Summary</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Tell us about yourself..." {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* TODO: Use a platform to handle the image (cloudinary) */}
+        <FormField
+          control={form.control}
+          name="profile_picture"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Picture</FormLabel>
+              <FormControl>
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          const base64String = reader.result as string;
+                          field.onChange(base64String);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  {field.value && (
+                    <Image
+                      src={field.value}
+                      alt="Profile Picture"
+                      width={100}
+                      height={100}
+                      className="rounded-full object-cover"
+                    />
+                  )}
+                </div>
               </FormControl>
             </FormItem>
           )}

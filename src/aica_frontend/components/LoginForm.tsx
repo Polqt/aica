@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const loginFormSchema = z.object({
   email: z.email({ pattern: z.regexes.email }),

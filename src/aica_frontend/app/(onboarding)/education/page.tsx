@@ -1,56 +1,71 @@
 'use client';
 
+import EducationCard from '@/components/EducationCard';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { apiClient } from '@/lib/api';
+import { Form } from '@/components/ui/form';
+import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import z from 'zod';
 
-const educationFormSchema = z.object({
+const educationItemSchema = z.object({
   institution_name: z.string().min(2, 'Institution name is required'), // TODO: Add institution validation
   location: z.string().min(2, 'Location is required'),
-  degree: z.string().min(2, 'Degree is required'), // TODO: Tech education only
-  field_of_study: z.string().min(2, 'Field of study is required'),
+  degree: z.string().min(2, 'Degree is required'),
+  field_of_study: z.string().optional(), // TODO: Tech education only
   start_date: z.string(),
-  end_date: z.string().optional(),
+  end_date: z.string(),
+  description: z.string().optional(),
+});
+
+const educationFormSchema = z.object({
+  educations: z
+    .array(educationItemSchema)
+    .min(1, 'At least one education is required'),
 });
 
 export default function Education() {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
+  const { updateData } = useOnboarding();
+  const [expandedIndexes, setExpandedIndexes] = useState<number[]>([0]);
 
   const form = useForm<z.infer<typeof educationFormSchema>>({
     resolver: zodResolver(educationFormSchema),
     defaultValues: {
-      institution_name: '',
-      degree: '',
-      field_of_study: '',
-      start_date: '',
-      end_date: '',
+      educations: [
+        {
+          institution_name: '',
+          location: '',
+          degree: '',
+          field_of_study: '',
+          start_date: '',
+          end_date: '',
+          description: '',
+        },
+      ],
     },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'educations',
+  });
+
+  const toggleExpand = (index: number) => {
+    setExpandedIndexes(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index],
+    );
+  };
 
   async function onSubmit(values: z.infer<typeof educationFormSchema>) {
     setApiError(null);
 
     try {
-      const result = await apiClient.updateCurrentUserProfile({
-        educations: [values],
-      });
-
-      if (result) {
-        router.push('/experience');
-      }
+      updateData({ educations: values.educations });
+      router.push('/experience');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
     }
@@ -59,50 +74,37 @@ export default function Education() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="institution_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Institution Name</FormLabel>
-              <FormControl>
-                <Input placeholder="USLS - Bacolod" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        {fields.map((field, index) => (
+          <EducationCard
+            key={field.id}
+            index={index}
+            isExpanded={expandedIndexes.includes(index)}
+            toggleExpand={toggleExpand}
+            remove={remove}
+            canRemove={fields.length > 1}
+          />
+        ))}
 
-        <FormField
-          control={form.control}
-          name="degree"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Degree</FormLabel>
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <Button
+          type="button"
+          variant={'outline'}
+          onClick={() =>
+            append({
+              institution_name: '',
+              location: '',
+              degree: '',
+              field_of_study: '',
+              start_date: '',
+              end_date: '',
+              description: '',
+            })
+          }
+        >
+          + Add Another Education
+        </Button>
 
-        <FormField
-          control={form.control}
-          name="field_of_study"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Field of Study</FormLabel>
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        {apiError && <div className="text-red-500 text-sm">{apiError}</div>}
 
-        {/* TODO: Add the forms later */}
-
-        {apiError && (
-          <p className="text-sm font-medium text-destructive">{apiError}</p>
-        )}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

@@ -5,20 +5,24 @@ from datetime import datetime, date
 # Education
 class EducationBase(BaseModel):
     institution_name: str
+    address: str
     degree: str
     field_of_study: str
     start_date: date
     end_date: date
+    description: str
 
 class EducationCreate(EducationBase):
     pass
 
 class EducationUpdate(BaseModel):
     institution_name: str
+    address: str
     degree: str
     field_of_study: str
     start_date: date
     end_date: date
+    description: str
 
 class Education(EducationBase):
     id: int

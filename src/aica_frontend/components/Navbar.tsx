@@ -12,7 +12,6 @@ import {
   MobileNavMenu,
 } from '@/components/ui/resizable-navbar';
 import { useState } from 'react';
-import { ModeToggle } from './ModeToggle';
 import Link from 'next/link';
 
 export function Navbar() {
@@ -37,7 +36,6 @@ export function Navbar() {
           <NavbarLogo />
           <NavItems items={navItems} />
           <div className="flex items-center gap-4 z-10">
-            <ModeToggle />
             <NavbarButton as={Link} href="/login" variant="secondary">
               Login
             </NavbarButton>
@@ -61,7 +59,6 @@ export function Navbar() {
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
           >
-            <ModeToggle />
             {navItems.map((item, idx) => (
               <a
                 key={`mobile-link-${idx}`}

@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider } from '@/lib/context/AuthContext';
 import { Toaster } from 'sonner';
 
 export default function AuthLayout({

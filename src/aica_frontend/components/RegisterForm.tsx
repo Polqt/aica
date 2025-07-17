@@ -9,7 +9,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const registerFormSchema = z.object({
   email: z.email({ pattern: z.regexes.email }),
