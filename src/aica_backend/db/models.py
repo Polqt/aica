@@ -99,8 +99,8 @@ class Certificate(Base):
 class JobPosting(Base):
     __tablename__ = "job_postings"
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    source_url = Mapped[str] = mapped_column(String, unique=True, index=True)
-    source_site = Mapped[str] = mapped_column(String, index=True)
+    source_url: Mapped[str] = mapped_column(String, unique=True, index=True)
+    source_site: Mapped[str] = mapped_column(String, index=True)
 
     full_text: Mapped[str] = mapped_column(Text, nullable=True)
 

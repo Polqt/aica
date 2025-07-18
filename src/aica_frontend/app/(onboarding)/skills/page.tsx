@@ -11,9 +11,12 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import z from 'zod';
 
 const skillFormSchema = z.object({
-  skills: z.array(z.string().min(1, 'At least one skill is required')),
+  skills: z.array(
+    z.object({
+      name: z.string().min(1, 'Skill is required'),
+    }),
+  ),
 });
-
 export default function Skills() {
   const router = useRouter();
   const { updateData } = useOnboarding();
@@ -22,7 +25,7 @@ export default function Skills() {
   const form = useForm<z.infer<typeof skillFormSchema>>({
     resolver: zodResolver(skillFormSchema),
     defaultValues: {
-      skills: [''],
+      skills: [{ name: '' }],
     },
   });
 
@@ -33,7 +36,9 @@ export default function Skills() {
 
   async function onSubmit(values: z.infer<typeof skillFormSchema>) {
     try {
-      updateData({ skills: values.skills });
+      const skillNames = values.skills.map(skill => skill.name);
+
+      updateData({ skills: skillNames });
       router.push('/certificates');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
@@ -53,7 +58,11 @@ export default function Skills() {
             />
           ))}
 
-          <Button type="button" variant="outline" onClick={() => append('')}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ name: '' })}
+          >
             + Add Another Skill
           </Button>
 

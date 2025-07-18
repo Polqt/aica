@@ -28,7 +28,6 @@ export default function CertificateCard({
     `certificates.${index}.issuing_organization`,
   );
   const issueDate = watch(`certificates.${index}.issue_date`);
-  const credentialUrl = watch(`certificates.${index}.credential_url`);
   const credentialId = watch(`certificates.${index}.credential_id`);
 
   return (
@@ -51,6 +50,19 @@ export default function CertificateCard({
 
       {isExpanded && (
         <div className="pt-3 space-y-4">
+          <FormField
+            control={control}
+            name={`certificates.${index}.credential_url`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Credential URL</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={control}
             name={`certificates.${index}.name`}

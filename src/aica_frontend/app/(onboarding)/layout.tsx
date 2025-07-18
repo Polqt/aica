@@ -9,7 +9,7 @@ const steps = [
   { path: '/education', name: 'Education', step: 2 },
   { path: '/experience', name: 'Work Experience', step: 3 },
   { path: '/skills', name: 'Skills & Summary', step: 4 },
-  { path: '/certifications', name: 'Certifications', step: 5 },
+  { path: '/certificate', name: 'Certificate', step: 5 },
 ];
 
 export default function OnboardingLayout({

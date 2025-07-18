@@ -6,7 +6,7 @@ from ...db.session import SessionLocal
 from ...crud import crud_jobs
 
 from crawl4ai import AsyncWebCrawler
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 from typing import List
 

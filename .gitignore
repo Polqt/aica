@@ -69,3 +69,11 @@ out/
 .env.test.local
 .env.production.local
 *.env
+
+# Database data
+data/
+/data/
+
+# Docker
+.dockerignore
+docker-compose.override.yml

@@ -1,14 +1,14 @@
 FROM python:3.11-slim
 
-WORKDIR /app/src
+WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src
 
 COPY requirements.txt .
 RUN pip install --default-timeout=300 --no-cache-dir -r requirements.txt
 
-COPY ./src /app/src
+COPY ./src/ ./src/
 
 EXPOSE 8000

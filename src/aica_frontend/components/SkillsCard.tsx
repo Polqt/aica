@@ -23,7 +23,7 @@ export default function SkillsCard({
     <div className="border rounded-mg p-4 bg-muted space-y-3">
       <FormField
         control={control}
-        name={`skills.${index}`}
+        name={`skills.${index}.name`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Skill</FormLabel>

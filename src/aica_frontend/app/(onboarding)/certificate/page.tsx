@@ -1,5 +1,7 @@
 'use client';
 
+import CertificateCard from '@/components/CertificateCard';
+import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +14,7 @@ const certificateItemSchema = z.object({
   name: z.string().min(1, 'Certificate name is required'),
   issuing_organization: z.string().min(1, 'Issuing organization is required'),
   issue_date: z.string().optional(),
-  credential_url: z.string().url('Invalid URL format').optional(),
+  credential_url: z.string().url('Invalid URL format'),
   credential_id: z.string().min(1, 'Credential ID is required'),
 });
 
@@ -63,11 +65,41 @@ export default function Certificate() {
   return (
     <FormProvider {...form}>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
-            
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {fields.map((field, index) => (
+            <CertificateCard
+              key={field.id}
+              index={index}
+              isExpanded={expandedIndexes.includes(index)}
+              toggleExpand={toggleExpand}
+              remove={remove}
+              canRemove={fields.length > 1}
+            />
+          ))}
+
+          <Button
+            type="button"
+            variant={'outline'}
+            onClick={() =>
+              append({
+                name: '',
+                issuing_organization: '',
+                issue_date: '',
+                credential_url: '',
+                credential_id: '',
+              })
+            }
+          >
+            + Add Another Certificate
+          </Button>
+
+          {apiError && (
+            <p className="text-sm font-medium text-destructive">{apiError}</p>
+          )}
+
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Saving...' : 'Submit'}
+          </Button>
         </form>
       </Form>
     </FormProvider>

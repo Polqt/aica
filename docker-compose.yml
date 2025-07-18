@@ -1,21 +1,24 @@
 services:
   postgres:
-    image: postgres:17.5-alpine
+    image: ankane/pgvector:latest 
     container_name: aica_postgres
+    restart: always
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD} 
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} 
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - ${POSTGRES_PORT}:5432 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 30s
       retries: 5
-
+    attach: false
+    
   redis:
     image: redis:7-alpine
     container_name: aica_redis
@@ -57,7 +60,10 @@ services:
       - .env
     volumes:
       - ./src:/app/src
-    command: celery -A aica_backend.workers.celery_app.celery_app beat -l info --scheduler
+    command: celery -A aica_backend.workers.celery_app.celery_app beat -l info
+    depends_on:
+      - redis
+      - postgres
 
 volumes:
   postgres_data:

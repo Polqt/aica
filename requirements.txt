@@ -15,6 +15,7 @@ pydantic-settings
 python-multipart
 
 celery[redis]
+gevent
 crawl4ai
 sentence-transformers
 langchain
