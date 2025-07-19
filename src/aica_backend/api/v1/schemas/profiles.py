@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, constr, Field, EmailStr, conlist
 from datetime import datetime, date
 
@@ -16,8 +16,8 @@ class EducationCreate(EducationBase):
     pass
 
 class EducationUpdate(BaseModel):
-    institution_name: str
-    address: str
+    institution_name: Optional[str] = None
+    address: Optional[str] = None
     degree: str
     field_of_study: str
     start_date: date
@@ -44,12 +44,12 @@ class ExperienceCreate(ExperienceBase):
     pass
 
 class ExperienceUpdate(BaseModel):
-    job_title: str
-    company_name: str
-    start_date: date
-    end_date: date
-    description: List[str]
-    is_current: bool = False
+    job_title: Optional[str] = None
+    company_name: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    description: Optional[List[str]] = None
+    is_current: Optional[bool] = None
 
 class Experience(ExperienceBase):
     id: int
@@ -73,11 +73,11 @@ class Skill(SkillBase):
 
 # Certificate
 class CertificateBase(BaseModel):
-    name: str
-    issuing_organization: str
-    issue_date: date
-    credential_url: str
-    credential_id: str
+    name: Optional[str] = None
+    issuing_organization: Optional[str] = None
+    issue_date: Optional[date] = None
+    credential_url: Optional[str] = None
+    credential_id: Optional[str] = None
 
 class CertificateCreate(CertificateBase):
     pass
@@ -94,25 +94,35 @@ class Certificate(CertificateBase):
 
 # Profile
 class ProfileBase(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    professional_title: Optional[str] = None
+    contact_number: Optional[str] = None
+    address: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    summary: Optional[str] = None
+    profile_picture: Optional[str] = None
+
+class ProfileCreate(ProfileBase):
     first_name: str
     last_name: str
     professional_title: str
     contact_number: str
     address: str
-    linkedin_url: str
     summary: str
+    linkedin_url: Optional[str] = None
+    profile_picture: Optional[str] = None
 
-class ProfileCreate(ProfileBase):
     educations: conlist(EducationCreate, min_length=1)
     experiences: conlist(ExperienceCreate, min_length=1)
     skills: conlist(SkillCreate, min_length=1)
     certificates: conlist(CertificateCreate, min_length=1)
 
 class ProfileUpdate(ProfileBase):
-    educations: conlist(EducationCreate, min_length=1)
-    experiences: conlist(ExperienceCreate, min_length=1)
-    skills: conlist(SkillCreate, min_length=1)
-    certificates: conlist(CertificateCreate, min_length=1)
+    educations: Optional[List[EducationCreate]] = None
+    experiences: Optional[List[ExperienceCreate]] = None
+    skills: Optional[List[SkillCreate]] = None
+    certificates: Optional[List[CertificateCreate]] = None
 
 class ProfileInDBBase(ProfileBase):
     id: int

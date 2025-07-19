@@ -7,10 +7,12 @@ import {
   FormItem,
   FormLabel,
   FormControl,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Textarea } from './ui/textarea';
 
 type ExperienceCardProps = {
   index: number;
@@ -85,8 +87,22 @@ export default function ExperienceCard({
               <FormItem>
                 <FormLabel>Job Description</FormLabel>
                 <FormControl>
-                  <Input placeholder="Worked on full-stack apps" {...field} />
+                  <Textarea
+                    placeholder="e.g. Developed APIs using FastAPI, Collaborated with UI/UX team"
+                    value={
+                      Array.isArray(field.value)
+                        ? field.value.join('\n')
+                        : field.value
+                    }
+                    onChange={e => {
+                      const lines = e.target.value
+                        .split('\n')
+                        .filter(line => line.trim() !== '');
+                      field.onChange(lines.length > 0 ? lines : ['']);
+                    }}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

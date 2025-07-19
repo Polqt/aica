@@ -12,7 +12,7 @@ import z from 'zod';
 
 const educationItemSchema = z.object({
   institution_name: z.string().min(2, 'Institution name is required'), // TODO: Add institution validation
-  location: z.string().min(2, 'Location is required'),
+  address: z.string().min(2, 'Location is required'),
   degree: z.string().min(2, 'Degree is required'),
   field_of_study: z.string().optional(), // TODO: Tech education only
   start_date: z.string(),
@@ -38,7 +38,7 @@ export default function Education() {
       educations: [
         {
           institution_name: '',
-          location: '',
+          address: '',
           degree: '',
           field_of_study: '',
           start_date: '',
@@ -62,6 +62,7 @@ export default function Education() {
 
   async function onSubmit(values: z.infer<typeof educationFormSchema>) {
     setApiError(null);
+    form.clearErrors();
 
     try {
       updateData({ educations: values.educations });
@@ -91,7 +92,7 @@ export default function Education() {
           onClick={() =>
             append({
               institution_name: '',
-              location: '',
+              address: '',
               degree: '',
               field_of_study: '',
               start_date: '',
@@ -103,7 +104,9 @@ export default function Education() {
           + Add Another Education
         </Button>
 
-        {apiError && <div className="text-red-500 text-sm">{apiError}</div>}
+        {apiError && (
+          <p className="text-sm font-medium text-destructive">{apiError}</p>
+        )}
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving...' : 'Continue'}

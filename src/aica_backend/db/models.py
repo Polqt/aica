@@ -26,7 +26,7 @@ class Profile(Base):
     professional_title: Mapped[str] = mapped_column(String, index=True, nullable=False)
     contact_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
     address: Mapped[str] = mapped_column(String, nullable=False)
-    linkedin_url: Mapped[str] = mapped_column(String, nullable=False)
+    linkedin_url: Mapped[str] = mapped_column(String, nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
     profile_picture: Mapped[str] = mapped_column(String, nullable=False)
 
@@ -67,7 +67,7 @@ class Experience(Base):
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     is_current: Mapped[bool] = mapped_column(Boolean, default=False)
-    description: Mapped[List[str]] = mapped_column(JSON, nullable=False)
+    description: Mapped[List[str]] = mapped_column(JSON, nullable=True)
 
 class Skill(Base):
     __tablename__ = "skills"
@@ -90,11 +90,11 @@ class Certificate(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
 
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    issuing_organization: Mapped[str] = mapped_column(String, nullable=False)
-    issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    credential_url: Mapped[str] = mapped_column(String, nullable=False)
-    credential_id: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=True)
+    issuing_organization: Mapped[str] = mapped_column(String, nullable=True)
+    issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
+    credential_url: Mapped[str] = mapped_column(String, nullable=True)
+    credential_id: Mapped[str] = mapped_column(String, nullable=True)
 
 class JobPosting(Base):
     __tablename__ = "job_postings"

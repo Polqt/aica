@@ -11,11 +11,19 @@ import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import z from 'zod';
 
 const certificateItemSchema = z.object({
-  name: z.string().min(1, 'Certificate name is required'),
-  issuing_organization: z.string().min(1, 'Issuing organization is required'),
+  name: z.string().optional(),
+  issuing_organization: z.string().optional(),
   issue_date: z.string().optional(),
-  credential_url: z.string().url('Invalid URL format'),
-  credential_id: z.string().min(1, 'Credential ID is required'),
+  credential_url: z
+    .string()
+    .optional()
+    .refine(
+      val => !val || val === '' || z.string().url().safeParse(val).success,
+      {
+        message: 'Invalid URL format',
+      },
+    ),
+  credential_id: z.string().optional(),
 });
 
 const certificateFormSchema = z.object({
@@ -24,7 +32,7 @@ const certificateFormSchema = z.object({
 
 export default function Certificate() {
   const router = useRouter();
-  const { updateData } = useOnboarding();
+  const { updateData, submitOnboardingData } = useOnboarding();
   const [apiError, setApiError] = useState<string | null>(null);
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([0]);
 
@@ -55,8 +63,21 @@ export default function Certificate() {
   };
 
   async function onSubmit(values: z.infer<typeof certificateFormSchema>) {
+    setApiError(null);
+    form.clearErrors();
+
+    const validCertificates = values.certificates.filter(
+      cert =>
+        cert.name &&
+        cert.name.trim() !== '' &&
+        cert.issuing_organization &&
+        cert.issuing_organization.trim() !== '',
+    );
+
+    updateData({ certificates: validCertificates });
+
     try {
-      updateData({ certificates: values.certificates });
+      await submitOnboardingData();
       router.push('/dashboard');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
@@ -97,9 +118,30 @@ export default function Certificate() {
             <p className="text-sm font-medium text-destructive">{apiError}</p>
           )}
 
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving...' : 'Submit'}
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                updateData({ certificates: [] });
+                try {
+                  await submitOnboardingData();
+                  router.push('/dashboard');
+                } catch (error) {
+                  setApiError(
+                    error instanceof Error ? error.message : 'Unknown error',
+                  );
+                }
+              }}
+              disabled={form.formState.isSubmitting}
+            >
+              Skip Certificates
+            </Button>
+
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? 'Saving...' : 'Submit'}
+            </Button>
+          </div>
         </form>
       </Form>
     </FormProvider>

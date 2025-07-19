@@ -35,11 +35,14 @@ export default function Skills() {
   });
 
   async function onSubmit(values: z.infer<typeof skillFormSchema>) {
+    setApiError(null);
+    form.clearErrors();
+
     try {
       const skillNames = values.skills.map(skill => skill.name);
 
       updateData({ skills: skillNames });
-      router.push('/certificates');
+      router.push('/certificate');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
     }

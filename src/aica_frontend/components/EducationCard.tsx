@@ -24,7 +24,7 @@ export default function EducationCard({
 }: EducationCardProps) {
   const { control, watch } = useFormContext();
   const institution = watch(`educations.${index}.institution_name`);
-  const location = watch(`educations.${index}.location`);
+  const location = watch(`educations.${index}.address`);
   const start = watch(`educations.${index}.start_date`);
   const end = watch(`educations.${index}.end_date`);
 
@@ -62,7 +62,7 @@ export default function EducationCard({
 
           <FormField
             control={control}
-            name={`educations.${index}.location`}
+            name={`educations.${index}.address`}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>School Address</FormLabel>

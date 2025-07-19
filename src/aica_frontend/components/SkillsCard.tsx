@@ -2,7 +2,13 @@
 
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel } from './ui/form';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 
@@ -20,7 +26,7 @@ export default function SkillsCard({
   const { control } = useFormContext();
 
   return (
-    <div className="border rounded-mg p-4 bg-muted space-y-3">
+    <div className="border rounded-md p-4 bg-muted space-y-3">
       <FormField
         control={control}
         name={`skills.${index}.name`}
@@ -30,16 +36,13 @@ export default function SkillsCard({
             <FormControl>
               <Input {...field} />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
 
       {canRemove && (
-        <Button
-          type="button"
-          variant={'outline'}
-          onClick={() => remove(index)}
-        >
+        <Button type="button" variant={'outline'} onClick={() => remove(index)}>
           Remove
         </Button>
       )}

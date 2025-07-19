@@ -7,11 +7,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -37,7 +39,17 @@ const profileFormSchema = z.object({
   profile_picture: z.string().optional(),
 });
 
-export default function Profle() {
+const PROFESSIONAL_TITLES = [
+  'Software Engineer',
+  'Frontend Developer',
+  'Backend Developer',
+  'Full Stack Developer',
+  'UI/UX Designer',
+  'Data Scientist',
+  'DevOps Engineer',
+];
+
+export default function Profile() {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
   const { updateData } = useOnboarding();
@@ -58,7 +70,6 @@ export default function Profle() {
 
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
     setApiError(null);
-
     try {
       updateData(values);
       router.push('/education');
@@ -70,6 +81,7 @@ export default function Profle() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* First Name */}
         <FormField
           control={form.control}
           name="first_name"
@@ -79,10 +91,12 @@ export default function Profle() {
               <FormControl>
                 <Input placeholder="Juan" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Last Name */}
         <FormField
           control={form.control}
           name="last_name"
@@ -92,11 +106,12 @@ export default function Profle() {
               <FormControl>
                 <Input placeholder="Dela Cruz" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* TODO: Change it to a with options that uses api for tech */}
+        {/* Professional Title */}
         <FormField
           control={form.control}
           name="professional_title"
@@ -106,15 +121,22 @@ export default function Profle() {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select your title" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent></SelectContent>
+                <SelectContent>
+                  {PROFESSIONAL_TITLES.map(title => (
+                    <SelectItem key={title} value={title}>
+                      {title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </FormItem>
           )}
         />
 
+        {/* Contact Number */}
         <FormField
           control={form.control}
           name="contact_number"
@@ -134,6 +156,7 @@ export default function Profle() {
           )}
         />
 
+        {/* Address */}
         <FormField
           control={form.control}
           name="address"
@@ -147,6 +170,7 @@ export default function Profle() {
           )}
         />
 
+        {/* LinkedIn URL */}
         <FormField
           control={form.control}
           name="linkedin_url"
@@ -154,12 +178,16 @@ export default function Profle() {
             <FormItem>
               <FormLabel>LinkedIn URL</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="https://linkedin.com/in/your-profile"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
+        {/* Summary */}
         <FormField
           control={form.control}
           name="summary"
@@ -173,7 +201,7 @@ export default function Profle() {
           )}
         />
 
-        {/* TODO: Use a platform to handle the image (cloudinary) */}
+        {/* Profile Picture */}
         <FormField
           control={form.control}
           name="profile_picture"
@@ -212,9 +240,12 @@ export default function Profle() {
           )}
         />
 
+        {/* Error Message */}
         {apiError && (
           <p className="text-sm font-medium text-destructive">{apiError}</p>
         )}
+
+        {/* Submit Button */}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

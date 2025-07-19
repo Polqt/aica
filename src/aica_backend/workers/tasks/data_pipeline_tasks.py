@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 from typing import List
 
+
 # Models and Chains are initialized once per worker process
 logging.basicConfig(level=logging.INFO)
 

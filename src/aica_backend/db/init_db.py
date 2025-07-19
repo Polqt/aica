@@ -3,6 +3,8 @@ from .session import engine
 from . import models
 
 def init_db():
-    print('Creating database tables...')
-    Base.metadata.create_all(bind=engine)
-    print('Database tables created successfully.')
+    print("Dropping existing tables...")
+    Base.metadata.drop_all(bind=engine)  
+    print("Creating tables...")
+    Base.metadata.create_all(bind=engine)  
+    print("Database reset and tables created successfully.")

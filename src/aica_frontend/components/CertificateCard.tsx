@@ -1,11 +1,17 @@
 'use client';
 
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { MinusCircle } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel } from './ui/form';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 type CertificateCardProps = {
   index: number;
@@ -22,47 +28,42 @@ export default function CertificateCard({
   remove,
   canRemove,
 }: CertificateCardProps) {
-  const { control, watch } = useFormContext();
-  const name = watch(`certificates.${index}.name`);
-  const issuingOrganization = watch(
-    `certificates.${index}.issuing_organization`,
-  );
-  const issueDate = watch(`certificates.${index}.issue_date`);
-  const credentialId = watch(`certificates.${index}.credential_id`);
+  const { control } = useFormContext();
 
   return (
-    <div className="border rounded-md p-4 bg-muted space-y-3">
-      <div
-        className="flex justify-between items-center cursor-pointer"
-        onClick={() => toggleExpand(index)}
-      >
-        <div>
-          <h3 className="font-semibold text-base">
-            {name || 'Certificate Name'} -{' '}
-            {issuingOrganization || 'Organization'}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {issueDate || 'Issue Date'} - {credentialId || 'Credential ID'}
-          </p>
+    <div
+      className={cn(
+        'rounded-xl border p-4 space-y-4',
+        isExpanded && 'bg-muted',
+      )}
+    >
+      <div className="flex justify-between items-center">
+        <h3 className="font-semibold text-base">Certificate {index + 1}</h3>
+        <div className="flex items-center gap-2">
+          {canRemove && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => remove(index)}
+              className="text-destructive"
+            >
+              <MinusCircle className="h-5 w-5" />
+            </Button>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => toggleExpand(index)}
+          >
+            {isExpanded ? 'Collapse' : 'Expand'}
+          </Button>
         </div>
-        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
       </div>
 
       {isExpanded && (
-        <div className="pt-3 space-y-4">
-          <FormField
-            control={control}
-            name={`certificates.${index}.credential_url`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Credential URL</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={control}
             name={`certificates.${index}.name`}
@@ -70,21 +71,74 @@ export default function CertificateCard({
               <FormItem>
                 <FormLabel>Certificate Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    placeholder="e.g. AWS Certified Developer"
+                    {...field}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
 
-          {canRemove && (
-            <Button
-              type="button"
-              variant={'outline'}
-              onClick={() => remove(index)}
-            >
-              Remove Certificate
-            </Button>
-          )}
+          <FormField
+            control={control}
+            name={`certificates.${index}.issuing_organization`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Issuing Organization</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Amazon Web Services" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name={`certificates.${index}.issue_date`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Issue Date</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name={`certificates.${index}.credential_id`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Credential ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. ABCD-1234" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name={`certificates.${index}.credential_url`}
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Credential URL</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://www.your-cert-link.com"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       )}
     </div>

@@ -12,7 +12,7 @@ import { useOnboarding } from '@/lib/context/OnboardingContext';
 import ExperienceCard from '@/components/ExperienceCard';
 
 const experienceItemSchema = z.object({
-  job_title: z.string(),
+  job_title: z.string().min(2, 'Job title is required'),
   company_name: z.string().min(2, 'Company name is required'),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string(),
@@ -60,8 +60,11 @@ export default function Experience() {
   };
 
   async function onSubmit(values: z.infer<typeof experienceFormSchema>) {
+    setApiError(null);
+    form.clearErrors();
+
     try {
-      await updateData({ experiences: values.experiences });
+      updateData({ experiences: values.experiences });
       router.push('/skills');
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Unknown error');
