@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import z from 'zod';
+import { toast } from 'sonner';
 
 const educationItemSchema = z.object({
   institution_name: z.string().min(2, 'Institution name is required'), // TODO: Add institution validation
@@ -66,9 +67,27 @@ export default function Education() {
 
     try {
       updateData({ educations: values.educations });
+
+      // Show success toast for education completion
+      toast.success('Education Added!', {
+        description: `Successfully added ${
+          values.educations.length
+        } education record${
+          values.educations.length > 1 ? 's' : ''
+        }. Let's add your work experience next.`,
+      });
+
       router.push('/experience');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      // Show error toast
+      toast.error('Education Update Failed', {
+        description: errorMessage,
+      });
+
+      setApiError(errorMessage);
     }
   }
 

@@ -27,6 +27,7 @@ import z from 'zod';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 const profileFormSchema = z.object({
   first_name: z.string().min(2, 'First name is required'),
@@ -72,16 +73,30 @@ export default function Profile() {
     setApiError(null);
     try {
       updateData(values);
+
+      // Show success toast for profile completion
+      toast.success('Profile Updated!', {
+        description:
+          "Your basic information has been saved. Let's add your education next.",
+      });
+
       router.push('/education');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      // Show error toast
+      toast.error('Profile Update Failed', {
+        description: errorMessage,
+      });
+
+      setApiError(errorMessage);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* First Name */}
         <FormField
           control={form.control}
           name="first_name"
@@ -96,7 +111,6 @@ export default function Profile() {
           )}
         />
 
-        {/* Last Name */}
         <FormField
           control={form.control}
           name="last_name"
@@ -111,7 +125,6 @@ export default function Profile() {
           )}
         />
 
-        {/* Professional Title */}
         <FormField
           control={form.control}
           name="professional_title"
@@ -136,7 +149,6 @@ export default function Profile() {
           )}
         />
 
-        {/* Contact Number */}
         <FormField
           control={form.control}
           name="contact_number"
@@ -156,7 +168,6 @@ export default function Profile() {
           )}
         />
 
-        {/* Address */}
         <FormField
           control={form.control}
           name="address"
@@ -170,7 +181,6 @@ export default function Profile() {
           )}
         />
 
-        {/* LinkedIn URL */}
         <FormField
           control={form.control}
           name="linkedin_url"
@@ -187,7 +197,6 @@ export default function Profile() {
           )}
         />
 
-        {/* Summary */}
         <FormField
           control={form.control}
           name="summary"
@@ -240,12 +249,10 @@ export default function Profile() {
           )}
         />
 
-        {/* Error Message */}
         {apiError && (
           <p className="text-sm font-medium text-destructive">{apiError}</p>
         )}
 
-        {/* Submit Button */}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

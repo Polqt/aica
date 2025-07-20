@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import z from 'zod';
+import { toast } from 'sonner';
 
 const certificateItemSchema = z.object({
   name: z.string().optional(),
@@ -79,17 +80,37 @@ export default function Certificate() {
 
     try {
       await submitOnboardingData();
-      router.push('/dashboard');
+
+      if (validCertificates.length > 0) {
+        toast.success('Certificates Added!', {
+          description: `Successfully added ${
+            validCertificates.length
+          } certificate${
+            validCertificates.length > 1 ? 's' : ''
+          } to your profile.`,
+        });
+      }
+
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
     } catch (error) {
       console.error('Certificate submission error:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
-      if (error instanceof Error) {
-        setApiError(error.message);
-      } else {
-        setApiError('An unexpected error occurred. Please try again.');
-      }
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'An unexpected error occurred. Please try again.';
+
+      toast.error('Failed to Save Certificates', {
+        description: errorMessage,
+      });
+
+      setApiError(errorMessage);
     }
   }
+
   return (
     <FormProvider {...form}>
       <Form {...form}>
@@ -134,6 +155,10 @@ export default function Certificate() {
                   updateData({ certificates: [] });
                   try {
                     await submitOnboardingData();
+                    toast.success('Profile created successfully!', {
+                      description:
+                        'Welcome to AICA! You can add certificates later from your profile.',
+                    });
                     router.push('/dashboard');
                   } catch (error) {
                     console.error('Skip certificates error:', error);
@@ -141,13 +166,25 @@ export default function Certificate() {
                       'Error details:',
                       JSON.stringify(error, null, 2),
                     );
-                    if (error instanceof Error) {
-                      setApiError(error.message);
-                    } else {
-                      setApiError(
-                        'An unexpected error occurred. Please try again.',
-                      );
-                    }
+                    const errorMessage =
+                      error instanceof Error
+                        ? error.message
+                        : 'An unexpected error occurred. Please try again.';
+                    setApiError(errorMessage);
+                    toast.error('Failed to complete profile', {
+                      description: errorMessage,
+                      action: {
+                        label: 'Retry',
+                        onClick: async () => {
+                          try {
+                            await submitOnboardingData();
+                            router.push('/dashboard');
+                          } catch (retryError) {
+                            console.error('Retry error:', retryError);
+                          }
+                        },
+                      },
+                    });
                   }
                 }}
                 disabled={form.formState.isSubmitting}

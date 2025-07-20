@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -65,9 +66,19 @@ export default function Experience() {
 
     try {
       updateData({ experiences: values.experiences });
+      toast.success('Experience saved successfully!');
       router.push('/skills');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      setApiError(errorMessage);
+      toast.error('Failed to save experience', {
+        description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: () => form.handleSubmit(onSubmit)(),
+        },
+      });
     }
   }
 

@@ -4,17 +4,23 @@ import z from 'zod';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
+import { toast } from 'sonner';
 
 const loginFormSchema = z.object({
-  email: z.email({ pattern: z.regexes.email }),
-  password: z.string().min(8, {
-    message: 'Password must be at least 8 characters long.',
-  }),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export default function LoginForm() {
@@ -34,9 +40,48 @@ export default function LoginForm() {
 
     try {
       await login(values.email, values.password);
-      router.push('/dashboard');
+
+      toast.success('Welcome back!', {
+        description: `Successfully logged in as ${values.email}`,
+      });
+
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      let errorMessage = 'Login failed. Please try again.';
+
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        if (
+          message.includes('invalid credentials') ||
+          message.includes('unauthorized')
+        ) {
+          errorMessage =
+            'Invalid email or password. Please check your credentials and try again.';
+        } else if (message.includes('network') || message.includes('fetch')) {
+          errorMessage =
+            'Network error. Please check your connection and try again.';
+        } else if (message.includes('timeout')) {
+          errorMessage = 'Request timed out. Please try again.';
+        } else if (message.includes('email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      // Show error toast with actionable message
+      toast.error('Login Failed', {
+        description: errorMessage,
+        action: {
+          label: 'Try Again',
+          onClick: () => form.reset(),
+        },
+      });
+
+      // Also set local error for persistent display
+      setApiError(errorMessage);
     }
   }
 
@@ -57,6 +102,7 @@ export default function LoginForm() {
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -67,8 +113,14 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input id="password" type="password" {...field} />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  {...field}
+                />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

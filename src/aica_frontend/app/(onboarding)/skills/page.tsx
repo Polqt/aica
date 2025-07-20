@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import z from 'zod';
 
 const skillFormSchema = z.object({
@@ -42,9 +43,19 @@ export default function Skills() {
       const skillNames = values.skills.map(skill => skill.name);
 
       updateData({ skills: skillNames });
+      toast.success('Skills saved successfully!');
       router.push('/certificate');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      setApiError(errorMessage);
+      toast.error('Failed to save skills', {
+        description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: () => form.handleSubmit(onSubmit)(),
+        },
+      });
     }
   }
 
