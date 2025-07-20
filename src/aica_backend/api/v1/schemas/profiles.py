@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, constr, Field, EmailStr, conlist
+from pydantic import BaseModel, constr, Field, EmailStr, conlist, field_validator
 from datetime import datetime, date
 
 # Education
@@ -11,6 +11,29 @@ class EducationBase(BaseModel):
     start_date: date
     end_date: date
     description: str
+
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def parse_dates(cls, v):
+        """
+        VALIDATION FIX: Parse various date formats to ensure consistency
+        
+        PROBLEM: Frontend might send dates in different formats:
+        - MM/DD/YYYY (from date pickers)
+        - DD/MM/YYYY (locale-specific)
+        - ISO strings
+        
+        SOLUTION: Accept string dates and convert them to Python date objects
+        Only accept YYYY-MM-DD format to maintain data consistency
+        """
+        if v is None or v == '':
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError('Invalid date format, expected YYYY-MM-DD')
+        return v
 
 class EducationCreate(EducationBase):
     pass
@@ -39,6 +62,18 @@ class ExperienceBase(BaseModel):
     end_date: date
     description: List[str]
     is_current: bool = False
+
+    @field_validator('start_date', 'end_date', mode='before')
+    @classmethod
+    def parse_dates(cls, v):
+        if v is None or v == '':
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError('Invalid date format, expected YYYY-MM-DD')
+        return v
 
 class ExperienceCreate(ExperienceBase):
     pass
@@ -78,6 +113,18 @@ class CertificateBase(BaseModel):
     issue_date: Optional[date] = None
     credential_url: Optional[str] = None
     credential_id: Optional[str] = None
+
+    @field_validator('issue_date', mode='before')
+    @classmethod
+    def parse_issue_date(cls, v):
+        if v is None or v == '':
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError('Invalid date format, expected YYYY-MM-DD')
+        return v
 
 class CertificateCreate(CertificateBase):
     pass

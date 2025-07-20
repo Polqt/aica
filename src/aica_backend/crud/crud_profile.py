@@ -27,16 +27,33 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
             setattr(profile, field, value)
 
     if profile_in.skills is not None:
-        profile.skills = [get_or_create_skill(db, name) for name in profile_in.skills]
+        # Extract skill names from SkillCreate objects
+        # PROBLEM: Frontend now sends skills as [{"name": "Python"}, {"name": "JavaScript"}]
+        # but this function was expecting simple strings
+        # SOLUTION: Extract the 'name' property from each SkillCreate object
+        skill_names = [skill.name for skill in profile_in.skills]
+        profile.skills = [get_or_create_skill(db, name) for name in skill_names]
 
     if profile_in.educations is not None:
-        profile.educations = [models.Education(**edu.model_dump()) for edu in profile_in.educations]
+        profile.educations.clear()
+        for edu in profile_in.educations:
+            edu_data = edu.model_dump(exclude={'profile_id'})
+            new_edu = models.Education(**edu_data)
+            profile.educations.append(new_edu)
 
     if profile_in.experiences is not None:
-        profile.experiences = [models.Experience(**exp.model_dump()) for exp in profile_in.experiences]
+        profile.experiences.clear()
+        for exp in profile_in.experiences:
+            exp_data = exp.model_dump(exclude={'profile_id'})
+            new_exp = models.Experience(**exp_data)
+            profile.experiences.append(new_exp)
 
     if profile_in.certificates is not None:
-        profile.certificates = [models.Certificate(**cert.model_dump()) for cert in profile_in.certificates]
+        profile.certificates.clear()
+        for cert in profile_in.certificates:
+            cert_data = cert.model_dump(exclude={'profile_id'})
+            new_cert = models.Certificate(**cert_data)
+            profile.certificates.append(new_cert)
 
     db.commit()
     db.refresh(profile)

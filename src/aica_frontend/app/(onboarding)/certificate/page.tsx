@@ -74,13 +74,20 @@ export default function Certificate() {
         cert.issuing_organization.trim() !== '',
     );
 
+    console.log('Valid certificates to submit:', validCertificates);
     updateData({ certificates: validCertificates });
 
     try {
       await submitOnboardingData();
       router.push('/dashboard');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      console.error('Certificate submission error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      if (error instanceof Error) {
+        setApiError(error.message);
+      } else {
+        setApiError('An unexpected error occurred. Please try again.');
+      }
     }
   }
   return (
@@ -118,29 +125,44 @@ export default function Certificate() {
             <p className="text-sm font-medium text-destructive">{apiError}</p>
           )}
 
-          <div className="flex gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={async () => {
-                updateData({ certificates: [] });
-                try {
-                  await submitOnboardingData();
-                  router.push('/dashboard');
-                } catch (error) {
-                  setApiError(
-                    error instanceof Error ? error.message : 'Unknown error',
-                  );
-                }
-              }}
-              disabled={form.formState.isSubmitting}
-            >
-              Skip Certificates
-            </Button>
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={async () => {
+                  updateData({ certificates: [] });
+                  try {
+                    await submitOnboardingData();
+                    router.push('/dashboard');
+                  } catch (error) {
+                    console.error('Skip certificates error:', error);
+                    console.error(
+                      'Error details:',
+                      JSON.stringify(error, null, 2),
+                    );
+                    if (error instanceof Error) {
+                      setApiError(error.message);
+                    } else {
+                      setApiError(
+                        'An unexpected error occurred. Please try again.',
+                      );
+                    }
+                  }
+                }}
+                disabled={form.formState.isSubmitting}
+              >
+                Skip Certificates
+              </Button>
 
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Saving...' : 'Submit'}
-            </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Saving...' : 'Submit'}
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Certificates are optional. You can skip this step and add them
+              later.
+            </p>
           </div>
         </form>
       </Form>
