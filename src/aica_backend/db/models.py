@@ -113,3 +113,39 @@ class JobPosting(Base):
 
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    
+class PipelineRun(Base):
+    __tablename__ = "pipeline_runs"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    run_date: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
+    status: Mapped[str] = mapped_column(String, default="running")
+    total_jobs_scraped: Mapped[int] = mapped_column(default=0)
+    total_jobs_processed: Mapped[int] = mapped_column(default=0)
+    total_jobs_embedded: Mapped[int] = mapped_column(default=0)
+    error_count: Mapped[int] = mapped_column(default=0)
+    started_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
+    completed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+
+class ScrapingSession(Base):
+    __tablename__ = "scraping_sessions"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    pipeline_run_id: Mapped[int] = mapped_column(ForeignKey("pipeline_runs.id"))
+    site_name: Mapped[str] = mapped_column(String, index=True)
+    jobs_found: Mapped[int] = mapped_column(default=0)
+    jobs_successful: Mapped[int] = mapped_column(default=0)
+    jobs_failed_scraping: Mapped[int] = mapped_column(default=0)
+    status: Mapped[str] = mapped_column(String, default="pending")
+    
+class ProcessingError(Base):
+    __tablename__ = "processing_errors"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    job_posting_id: Mapped[int] = mapped_column(ForeignKey("job_postings.id"), nullable=True)
+    pipeline_run_id: Mapped[int] = mapped_column(ForeignKey("pipeline_runs.id"), nullable=True)
+    error_type: Mapped[str] = mapped_column(String, index=True)
+    error_message: Mapped[str] = mapped_column(Text)
+    retry_count: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
+    

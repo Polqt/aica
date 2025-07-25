@@ -9,6 +9,31 @@ class Settings(BaseSettings):
     REDIS_URL: str
     CRAWL4AI_API_KEY: str
     
+    # AI/LLM Settings
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL_NAME: str = "llama3:latest"
+    OLLAMA_TIMEOUT: int = 120
+    
+    # Embedding Settings
+    EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
+    EMBEDDING_DIMENSION: int = 384
+    VECTOR_SIMILARITY_THRESHOLD: float = 0.75
+    
+    # Pipeline Settings
+    SCRAPING_BATCH_SIZE: int = 100
+    MAX_RETRIES: int = 3
+    RETRY_DELAY: int = 60
+    PIPELINE_TIMEOUT: int = 3600
+    
+    JOB_SITES_CONFIG: dict = {
+        ""
+    }
+    
+    # Monitoring & Logging
+    LOG_LEVEL: str = "INFO"
+    ENABLE_METRICS: bool = True
+    ALERT_WEBHOOK_URL: str = ""
+    
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
     ENVIRONMENT: str = "development"
     SECURE_COOKIES: bool = False
