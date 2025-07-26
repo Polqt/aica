@@ -7,7 +7,10 @@ interface OnboardingState {
   setPersonalDetails: (data: Partial<ProfileUpdate>) => void;
   setEducations: (data: ProfileUpdate['educations']) => void;
   setExperiences: (data: ProfileUpdate['experiences']) => void;
-  setSkillsAndSummary: (data: { skills?: string[]; summary?: string }) => void;
+  setSkillsAndSummary: (data: {
+    skills?: string[] | ProfileUpdate['skills'];
+    summary?: string;
+  }) => void;
   getCombinedProfileData: () => ProfileUpdate;
   resetOnboarding: () => void;
 }
@@ -60,7 +63,15 @@ export const useOnboardingStore = create<OnboardingState>()(
           set(state => ({
             profileData: {
               ...state.profileData,
-              ...data,
+              // Convert string[] to SkillCreate[] if needed
+              ...(data.skills && {
+                skills:
+                  Array.isArray(data.skills) &&
+                  typeof data.skills[0] === 'string'
+                    ? (data.skills as string[]).map(name => ({ name }))
+                    : (data.skills as ProfileUpdate['skills']),
+              }),
+              ...(data.summary && { summary: data.summary }),
             },
           })),
 

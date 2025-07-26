@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -118,5 +118,28 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom styles for react-phone-input-2 */
+.react-tel-input {
+  .flag-dropdown {
+    @apply border-gray-300 dark:border-gray-600 bg-background;
+  }
+
+  .selected-flag {
+    @apply bg-background hover:bg-gray-50 dark:hover:bg-gray-700;
+  }
+
+  .country-list {
+    @apply bg-background border-gray-300 dark:border-gray-600 shadow-lg;
+  }
+
+  .country-list .country:hover {
+    @apply bg-gray-50 dark:bg-gray-700;
+  }
+
+  .form-control {
+    @apply transition-all duration-200;
   }
 }
