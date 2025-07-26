@@ -40,6 +40,28 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
     MAX_FILE_SIZE: int = 5 * 1024 * 1024  
     ALLOWED_FILE_TYPES: List[str] = ["image/jpeg", "image/png", "image/webp"]
+    
+    JOB_SITES_CONFIG: dict = {
+        "jobstreet": {
+            "base_url": "https://ph.jobstreet.com/",
+            "search_urls": [
+                "/jobs-",
+                "",
+                "",
+                "",
+            ],
+            "selectors": {
+                "job_links": "a[data-automation='jobTitle']",
+                "job_title": "h1[data-automation='job-detail-title']",
+                "company": "span[data-automation='advertiser-name']",
+                "description": "div[data-automation='job-description']",
+            },
+            "rate_limit": 100,
+            "headers": {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+        }
+    }
 
     class Config:
         env_file = ".env"

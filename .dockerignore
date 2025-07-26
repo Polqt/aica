@@ -11,3 +11,13 @@ venv/
 
 aica_frontend/node_modules/
 aica_frontend/.next/
+
+*.log
+*.tmp
+
+datasets/
+media/
+uploads/
+
+.DS_Store
+Thumbs.db
