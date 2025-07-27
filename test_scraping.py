@@ -13,8 +13,6 @@ async def test_scraping():
     print("Testing JobstreetPH scraping...")
     try:
         urls = await service.scrape_site("jobstreet")
-        print(f"Found {len(urls)} job URLs on JobstreetPH")
-
         if urls:
             print("Testing content extraction...")
             content = await service.extract_job_content(urls[0])

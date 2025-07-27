@@ -1,0 +1,32 @@
+{
+  "programming_languages": [
+    "Python", "JavaScript", "TypeScript", "Java", "C#", "C++", "PHP", "Ruby", "Go", "Rust", "Swift", "Kotlin", "Scala", "R", "MATLAB", "SQL", "HTML", "CSS", "Dart", "Objective-C"
+  ],
+  "frameworks_libraries": [
+    "React", "Angular", "Vue.js", "Node.js", "Express.js", "Django", "Flask", "FastAPI", "Spring", "ASP.NET", "Laravel", "Ruby on Rails", "Next.js", "Nuxt.js", "Svelte", "jQuery", "Bootstrap", "Tailwind CSS", "Material-UI", "Chakra UI"
+  ],
+  "databases": [
+    "MySQL", "PostgreSQL", "MongoDB", "Redis", "SQLite", "Oracle", "SQL Server", "MariaDB", "Cassandra", "DynamoDB", "Elasticsearch", "Neo4j", "InfluxDB", "CouchDB", "Firebase"
+  ],
+  "cloud_platforms": [
+    "AWS", "Azure", "Google Cloud", "GCP", "DigitalOcean", "Heroku", "Vercel", "Netlify", "Cloudflare", "IBM Cloud", "Oracle Cloud"
+  ],
+  "devops_tools": [
+    "Docker", "Kubernetes", "Jenkins", "GitLab CI", "GitHub Actions", "CircleCI", "Travis CI", "Ansible", "Terraform", "Vagrant", "Chef", "Puppet", "Helm", "ArgoCD"
+  ],
+  "version_control": [
+    "Git", "GitHub", "GitLab", "Bitbucket", "SVN", "Mercurial"
+  ],
+  "testing": [
+    "Jest", "Pytest", "JUnit", "Selenium", "Cypress", "Mocha", "Chai", "PHPUnit", "RSpec", "TestNG", "Postman", "Insomnia"
+  ],
+  "mobile_development": [
+    "React Native", "Flutter", "Xamarin", "Ionic", "Cordova", "Android Studio", "Xcode", "SwiftUI"
+  ],
+  "data_science_ml": [
+    "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "Matplotlib", "Seaborn", "Jupyter", "Apache Spark", "Hadoop", "Kafka", "Airflow", "MLflow", "Kubeflow"
+  ],
+  "methodologies": [
+    "Agile", "Scrum", "Kanban", "DevOps", "CI/CD", "TDD", "BDD", "Microservices", "REST API", "GraphQL", "SOAP", "Waterfall", "Lean"
+  ]
+}
