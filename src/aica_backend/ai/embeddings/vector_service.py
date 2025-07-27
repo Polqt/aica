@@ -7,10 +7,10 @@
 
 
 from sentence_transformers import SentenceTransformer
-from ..core.config import settings
-from ..api.v1.schemas.jobs import JobDetails
-from ..api.v1.schemas.profiles import Profile
-from ..db.models import JobPosting
+from ...core.config import settings
+from ...api.v1.schemas.jobs import JobDetails
+from ...api.v1.schemas.profiles import Profile
+from ...db.models import JobPosting
 from typing import List
 
 

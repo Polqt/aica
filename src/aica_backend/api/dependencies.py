@@ -7,7 +7,7 @@ from ..db.session import SessionLocal
 from ..db import models
 from ..crud import crud_user
 from ..core.config import settings
-from ..api.v1.schemas import token as token_schema
+from .v1.schemas import token as token_schema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login/access-token")
 

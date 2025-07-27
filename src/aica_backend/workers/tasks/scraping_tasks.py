@@ -1,12 +1,13 @@
 import logging
+import asyncio
 from typing import List
 
 from ..celery_app import celery_app
-from ...core.config import settings
+from ...core.config.config import settings
 from ...db.session import SessionLocal
 from ...crud import crud_jobs
 from ...services.scraping_service import ScrapingService
-from enrichment_tasks import enrich_job_with_llm
+# from enrichment_tasks import enrich_job_with_llm
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,7 +22,7 @@ def scrape_site_jobs(self, site_name: str, pipeline_run_id: int = None):
         
         scraping_service = ScrapingService()
         
-        job_urls = await scraping_service.scrape_site(site_name)
+        job_urls = asyncio.run(scraping_service.scrape_site(site_name))
         
         if not job_urls:
             logging.warning(f"No job URLs found for {site_name}")
@@ -67,7 +68,7 @@ def extract_job_content(self, job_id: int):
         logging.info(f"Extracting content for job {job_id}: {job.source_url}")
         
         scraping_service = ScrapingService()
-        content = await scraping_service.extract_job_content(job.source_url)
+        content = asyncio.run(scraping_service.extract_job_content(job.source_url))
         
         if content:
             job.full_text = content
@@ -76,7 +77,7 @@ def extract_job_content(self, job_id: int):
             
             logging.info(f"Successfully extracted content for job {job_id}")
             
-            enrich_job_with_llm.delay(job_id) # Queue for LLM enrichment
+            # enrich_job_with_llm.delay(job_id) Queue for LLM enrichment
         else:
             crud_jobs.update_job_status(db, job_id=job_id, status='extraction_failed')
             logging.error(f"Failed to extract content for job {job_id}")

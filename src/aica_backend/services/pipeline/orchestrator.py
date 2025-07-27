@@ -5,9 +5,12 @@
 # - Error recovery
 # - Metrics collection
 
+from ...data.ingestion.base_scraper import ScrapingService
 
 class PipelineOrchestrator:
     def __init__(self):
+        
+        
         self.scraping_service = ScrapingService()
         self.llm_service = OllamaService()
         self.vector_service = VectorService()

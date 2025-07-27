@@ -5,8 +5,8 @@
 # - Structured output parsing
 # - Error handling for LLM failures
 
-from ..api.v1.schemas.jobs import JobDetails
-from ..core.config import settings
+from ...api.v1.schemas.jobs import JobDetails
+from ...core.config import settings
 
 
 class OllamaService:
