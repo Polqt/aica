@@ -13,11 +13,11 @@ class ScrapingOrchestrator:
         
         for site in sites:
             try:
-                urls = asyncio.run(self.scraper.get_search_urls(site))
-                results[site] = len(urls)
-                logging.info(f"Scraped {len(urls)} job from {site}")
+                json_file = await self.scraper.scrape_jobs_with_content(site)
+                results[site] = {"json_file": json_file, "status": "success"}
+                logging.info(f"Completed scraping for {site}: {json_file}")
             except Exception as e:
                 logging.error(f"Error scraping {site}: {e}")
-                results[site] = 0
+                results[site] = {"error": str(e), "status": "failed"}
         return results
                        

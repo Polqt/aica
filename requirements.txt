@@ -16,6 +16,8 @@ python-multipart
 
 pydantic
 celery[redis]
+slowapi
+redis
 gevent
 crawl4ai
 sentence-transformers

@@ -1,7 +1,7 @@
 from celery import Celery
 from celery.schedules import crontab
 
-from ..core.config.config import settings
+from ..core.config import settings
 from .tasks.scraping_tasks import trigger_daily_scraping
 
 celery_app = Celery(

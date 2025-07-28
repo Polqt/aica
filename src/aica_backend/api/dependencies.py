@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
@@ -9,7 +9,7 @@ from ..crud import crud_user
 from ..core.config import settings
 from .v1.schemas import token as token_schema
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login/access-token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login/access-token", auto_error=False)
 
 def get_db():
     db = SessionLocal()
@@ -19,7 +19,35 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)) -> models.User:
+def get_token_from_cookie_or_header(request: Request, token: str = Depends(oauth2_scheme)) -> str:
+    """
+    Get JWT token from httpOnly cookie or Authorization header.
+    Cookie takes precedence for security.
+    """
+    # First try to get token from httpOnly cookie
+    cookie_token = request.cookies.get("access_token")
+    if cookie_token:
+        # Remove "Bearer " prefix if present
+        if cookie_token.startswith("Bearer "):
+            return cookie_token[7:]
+        return cookie_token
+    
+    # Fall back to Authorization header
+    if token:
+        return token
+    
+    # No token found
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db), 
+    token: str = Depends(get_token_from_cookie_or_header)
+) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

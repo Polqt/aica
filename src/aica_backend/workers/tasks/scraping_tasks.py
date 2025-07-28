@@ -3,10 +3,10 @@ import asyncio
 from typing import List
 
 from ..celery_app import celery_app
-from ...core.config.config import settings
+from ...core.config import settings
 from ...db.session import SessionLocal
 from ...crud import crud_jobs
-from ...services.scraping_service import ScrapingService
+from ...data.ingestion.base_scraper import ScrapingService
 # from enrichment_tasks import enrich_job_with_llm
 
 logging.basicConfig(level=logging.INFO)

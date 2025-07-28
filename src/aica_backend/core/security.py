@@ -1,5 +1,6 @@
+import secrets
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
 from .config import settings
 
@@ -17,4 +18,3 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     encode_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encode_jwt
-

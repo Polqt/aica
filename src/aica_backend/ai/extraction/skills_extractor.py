@@ -13,9 +13,8 @@ class ExtractedSkills:
     
 class SkillsExtractor:
     def __init__(self):
-        self.tech_skills = self._load_tect_skills()
+        self.tech_skills = self._load_tech_skills()
         self.soft_skills = self._load_soft_skills()
-        self.skill_pattern = self._build_skill_pattern()
         
     def extract_skills(self, job_description: str) -> ExtractedSkills:
         """Main method to extract skills from job description"""
