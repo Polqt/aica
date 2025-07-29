@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 from .base_class import Base
 import datetime
-from typing import List
+from typing import List, Dict, Any
 
 class User(Base):
     __tablename__ = "users"
@@ -106,7 +106,26 @@ class JobPosting(Base):
 
     job_title: Mapped[str] = mapped_column(String, nullable=True, index=True)
     company_name: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    extracted_skills: Mapped[list[str]] = mapped_column(JSON, nullable=True)
+    full_text: Mapped[str] = mapped_column(Text, nullable=True)
+    
+    location: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    country: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    work_type: Mapped[str] = mapped_column(String, nullable=True, index=True)  
+    employment_type: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    
+    salary_min: Mapped[int] = mapped_column(nullable=True)
+    salary_max: Mapped[int] = mapped_column(nullable=True)
+    salary_currency: Mapped[str] = mapped_column(String, nullable=True)
+    salary_period: Mapped[str] = mapped_column(String, nullable=True)  
+    experience_level: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    
+    technical_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
+    soft_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
+    all_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
+    skill_categories: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    
+    benefits: Mapped[List[str]] = mapped_column(JSON, nullable=True)
+    posting_date: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
 
     embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
     status: Mapped[str] = mapped_column(String, default="raw", index=True)

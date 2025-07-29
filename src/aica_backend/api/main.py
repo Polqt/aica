@@ -13,7 +13,7 @@ try:
     # Create rate limiter
     limiter = Limiter(
         key_func=get_remote_address,
-        storage_uri=settings.REDIS_URL.replace("/0", "/1")  # Use different Redis DB for rate limiting
+        storage_uri=settings.REDIS_URL.replace("/0", "/1") 
     )
     RATE_LIMITING_ENABLED = True
 except ImportError:
@@ -36,6 +36,7 @@ if RATE_LIMITING_ENABLED:
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
+    
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
@@ -44,11 +45,13 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
 
+# Trust specific hosts
 app.add_middleware(
     TrustedHostMiddleware, 
     allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"]
 )
 
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -64,6 +67,7 @@ app.add_middleware(
     expose_headers=["X-Total-Count"],
 )
 
+# API Route
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(login.router, prefix="/api/v1", tags=["Login"])
 app.include_router(profiles.router, prefix="/api/v1/profiles", tags=["Profiles"])
@@ -74,4 +78,13 @@ def health_check():
     return {
         "status": "ok",
         "environment": settings.ENVIRONMENT
+    }
+    
+@app.get("/", tags=["Root"])
+def read_root():
+    return {
+        "message": "AICA Backend API",
+        "version": "1.0.0",
+        "docs": "/docs" if settings.ENVIRONMENT == "development" else "Documentation disabled in production",
+        "health": "/health"
     }

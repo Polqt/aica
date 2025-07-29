@@ -51,6 +51,11 @@ class Settings(BaseSettings):
                 "job_title": "h1[data-automation='job-detail-title']",
                 "company": "span[data-automation='advertiser-name']",
                 "description": "div[data-automation='job-description']",
+                "location": "span[data-automation='job-detail-location']",
+                "salary": "span[data-automation='job-detail-salary']",
+                "work_type": "span[data-automation='job-detail-work-type']",
+                "employment_type": "span[data-automation='job-detail-employment-type']",
+                "posting_date": "span[data-automation='job-detail-date']"
             },
             "rate_limit": 20,
             "headers": {
