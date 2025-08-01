@@ -22,7 +22,8 @@ def scrape_site_jobs(self, site_name: str, pipeline_run_id: int = None):
         
         scraping_service = ScrapingService()
         
-        job_urls = asyncio.run(scraping_service.scrape_site(site_name))
+        job_data = asyncio.run(scraping_service.scrape_site(site_name, extract_details=True))
+        job_urls = [job['source_url'] for job in job_data if 'source_url' in job]
         
         if not job_urls:
             logging.warning(f"No job URLs found for {site_name}")

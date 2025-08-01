@@ -1,14 +1,14 @@
 import logging
 
 from ..celery_app import celery_app
-from ...core.config.config import settings
+from ...core.config import settings
 from ...db.session import SessionLocal
 from ...crud import crud_jobs
 
 from crawl4ai import AsyncWebCrawler
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
-from typing import List
+from typing import List, Optional
 
 
 # Models and Chains are initialized once per worker process
@@ -17,9 +17,12 @@ logging.basicConfig(level=logging.INFO)
 class JobDetails(BaseModel):
     job_title: str = Field(description='The precise job title')
     company_name: str = Field(description='The name of the hiring company')
-    extracted_skills: str = Field(description='A list of key skills that mentioned')
-
-
+    location: Optional[str] = Field(description='Job location')
+    technical_skills: List[str] = Field(description='List of technical skills')
+    soft_skills: List[str] = Field(description='List of soft skills')
+    work_type: Optional[str] = Field(description='Work arrangement type')
+    employment_type: Optional[str] = Field(description='Employment type')
+    extraction_quality_score: float = Field(description='Quality score of extraction')
 
 @celery_app.task(name="tasks.run_full_job_pipeline")
 def run_full_job_pipeline():

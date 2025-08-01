@@ -55,13 +55,15 @@ class Settings(BaseSettings):
                 "salary": "span[data-automation='job-detail-salary']",
                 "work_type": "span[data-automation='job-detail-work-type']",
                 "employment_type": "span[data-automation='job-detail-employment-type']",
-                "posting_date": "span[data-automation='job-detail-date']"
+                "posting_date": "span[data-automation='job-detail-date']",
+                "benefits": "span[data-automation='job-detail-benefits']"
             },
             "rate_limit": 20,
             "headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
-        }
+        },
+        
     }
     
     # Monitoring & Logging

@@ -126,9 +126,12 @@ class JobPosting(Base):
     
     benefits: Mapped[List[str]] = mapped_column(JSON, nullable=True)
     posting_date: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+    application_deadline: Mapped[datetime.date] = mapped_column(DateTime, nullable=True)
+    external_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
 
     embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
     status: Mapped[str] = mapped_column(String, default="raw", index=True)
+    extraction_quality_score: Mapped[float] = mapped_column(nullable=True)
 
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

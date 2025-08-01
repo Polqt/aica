@@ -13,7 +13,8 @@ class ScrapingOrchestrator:
         
         for site in sites:
             try:
-                json_file = await self.scraper.scrape_jobs_with_content(site)
+                job_data = await self.scraper.scrape_site(site, extract_details=True, max_jobs=50)
+                json_file = f"data/scraped_jobs/{site}_detailed_*.json"
                 results[site] = {"json_file": json_file, "status": "success"}
                 logging.info(f"Completed scraping for {site}: {json_file}")
             except Exception as e:
