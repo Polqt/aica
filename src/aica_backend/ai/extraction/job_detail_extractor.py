@@ -431,8 +431,9 @@ class JobDetailExtractor:
                             return datetime.strptime(date_str, fmt)
                         except ValueError:
                             continue
-                except Exception:
-                    pass
+                except Exception as e:
+                    logging.warning(f"Error parsing date '{date_str}': {str(e)}")
+                    return None
         
         return None
     
