@@ -1,173 +1,306 @@
-from sqlalchemy import String, DateTime, Date, Text, ForeignKey, Boolean, JSON
+from sqlalchemy import String, DateTime, Date, Text, ForeignKey, Boolean, JSON, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 from .base_class import Base
 import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 class User(Base):
+    """
+    User authentication model.
+    
+    Stores basic user credentials and links to detailed profile information.
+    Each user has exactly one profile (1:1 relationship).
+    """
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now
+    )
 
-    profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete-orphan", uselist=False)
+    profile: Mapped[Optional["Profile"]] = relationship(
+        back_populates="user", 
+        cascade="all, delete-orphan", 
+        uselist=False
+    )
 
 class Profile(Base):
+    """
+    User profile with detailed professional information.
+    
+    Contains personal details, professional summary, and relationships
+    to education, experience, certificates, and skills.
+    """
     __tablename__ = "profiles"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
 
-    first_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    last_name: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    professional_title: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    contact_number: Mapped[str] = mapped_column(String, index=True, nullable=False)
-    address: Mapped[str] = mapped_column(String, nullable=False)
-    linkedin_url: Mapped[str] = mapped_column(String, nullable=True)
+    # Personal Information
+    first_name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    professional_title: Mapped[str] = mapped_column(String(200), index=True, nullable=False)
+    contact_number: Mapped[str] = mapped_column(String(20), index=True, nullable=False)
+    address: Mapped[str] = mapped_column(Text, nullable=False)
+    linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
-    profile_picture: Mapped[str] = mapped_column(String, nullable=False)
+    profile_picture: Mapped[str] = mapped_column(String(500), nullable=False)
 
-    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now)
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now
+    )
     updated_at: Mapped[datetime.datetime] = mapped_column(
-        default=datetime.datetime.now, onupdate=datetime.datetime.now
+        DateTime, 
+        default=datetime.datetime.now, 
+        onupdate=datetime.datetime.now
     )
 
     user: Mapped["User"] = relationship(back_populates="profile")
-
-    educations: Mapped[List["Education"]] = relationship(cascade="all, delete-orphan")
-    experiences: Mapped[List["Experience"]] = relationship(cascade="all, delete-orphan")
-    certificates: Mapped[List["Certificate"]] = relationship(cascade="all, delete-orphan")
-    skills: Mapped[List["Skill"]] = relationship(secondary="profile_skill_link", back_populates="profiles")
+    educations: Mapped[List["Education"]] = relationship(
+        cascade="all, delete-orphan", 
+        back_populates="profile"
+    )
+    experiences: Mapped[List["Experience"]] = relationship(
+        cascade="all, delete-orphan", 
+        back_populates="profile"
+    )
+    certificates: Mapped[List["Certificate"]] = relationship(
+        cascade="all, delete-orphan", 
+        back_populates="profile"
+    )
+    skills: Mapped[List["Skill"]] = relationship(
+        secondary="profile_skill_link", 
+        back_populates="profiles"
+    )
 
 class Education(Base):
+    """Educational background information for user profiles."""
     __tablename__ = "educations"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
 
-    institution_name: Mapped[str] = mapped_column(String, nullable=False)
-    address: Mapped[str] = mapped_column(String, nullable=False)
-    degree: Mapped[str] = mapped_column(String, nullable=False)
-    field_of_study: Mapped[str] = mapped_column(String, nullable=True)
+    institution_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    address: Mapped[str] = mapped_column(String(500), nullable=False)
+    degree: Mapped[str] = mapped_column(String(100), nullable=False)
+    field_of_study: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    profile: Mapped["Profile"] = relationship(back_populates="educations")
 
 class Experience(Base):
+    """Work experience information for user profiles."""
     __tablename__ = "experiences"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
 
-    job_title: Mapped[str] = mapped_column(String, nullable=False)
-    company_name: Mapped[str] = mapped_column(String, nullable=False)
+    job_title: Mapped[str] = mapped_column(String(200), nullable=False)
+    company_name: Mapped[str] = mapped_column(String(200), nullable=False)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
     is_current: Mapped[bool] = mapped_column(Boolean, default=False)
-    description: Mapped[List[str]] = mapped_column(JSON, nullable=True)
+    description: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+
+    profile: Mapped["Profile"] = relationship(back_populates="experiences")
 
 class Skill(Base):
+    """Skills that can be associated with user profiles and job postings."""
     __tablename__ = "skills"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
+    category: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)
 
-    profiles: Mapped[List["Profile"]] = relationship(secondary="profile_skill_link", back_populates="skills")
+    profiles: Mapped[List["Profile"]] = relationship(
+        secondary="profile_skill_link", 
+        back_populates="skills"
+    )
 
 
 class ProfileSkillLink(Base):
+    """Many-to-many relationship table between profiles and skills."""
     __tablename__ = "profile_skill_link"
 
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
     skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), primary_key=True)
+    proficiency_level: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # beginner, intermediate, advanced, expert
 
 class Certificate(Base):
+    """Professional certificates and certifications for user profiles."""
     __tablename__ = "certificates"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
 
-    name: Mapped[str] = mapped_column(String, nullable=True)
-    issuing_organization: Mapped[str] = mapped_column(String, nullable=True)
-    issue_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
-    credential_url: Mapped[str] = mapped_column(String, nullable=True)
-    credential_id: Mapped[str] = mapped_column(String, nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    issuing_organization: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    issue_date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
+    expiration_date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
+    credential_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    credential_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
+    profile: Mapped["Profile"] = relationship(back_populates="certificates")
 
 class JobPosting(Base):
+    """
+    Job postings scraped from various job sites with extracted structured data.
+    
+    Contains both raw scraped data and AI-extracted structured information,
+    along with vector embeddings for similarity matching.
+    """
     __tablename__ = "job_postings"
+
+    # Primary identifiers
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    source_url: Mapped[str] = mapped_column(String, unique=True, index=True)
-    source_site: Mapped[str] = mapped_column(String, index=True)
+    source_url: Mapped[str] = mapped_column(String(1000), unique=True, index=True, nullable=False)
+    source_site: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    external_id: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
 
-    full_text: Mapped[str] = mapped_column(Text, nullable=True)
-
-    job_title: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    company_name: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    full_text: Mapped[str] = mapped_column(Text, nullable=True)
+    # Basic job information
+    job_title: Mapped[Optional[str]] = mapped_column(String(200), index=True, nullable=True)
+    company_name: Mapped[Optional[str]] = mapped_column(String(200), index=True, nullable=True)
+    full_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    location: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    country: Mapped[str] = mapped_column(String, nullable=True, index=True)
-    work_type: Mapped[str] = mapped_column(String, nullable=True, index=True)  
-    employment_type: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    # Location information
+    location: Mapped[Optional[str]] = mapped_column(String(200), index=True, nullable=True)
+    country: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
     
-    salary_min: Mapped[int] = mapped_column(nullable=True)
-    salary_max: Mapped[int] = mapped_column(nullable=True)
-    salary_currency: Mapped[str] = mapped_column(String, nullable=True)
-    salary_period: Mapped[str] = mapped_column(String, nullable=True)  
-    experience_level: Mapped[str] = mapped_column(String, nullable=True, index=True)
+    # Job type and employment details
+    work_type: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)  # remote, hybrid, onsite
+    employment_type: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)  # full-time, part-time, contract
+    experience_level: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)  # entry, mid, senior
     
-    technical_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
-    soft_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
-    all_skills: Mapped[List[str]] = mapped_column(JSON, nullable=True)
-    skill_categories: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True)
+    # Salary information
+    salary_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    salary_max: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    salary_currency: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    salary_period: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # hourly, monthly, yearly
     
-    benefits: Mapped[List[str]] = mapped_column(JSON, nullable=True)
-    posting_date: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
-    application_deadline: Mapped[datetime.date] = mapped_column(DateTime, nullable=True)
-    external_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
-
-    embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
-    status: Mapped[str] = mapped_column(String, default="raw", index=True)
-    extraction_quality_score: Mapped[float] = mapped_column(nullable=True)
-
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
-    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    # Extracted skills and requirements
+    technical_skills: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+    soft_skills: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+    all_skills: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+    skill_categories: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    
+    # Additional job details
+    benefits: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+    requirements: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
+    
+    # Dates
+    posting_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
+    application_deadline: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
+    
+    # AI/ML fields
+    embedding: Mapped[Optional[Vector]] = mapped_column(Vector(768), nullable=True)
+    extraction_quality_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    
+    # Status and processing
+    status: Mapped[str] = mapped_column(String(20), default="raw", index=True, nullable=False)  # raw, processed, embedded, failed
+    
+    # Timestamps
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now, nullable=False
+    )
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, 
+        default=datetime.datetime.now, 
+        onupdate=datetime.datetime.now,
+        nullable=False
+    )
     
 class PipelineRun(Base):
+    """
+    Tracks data pipeline execution runs.
+    
+    Records metrics and status for each complete pipeline execution,
+    including scraping, processing, and embedding phases.
+    """
     __tablename__ = "pipeline_runs"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    run_date: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
-    status: Mapped[str] = mapped_column(String, default="running")
-    total_jobs_scraped: Mapped[int] = mapped_column(default=0)
-    total_jobs_processed: Mapped[int] = mapped_column(default=0)
-    total_jobs_embedded: Mapped[int] = mapped_column(default=0)
-    error_count: Mapped[int] = mapped_column(default=0)
-    started_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
-    completed_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+    run_date: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="running", nullable=False)
+    
+    # Metrics
+    total_jobs_scraped: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_jobs_processed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_jobs_embedded: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    error_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    
+    # Timing
+    started_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now, nullable=False
+    )
+    completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
+    
+    # Relationships
+    scraping_sessions: Mapped[List["ScrapingSession"]] = relationship(
+        cascade="all, delete-orphan",
+        back_populates="pipeline_run"
+    )
+    processing_errors: Mapped[List["ProcessingError"]] = relationship(
+        cascade="all, delete-orphan",
+        back_populates="pipeline_run"
+    )
 
 class ScrapingSession(Base):
+    """
+    Tracks individual site scraping sessions within a pipeline run.
+    
+    Records metrics for each job site scraped during a pipeline execution.
+    """
     __tablename__ = "scraping_sessions"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    pipeline_run_id: Mapped[int] = mapped_column(ForeignKey("pipeline_runs.id"))
-    site_name: Mapped[str] = mapped_column(String, index=True)
-    jobs_found: Mapped[int] = mapped_column(default=0)
-    jobs_successful: Mapped[int] = mapped_column(default=0)
-    jobs_failed_scraping: Mapped[int] = mapped_column(default=0)
-    status: Mapped[str] = mapped_column(String, default="pending")
+    pipeline_run_id: Mapped[int] = mapped_column(ForeignKey("pipeline_runs.id"), nullable=False)
+    site_name: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    
+    # Metrics
+    jobs_found: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    jobs_successful: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    jobs_failed_scraping: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    
+    # Status tracking
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    started_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
+
+    pipeline_run: Mapped["PipelineRun"] = relationship(back_populates="scraping_sessions")
     
 class ProcessingError(Base):
+    """
+    Tracks errors that occur during data processing pipeline.
+    
+    Logs errors for debugging and retry mechanisms, with links
+    to specific job postings and pipeline runs.
+    """
     __tablename__ = "processing_errors"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    job_posting_id: Mapped[int] = mapped_column(ForeignKey("job_postings.id"), nullable=True)
-    pipeline_run_id: Mapped[int] = mapped_column(ForeignKey("pipeline_runs.id"), nullable=True)
-    error_type: Mapped[str] = mapped_column(String, index=True)
-    error_message: Mapped[str] = mapped_column(Text)
-    retry_count: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
+    job_posting_id: Mapped[Optional[int]] = mapped_column(ForeignKey("job_postings.id"), nullable=True)
+    pipeline_run_id: Mapped[Optional[int]] = mapped_column(ForeignKey("pipeline_runs.id"), nullable=True)
+    
+    # Error details
+    error_type: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    error_message: Mapped[str] = mapped_column(Text, nullable=False)
+    stack_trace: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Retry information
+    retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    resolved: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    
+    # Timestamp
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now, nullable=False
+    )
+
+    job_posting: Mapped[Optional["JobPosting"]] = relationship()
+    pipeline_run: Mapped[Optional["PipelineRun"]] = relationship(back_populates="processing_errors")
     

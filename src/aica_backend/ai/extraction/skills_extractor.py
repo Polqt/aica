@@ -21,7 +21,7 @@ class SkillsExtractor:
         
     def extract_skills_from_text(self, job_description: str) -> ExtractedSkills:
         """Main method to extract skills from job description"""
-        if not text or not isinstance(text, str) or text.strip() == "":
+        if not job_description or not isinstance(job_description, str) or job_description.strip() == "":
             logging.debug("No job description provided for skill extraction.")
             return ExtractedSkills(
                 technical_skills=[],
@@ -32,7 +32,7 @@ class SkillsExtractor:
             )
 
         try:
-            text_lower = text.lower()
+            text_lower = job_description.lower()
             found_skills = {}
             skill_categories = {}
             
