@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from .v1.endpoints import profiles, users, login, jobs
+from .v1.endpoints import auth, profiles, users, jobs
 from ..core.config import settings
 
 # Rate limiting imports
@@ -69,7 +69,7 @@ app.add_middleware(
 
 # API Route
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
-app.include_router(login.router, prefix="/api/v1", tags=["Login"])
+app.include_router(auth.router, prefix="/api/v1", tags=["Login"])
 app.include_router(profiles.router, prefix="/api/v1/profiles", tags=["Profiles"])
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
 

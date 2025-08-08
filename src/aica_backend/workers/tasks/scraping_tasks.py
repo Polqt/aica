@@ -5,7 +5,7 @@ from ..celery_app import celery_app
 from ...core.config import settings
 from ...db.session import SessionLocal
 from ...crud import crud_jobs
-from ...data.ingestion.base_scraper import ScrapingService
+from ...services.scraping.scrapers.base_scraper import ScrapingService
 # from enrichment_tasks import enrich_job_with_llm
 
 logging.basicConfig(level=logging.INFO)

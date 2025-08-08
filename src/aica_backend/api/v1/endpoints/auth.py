@@ -17,7 +17,6 @@ def login_for_access_token(
     db: Session = Depends(dependencies.get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    # Apply rate limiting: 5 attempts per minute per IP
     if hasattr(request.app.state, 'limiter'):
         request.app.state.limiter.limit("5/minute")(request)
     
@@ -35,10 +34,10 @@ def login_for_access_token(
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Convert minutes to seconds
-        httponly=True,  # Prevents XSS attacks
-        secure=settings.ENVIRONMENT == "production",  # HTTPS only in production
-        samesite="strict",  # CSRF protection
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,  
+        httponly=True,  #
+        secure=settings.ENVIRONMENT == "production",  
+        samesite="strict",  
     )
     
     return {"access_token": access_token, "token_type": "bearer"}

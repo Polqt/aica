@@ -4,7 +4,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from aica_backend.data.ingestion.base_scraper import ScrapingService
+from aica_backend.services.scraping.scrapers.base_scraper import ScrapingService
 
 async def test_scraping():
     service = ScrapingService()
