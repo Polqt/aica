@@ -6,12 +6,6 @@ import datetime
 from typing import List, Dict, Any, Optional
 
 class User(Base):
-    """
-    User authentication model.
-    
-    Stores basic user credentials and links to detailed profile information.
-    Each user has exactly one profile (1:1 relationship).
-    """
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -28,12 +22,6 @@ class User(Base):
     )
 
 class Profile(Base):
-    """
-    User profile with detailed professional information.
-    
-    Contains personal details, professional summary, and relationships
-    to education, experience, certificates, and skills.
-    """
     __tablename__ = "profiles"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -78,7 +66,6 @@ class Profile(Base):
     )
 
 class Education(Base):
-    """Educational background information for user profiles."""
     __tablename__ = "educations"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -95,7 +82,6 @@ class Education(Base):
     profile: Mapped["Profile"] = relationship(back_populates="educations")
 
 class Experience(Base):
-    """Work experience information for user profiles."""
     __tablename__ = "experiences"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -111,7 +97,6 @@ class Experience(Base):
     profile: Mapped["Profile"] = relationship(back_populates="experiences")
 
 class Skill(Base):
-    """Skills that can be associated with user profiles and job postings."""
     __tablename__ = "skills"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -125,7 +110,6 @@ class Skill(Base):
 
 
 class ProfileSkillLink(Base):
-    """Many-to-many relationship table between profiles and skills."""
     __tablename__ = "profile_skill_link"
 
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
@@ -133,7 +117,6 @@ class ProfileSkillLink(Base):
     proficiency_level: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # beginner, intermediate, advanced, expert
 
 class Certificate(Base):
-    """Professional certificates and certifications for user profiles."""
     __tablename__ = "certificates"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -149,12 +132,6 @@ class Certificate(Base):
     profile: Mapped["Profile"] = relationship(back_populates="certificates")
 
 class JobPosting(Base):
-    """
-    Job postings scraped from various job sites with extracted structured data.
-    
-    Contains both raw scraped data and AI-extracted structured information,
-    along with vector embeddings for similarity matching.
-    """
     __tablename__ = "job_postings"
 
     # Primary identifiers
@@ -216,12 +193,6 @@ class JobPosting(Base):
     )
     
 class PipelineRun(Base):
-    """
-    Tracks data pipeline execution runs.
-    
-    Records metrics and status for each complete pipeline execution,
-    including scraping, processing, and embedding phases.
-    """
     __tablename__ = "pipeline_runs"
     
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -251,11 +222,6 @@ class PipelineRun(Base):
     )
 
 class ScrapingSession(Base):
-    """
-    Tracks individual site scraping sessions within a pipeline run.
-    
-    Records metrics for each job site scraped during a pipeline execution.
-    """
     __tablename__ = "scraping_sessions"
     
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -275,12 +241,6 @@ class ScrapingSession(Base):
     pipeline_run: Mapped["PipelineRun"] = relationship(back_populates="scraping_sessions")
     
 class ProcessingError(Base):
-    """
-    Tracks errors that occur during data processing pipeline.
-    
-    Logs errors for debugging and retry mechanisms, with links
-    to specific job postings and pipeline runs.
-    """
     __tablename__ = "processing_errors"
     
     id: Mapped[int] = mapped_column(primary_key=True)
