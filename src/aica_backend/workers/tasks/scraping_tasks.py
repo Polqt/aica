@@ -1,6 +1,5 @@
 import logging
 import asyncio
-from typing import List
 
 from ..celery_app import celery_app
 from ...core.config import settings
