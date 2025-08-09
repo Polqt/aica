@@ -22,12 +22,18 @@ try:
     from slowapi.util import get_remote_address
     from slowapi.errors import RateLimitExceeded
     
-    limiter = Limiter(
-        key_func=get_remote_address,
-        storage_uri=settings.REDIS_URL.replace("/0", "/1"),  #
-    )
-    RATE_LIMITING_ENABLED = True
-    logger.info("Rate limiting enabled with Redis backend")
+    # Temporarily disable Redis rate limiting for local development
+    # limiter = Limiter(
+    #     key_func=get_remote_address,
+    #     storage_uri=settings.REDIS_URL.replace("/0", "/1"),  #
+    # )
+    # RATE_LIMITING_ENABLED = True
+    # logger.info("Rate limiting enabled with Redis backend")
+    
+    # For now, disable rate limiting
+    limiter = None
+    RATE_LIMITING_ENABLED = False
+    logger.info("Rate limiting disabled for local development")
 except ImportError:
     logger.warning("slowapi not installed. Rate limiting disabled. Install with: pip install slowapi")
     limiter = None
@@ -54,16 +60,12 @@ if RATE_LIMITING_ENABLED:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 1. Request sanitization (first line of defense)
 app.add_middleware(RequestSanitizationMiddleware)
 
-# 2. Security headers (add security headers to all responses)  
 app.add_middleware(SecurityHeadersMiddleware)
 
-# 3. Origin validation (additional CORS security)
 app.add_middleware(OriginValidationMiddleware)
 
-# 4. Trusted host middleware (prevent host header attacks)
 app.add_middleware(
     TrustedHostMiddleware, 
     allowed_hosts=[
@@ -74,11 +76,10 @@ app.add_middleware(
     ]
 )
 
-# 5. CORS middleware (handle cross-origin requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,  # Required for httpOnly cookies
+    allow_credentials=True, 
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=[
         "Authorization",
@@ -95,7 +96,7 @@ app.add_middleware(
         "X-Rate-Limit-Remaining",
         "X-Rate-Limit-Reset"
     ],
-    max_age=86400,  # Cache preflight requests for 24 hours
+    max_age=86400,
 )
 
 @app.middleware("http")
@@ -153,7 +154,7 @@ app.include_router(
     profiles.router, 
     prefix="/api/v1/profiles", 
     tags=["Profiles"],
-    dependencies=[],  # Add authentication dependency here if needed
+    dependencies=[], 
     responses={
         401: {"description": "Unauthorized"}
     }
@@ -194,59 +195,3 @@ app.include_router(
 #         401: {"description": "Unauthorized"}
 #     }
 # )
-
-@app.get("/health", tags=['System'])
-def health_check():
-    return {
-        "status": "healthy",
-        "environment": settings.ENVIRONMENT,
-        "version": "1.0.0",
-        "features": {
-            "rate_limiting": RATE_LIMITING_ENABLED,
-            "documentation": settings.DOCS_ENABLED,
-            "debug_mode": settings.DEBUG
-        },
-        "timestamp": "2025-01-01T00:00:00Z"  
-    }
-
-@app.get("/", tags=["System"])
-def read_root():
-    return {
-        "message": "AICA Backend API - AI Career Assistant",
-        "version": "1.0.0",
-        "description": "Intelligent Job Matching and Resume Building Platform",
-        "environment": settings.ENVIRONMENT,
-        "endpoints": {
-            "health": "/health",
-            "docs": "/docs" if settings.DOCS_ENABLED else "disabled",
-            "api": "/api/v1"
-        },
-        "features": [
-            "JWT Authentication with httpOnly cookies",
-            "Rate limiting and DDoS protection", 
-            "Comprehensive security headers",
-            "CORS and origin validation",
-            "Request sanitization",
-            "Audit logging"
-        ]
-    }
-
-@app.exception_handler(500)
-async def internal_server_error_handler(request: Request, exc: Exception):
-    logger.error(f"Internal server error: {str(exc)} | Path: {request.url.path}")
-    return {
-        "error": "Internal server error",
-        "message": "An unexpected error occurred. Please try again later.",
-        "timestamp": "2025-01-01T00:00:00Z"
-    }
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info(f"AICA Backend starting up in {settings.ENVIRONMENT} mode")
-    logger.info(f"Rate limiting: {'✅ Enabled' if RATE_LIMITING_ENABLED else '❌ Disabled'}")
-    logger.info(f"Documentation: {'✅ Enabled' if settings.DOCS_ENABLED else '❌ Disabled'}")
-    logger.info(f"Security features: ✅ All enabled")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("AICA Backend shutting down")

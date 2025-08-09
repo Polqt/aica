@@ -21,7 +21,6 @@ def get_jobs(
     salary_max: Optional[int] = Query(None),
     db: Session = Depends(dependencies.get_db),
 ):
-    """Get job postings with optional filters"""
     filters = {
         "location": location,
         "work_type": work_type,
@@ -30,7 +29,6 @@ def get_jobs(
         "salary_min": salary_min,
         "salary_max": salary_max,
     }
-    # Remove None values
     filters = {k: v for k, v in filters.items() if v is not None}
     
     job_list = jobs.get_jobs(db=db, skip=skip, limit=limit, filters=filters)
@@ -41,7 +39,6 @@ def get_job(
     job_id: int,
     db: Session = Depends(dependencies.get_db),
 ):
-    """Get a specific job by ID"""
     job = jobs.get_job(db=db, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -54,7 +51,6 @@ def search_jobs_by_skills(
     threshold: float = Query(0.7, ge=0.1, le=1.0),
     db: Session = Depends(dependencies.get_db),
 ):
-    """Search jobs by skills using semantic similarity"""
     try:
         results = job_management.search_jobs_by_skills(
             db=db, 
@@ -72,6 +68,5 @@ def search_jobs_by_skills(
 
 @router.get("/stats/overview")
 def get_job_stats(db: Session = Depends(dependencies.get_db)):
-    """Get job posting statistics"""
     stats = jobs.get_job_statistics(db=db)
     return stats

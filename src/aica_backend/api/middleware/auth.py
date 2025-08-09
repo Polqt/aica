@@ -11,7 +11,6 @@ from ...database.repositories.user import UserCRUD
 logger = logging.getLogger(__name__)
 
 class AuthMiddleware:
-
     def __init__(self):
         self.public_paths = {
             "/docs", "/redoc", "/openapi.json", "/health", "/",

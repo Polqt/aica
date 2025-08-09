@@ -1,6 +1,6 @@
 from sqlalchemy import String, DateTime, Date, Text, ForeignKey, Boolean, JSON, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from pgvector.sqlalchemy import Vector
+# from pgvector.sqlalchemy import Vector  # Disabled for now - requires pgvector extension
 from .base_class import Base
 import datetime
 from typing import List, Dict, Any, Optional
@@ -175,7 +175,7 @@ class JobPosting(Base):
     application_deadline: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
     
     # AI/ML fields
-    embedding: Mapped[Optional[Vector]] = mapped_column(Vector(768), nullable=True)
+    # embedding: Mapped[Optional[Vector]] = mapped_column(Vector(768), nullable=True)  # Disabled for now - requires pgvector extension
     extraction_quality_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     
     # Status and processing

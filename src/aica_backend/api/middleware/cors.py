@@ -59,26 +59,31 @@ class EnhancedCORSMiddleware:
             "Accept",
             "Origin",
             "X-Requested-With",
-            "X-CSRF-Token",  # For future CSRF protection
-            "X-API-Key"      # For future API key authentication
+            "X-CSRF-Token", 
+            "X-API-Key"    
         ]
     
     def _get_exposed_headers(self) -> List[str]:
         return [
-            "X-Total-Count",      # For pagination
-            "X-Rate-Limit-Limit", # For rate limiting info
+            "X-Total-Count",      
+            "X-Rate-Limit-Limit", 
             "X-Rate-Limit-Remaining",
             "X-Rate-Limit-Reset"
         ]
 
 class OriginValidationMiddleware:
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.trusted_origins = set(settings.ALLOWED_ORIGINS)
         self.suspicious_origins = set()  
     
-    async def __call__(self, request: Request, call_next):
-        origin = request.headers.get("Origin")
-        referer = request.headers.get("Referer")
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        headers = dict(scope.get("headers", []))
+        origin = headers.get(b"origin", b"").decode()
         
         if origin and origin not in self.trusted_origins:
             if settings.ENVIRONMENT == "production":
@@ -86,10 +91,12 @@ class OriginValidationMiddleware:
         
         if origin in self.suspicious_origins:
             logger.error(f"Blocked suspicious origin: {origin}")
-        
-        response = await call_next(request)
-        
-        if origin and origin in self.trusted_origins:
-            response.headers["X-Origin-Verified"] = "true"
-        
-        return response
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start" and origin and origin in self.trusted_origins:
+                headers = dict(message.get("headers", []))
+                headers[b"X-Origin-Verified"] = b"true"
+                message["headers"] = list(headers.items())
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)

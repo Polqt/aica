@@ -15,7 +15,6 @@ def match_profile_to_jobs(
     db: Session = Depends(dependencies.get_db),
     current_user: models.User = Depends(dependencies.get_current_user),
 ):
-    """Match current user's profile to available jobs"""
     if not current_user.profile:
         raise HTTPException(status_code=404, detail="User profile not found")
     
@@ -41,7 +40,6 @@ def match_jobs_to_profile(
     db: Session = Depends(dependencies.get_db),
     current_user: models.User = Depends(dependencies.get_current_user),
 ):
-    """Match specific jobs to current user's profile"""
     if not current_user.profile:
         raise HTTPException(status_code=404, detail="User profile not found")
     
@@ -65,7 +63,6 @@ def get_skill_suggestions(
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(dependencies.get_db),
 ):
-    """Get skill suggestions based on current skills and job market"""
     try:
         suggestions = matching.get_skill_suggestions(
             db=db,
@@ -86,8 +83,6 @@ def get_profile_job_compatibility(
     db: Session = Depends(dependencies.get_db),
     current_user: models.User = Depends(dependencies.get_current_user),
 ):
-    """Get detailed compatibility analysis between a profile and job"""
-    # Check if user owns the profile or is admin
     if current_user.profile.id != profile_id:
         raise HTTPException(status_code=403, detail="Access denied")
     

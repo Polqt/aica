@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 from ....database.repositories.user import UserCRUD
 from ....core.security import (
-    create_access_token, 
     verify_password, 
     token_manager,
     security_validator
@@ -32,7 +31,6 @@ class AuthenticationService:
                 if attempt > cutoff_time
             ]
         
-        # Check if user is locked out
         attempts = failed_login_attempts.get(identifier, [])
         if len(attempts) >= settings.MAX_LOGIN_ATTEMPTS:
             return False
@@ -41,7 +39,6 @@ class AuthenticationService:
     
     @staticmethod
     def record_failed_attempt(identifier: str):
-        """Record a failed login attempt"""
         now = datetime.utcnow()
         if identifier not in failed_login_attempts:
             failed_login_attempts[identifier] = []
@@ -49,7 +46,6 @@ class AuthenticationService:
     
     @staticmethod
     def clear_failed_attempts(identifier: str):
-        """Clear failed login attempts after successful login"""
         if identifier in failed_login_attempts:
             del failed_login_attempts[identifier]
 
@@ -225,10 +221,6 @@ def logout(
 def verify_token(
     current_user: dict = Depends(dependencies.get_current_user)
 ):
-    """
-    Token verification endpoint.
-    Useful for frontend to check if current token is still valid.
-    """
     return {
         "valid": True,
         "user": {

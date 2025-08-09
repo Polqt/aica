@@ -49,41 +49,6 @@ class Settings(BaseSettings):
     RETRY_DELAY: int = 60
     PIPELINE_TIMEOUT: int = 3600
     
-    # Job Scraping Configuration
-    JOB_SITES_CONFIG: dict = {
-        # "jobstreet": {
-        #     "base_url": "https://www.jobstreet.com.ph/",
-        #     "search_urls": [
-        #         "/en/job-search/software-developer-jobs",
-        #         "/en/job-search/python-developer-jobs", 
-        #         "/en/job-search/web-developer-jobs",
-        #         "/en/job-search/data-scientist-jobs",
-        #         "/en/job-search/software-engineer-jobs",
-        #         "/en/job-search/frontend-developer-jobs",
-        #         "/en/job-search/backend-developer-jobs",
-        #         "/en/job-search/full-stack-developer-jobs",
-        #         "/en/job-search/mobile-developer-jobs",
-        #         "/en/job-search/devops-engineer-jobs"
-        #     ],
-        #     "selectors": {
-        #         "job_links": "h3 a[href*='/job/']",
-        #         "job_title": "h1[data-automation='job-detail-title']",
-        #         "company": "span[data-automation='advertiser-name']",
-        #         "description": "div[data-automation='job-description']",
-        #         "location": "span[data-automation='job-detail-location']",
-        #         "salary": "span[data-automation='job-detail-salary']",
-        #         "work_type": "span[data-automation='job-detail-work-type']",
-        #         "employment_type": "span[data-automation='job-detail-employment-type']",
-        #         "posting_date": "span[data-automation='job-detail-date']",
-        #         "benefits": "span[data-automation='job-detail-benefits']"
-        #     },
-        #     "rate_limit": 20,
-        #     "headers": {
-        #         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        #     }
-        # },
-    }
-    
     # Security & Monitoring
     LOG_LEVEL: str = "INFO"
     ENABLE_METRICS: bool = True
@@ -117,7 +82,7 @@ class Settings(BaseSettings):
     CSP_POLICY: str = "default-src 'self'"
     
     # Additional Security Headers
-    HSTS_MAX_AGE: int = 31536000  # 1 year
+    HSTS_MAX_AGE: int = 31536000  
     FORCE_HTTPS: bool = False
 
     class Config:
@@ -126,7 +91,6 @@ class Settings(BaseSettings):
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Auto-configure based on environment
         if self.ENVIRONMENT == "production":
             self.DEBUG = False
             self.DOCS_ENABLED = False

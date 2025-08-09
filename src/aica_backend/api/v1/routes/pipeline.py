@@ -17,11 +17,9 @@ def start_scraping_pipeline(
     db: Session = Depends(dependencies.get_db),
     current_user: models.User = Depends(dependencies.get_current_user),
 ):
-    """Start a new scraping pipeline run"""
     try:
         pipeline_run = runner.start_pipeline(db=db, sites=sites)
         
-        # Run pipeline in background
         background_tasks.add_task(
             runner.execute_pipeline, 
             db, 
@@ -43,7 +41,6 @@ def get_pipeline_runs(
     limit: int = 50,
     db: Session = Depends(dependencies.get_db),
 ):
-    """Get pipeline run history"""
     runs = monitor.get_pipeline_runs(db=db, skip=skip, limit=limit)
     return [schemas.pipeline.PipelineRun.model_validate(run) for run in runs]
 
@@ -52,7 +49,6 @@ def get_pipeline_run(
     run_id: int,
     db: Session = Depends(dependencies.get_db),
 ):
-    """Get detailed information about a specific pipeline run"""
     run_detail = monitor.get_pipeline_run_detail(db=db, run_id=run_id)
     if not run_detail:
         raise HTTPException(status_code=404, detail="Pipeline run not found")
@@ -63,7 +59,6 @@ def stop_pipeline_run(
     run_id: int,
     db: Session = Depends(dependencies.get_db),
 ):
-    """Stop a running pipeline"""
     try:
         success = runner.stop_pipeline(db=db, run_id=run_id)
         if not success:
@@ -74,7 +69,6 @@ def stop_pipeline_run(
 
 @router.get("/stats/overview")
 def get_pipeline_stats(db: Session = Depends(dependencies.get_db)):
-    """Get pipeline statistics and metrics"""
     stats = monitor.get_pipeline_statistics(db=db)
     return stats
 
@@ -84,7 +78,6 @@ def start_job_processing(
     force_reprocess: bool = False,
     db: Session = Depends(dependencies.get_db),
 ):
-    """Start processing raw job postings (skill extraction, embeddings)"""
     try:
         processing_id = runner.start_job_processing(
             db=db, 
@@ -107,6 +100,5 @@ def start_job_processing(
 
 @router.get("/jobs/status")
 def get_job_processing_status(db: Session = Depends(dependencies.get_db)):
-    """Get status of job processing (raw vs processed vs embedded)"""
     status = monitor.get_job_processing_status(db=db)
     return status

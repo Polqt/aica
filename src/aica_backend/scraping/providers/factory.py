@@ -1,9 +1,3 @@
-"""
-Scraping Providers Factory
-
-This module manages and creates scraping provider instances.
-"""
-
 from typing import Dict, Any, Optional
 import logging
 from .base import BaseProvider
@@ -11,20 +5,13 @@ from .base import BaseProvider
 logger = logging.getLogger(__name__)
 
 class ProviderFactory:
-    """
-    Factory for creating and managing scraping providers
-    """
-    
     def __init__(self):
         self._providers = {}
         self._config = {}
         self._register_default_providers()
     
     def _register_default_providers(self):
-        """Register default scraping providers"""
         try:
-            # Register available providers here
-            # For now, we'll have a placeholder structure
             self._config = {
                 "jobstreet": {
                     "description": "JobStreet Philippines job scraper",
@@ -39,17 +26,13 @@ class ProviderFactory:
             logger.error(f"Failed to register default providers: {str(e)}")
     
     def get_provider(self, name: str) -> Optional[BaseProvider]:
-        """Get a provider instance by name"""
         if name not in self._providers:
             return self._create_provider(name)
         return self._providers.get(name)
     
     def _create_provider(self, name: str) -> Optional[BaseProvider]:
-        """Create a new provider instance"""
         try:
             if name == "jobstreet":
-                # Import and create JobStreet provider
-                # For now, return None as it's not implemented yet
                 return None
             
             logger.warning(f"Unknown provider: {name}")
@@ -60,11 +43,9 @@ class ProviderFactory:
             return None
     
     def get_available_providers(self) -> Dict[str, Dict[str, Any]]:
-        """Get information about available providers"""
         return self._config.copy()
     
     def get_scraping_config(self) -> Dict[str, Any]:
-        """Get current scraping configuration"""
         return {
             "providers": self._config,
             "global_settings": {
@@ -76,7 +57,6 @@ class ProviderFactory:
         }
     
     def update_scraping_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Update scraping configuration"""
         try:
             if "providers" in config:
                 self._config.update(config["providers"])
@@ -89,11 +69,9 @@ class ProviderFactory:
             raise
 
 
-# Global factory instance
 _provider_factory = None
 
 def get_provider_factory() -> ProviderFactory:
-    """Get global provider factory instance"""
     global _provider_factory
     if _provider_factory is None:
         _provider_factory = ProviderFactory()
@@ -101,17 +79,13 @@ def get_provider_factory() -> ProviderFactory:
 
 # Convenience functions
 def get_provider(name: str) -> Optional[BaseProvider]:
-    """Get a provider by name"""
     return get_provider_factory().get_provider(name)
 
 def get_available_providers() -> Dict[str, Dict[str, Any]]:
-    """Get available providers"""
     return get_provider_factory().get_available_providers()
 
 def get_scraping_config() -> Dict[str, Any]:
-    """Get scraping configuration"""
     return get_provider_factory().get_scraping_config()
 
 def update_scraping_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    """Update scraping configuration"""
     return get_provider_factory().update_scraping_config(config)

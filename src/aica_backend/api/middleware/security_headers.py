@@ -8,19 +8,24 @@ logger = logging.getLogger(__name__)
 
 class SecurityHeadersMiddleware:
     
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.security_headers = self._get_security_headers()
     
-    async def __call__(self, request: Request, call_next):
-        response = await call_next(request)
-        
-        for header_name, header_value in self.security_headers.items():
-            response.headers[header_name] = header_value
-        
-        if settings.ENVIRONMENT == "development":
-            logger.debug(f"Applied security headers to {request.url.path}")
-        
-        return response
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                for header_name, header_value in self.security_headers.items():
+                    headers[header_name.encode()] = header_value.encode()
+                message["headers"] = list(headers.items())
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
     
     def _get_security_headers(self) -> Dict[str, str]:
         base_headers = {
@@ -72,7 +77,8 @@ class SecurityHeadersMiddleware:
             return "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:"
 
 class RequestSanitizationMiddleware:
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.suspicious_patterns = [
             "<script", "javascript:", "vbscript:", "onload=", "onerror=",
             "eval(", "expression(", "url(", "import(", "__import__",
@@ -80,24 +86,27 @@ class RequestSanitizationMiddleware:
             "../", "..\\", "/etc/passwd", "/etc/shadow", "cmd.exe", "powershell"
         ]
     
-    async def __call__(self, request: Request, call_next):
-        try:
-            if self._contains_suspicious_content(request.url.path):
-                logger.warning(f"Suspicious request path detected: {request.url.path}")
-                return Response(
-                    content="Bad Request: Suspicious content detected",
-                    status_code=400
-                )
-            
-            user_agent = request.headers.get("User-Agent", "")
-            if not user_agent or len(user_agent) > 500:
-                logger.warning(f"Suspicious User-Agent: {user_agent[:100]}...")
-            
-            return await call_next(request)
-            
-        except Exception as e:
-            logger.error(f"Request sanitization error: {str(e)}")
-            return await call_next(request)
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path = scope.get("path", "")
+        if self._contains_suspicious_content(path):
+            logger.warning(f"Suspicious request path detected: {path}")
+            response = {
+                "type": "http.response.start",
+                "status": 400,
+                "headers": [(b"content-type", b"text/plain")],
+            }
+            await send(response)
+            await send({
+                "type": "http.response.body",
+                "body": b"Bad Request: Suspicious content detected",
+            })
+            return
+
+        await self.app(scope, receive, send)
     
     def _contains_suspicious_content(self, content: str) -> bool:
         content_lower = content.lower()
