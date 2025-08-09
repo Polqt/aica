@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
 
-from .v1.endpoints import auth, profiles, users, jobs
+from .v1.routes import auth, profiles, users, jobs, matching  
 from .middleware import (
     SecurityHeadersMiddleware, 
     RequestSanitizationMiddleware,
@@ -168,7 +168,33 @@ app.include_router(
     }
 )
 
-# Health check endpoint
+app.include_router(
+    matching.router,
+    prefix="/api/v1/matching",
+    tags=["Job Matching"],
+    responses={
+        401: {"description": "Unauthorized"}
+    }
+)
+
+# app.include_router(
+#     scraping.router,
+#     prefix="/api/v1/scraping",
+#     tags=["Scraping Management"],
+#     responses={
+#         401: {"description": "Unauthorized"}
+#     }
+# )
+
+# app.include_router(
+#     pipeline.router,
+#     prefix="/api/v1/pipeline",
+#     tags=["Pipeline Management"],
+#     responses={
+#         401: {"description": "Unauthorized"}
+#     }
+# )
+
 @app.get("/health", tags=['System'])
 def health_check():
     return {
@@ -183,7 +209,6 @@ def health_check():
         "timestamp": "2025-01-01T00:00:00Z"  
     }
 
-# Root endpoint
 @app.get("/", tags=["System"])
 def read_root():
     return {

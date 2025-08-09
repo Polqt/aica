@@ -5,9 +5,9 @@ from jose import JWTError
 import logging
 from typing import Optional
 
-from ..db.session import SessionLocal
-from ..db import models
-from ..crud import crud_user
+from ..database.session import SessionLocal
+from ..database import models
+from ..database.repositories.user import UserCRUD
 from ..core.security import token_manager, security_validator
 from .v1.schemas import token as token_schema
 
@@ -98,7 +98,7 @@ def get_current_user(
         raise credentials_exception
 
     try:
-        user = crud_user.get_user_by_email(db, email=token_data.email)
+        user = UserCRUD.get_user_by_email(db, email=token_data.email)
         if user is None:
             logger.warning(f"User not found in database: {token_data.email}")
             raise credentials_exception

@@ -22,5 +22,28 @@ gevent
 crawl4ai
 sentence-transformers
 langchain
-sentence-transformers
 pgvector
+
+# AI/ML Dependencies
+numpy
+faiss-cpu
+spacy
+scikit-learn
+nltk
+
+# Text Processing
+beautifulsoup4
+lxml
+html5lib
+unicodedata2
+
+# HTTP and Scraping
+requests
+httpx
+aiohttp
+selenium
+
+# Utilities
+python-dateutil
+pytz
+tqdm

@@ -66,7 +66,7 @@ export default function RegisterForm() {
         });
 
         setTimeout(() => {
-          router.push('/profile');
+          router.push('/onboarding/profile');
         }, 500);
       } else {
         throw new Error('Registration failed. Please try again.');

@@ -15,17 +15,6 @@ class EducationBase(BaseModel):
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
     def parse_dates(cls, v):
-        """
-        VALIDATION FIX: Parse various date formats to ensure consistency
-        
-        PROBLEM: Frontend might send dates in different formats:
-        - MM/DD/YYYY (from date pickers)
-        - DD/MM/YYYY (locale-specific)
-        - ISO strings
-        
-        SOLUTION: Accept string dates and convert them to Python date objects
-        Only accept YYYY-MM-DD format to maintain data consistency
-        """
         if v is None or v == '':
             return None
         if isinstance(v, str):

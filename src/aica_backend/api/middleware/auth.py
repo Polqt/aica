@@ -5,8 +5,8 @@ from jose import jwt, JWTError
 import logging
 
 from ...core.config import settings
-from ...db.session import SessionLocal
-from ...crud import crud_user
+from ...database.session import SessionLocal
+from ...database.repositories.user import UserCRUD
 
 logger = logging.getLogger(__name__)
 
@@ -71,15 +71,15 @@ class AuthMiddleware:
                 return None
             
             with SessionLocal() as db:
-                user = crud_user.get_user_by_email(db, email=email)
-                if not user:
+                db_user = UserCRUD.get_user_by_email(db, email=email)
+                if not db_user:
                     logger.warning(f"User not found for email: {email}")
                     return None
                 
                 return {
-                    "id": user.id,
-                    "email": user.email,
-                    "created_at": user.created_at
+                    "id": db_user.id,
+                    "email": db_user.email,
+                    "created_at": db_user.created_at
                 }
                 
         except JWTError as e:
