@@ -35,7 +35,7 @@ class Profile(Base):
     address: Mapped[str] = mapped_column(Text, nullable=False)
     linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
-    profile_picture: Mapped[str] = mapped_column(String(500), nullable=False)
+    profile_picture: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime.datetime] = mapped_column(

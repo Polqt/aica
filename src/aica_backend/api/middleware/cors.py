@@ -1,4 +1,3 @@
-from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import logging
@@ -7,7 +6,7 @@ from ...core.config import settings
 
 logger = logging.getLogger(__name__)
 
-class EnhancedCORSMiddleware:
+class CORSMiddleware:
     def __init__(self, app):
         self.app = app
         self._configure_cors()

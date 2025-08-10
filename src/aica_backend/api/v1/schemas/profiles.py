@@ -48,7 +48,7 @@ class ExperienceBase(BaseModel):
     job_title: str
     company_name: str
     start_date: date
-    end_date: date
+    end_date: Optional[date] = None
     description: List[str]
     is_current: bool = False
 
@@ -149,10 +149,10 @@ class ProfileCreate(ProfileBase):
     linkedin_url: Optional[str] = None
     profile_picture: Optional[str] = None
 
-    educations: conlist(EducationCreate, min_length=1)
-    experiences: conlist(ExperienceCreate, min_length=1)
-    skills: conlist(SkillCreate, min_length=1)
-    certificates: conlist(CertificateCreate, min_length=1)
+    educations: List[EducationCreate] = Field(..., min_length=1)
+    experiences: List[ExperienceCreate] = Field(..., min_length=1)
+    skills: List[SkillCreate] = Field(..., min_length=1)
+    certificates: List[CertificateCreate] = Field(..., min_length=1)
 
 class ProfileUpdate(ProfileBase):
     educations: Optional[List[EducationCreate]] = None
