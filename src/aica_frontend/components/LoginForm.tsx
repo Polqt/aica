@@ -1,9 +1,9 @@
 'use client';
 
-import z from 'zod';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import {
   Form,
   FormControl,
@@ -14,80 +14,40 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
-import { toast } from 'sonner';
-
-const loginFormSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+import { useFormSubmission } from '@/lib/hooks/useFormWithValidation';
+import { loginSchema, LoginFormData } from '@/lib/schemas/validation';
 
 export default function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
-  const [apiError, setApiError] = useState<string | null>(null);
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
     },
+    mode: 'onChange',
   });
 
-  async function loginOnSubmit(values: z.infer<typeof loginFormSchema>) {
-    setApiError(null);
-
-    try {
-      await login(values.email, values.password);
-
-      toast.success('Welcome back!', {
-        description: `Successfully logged in as ${values.email}`,
-      });
-
-      setTimeout(() => {
+  const { handleSubmit, isSubmitting, apiError, clearApiError } =
+    useFormSubmission<LoginFormData>({
+      onSubmit: async data => {
+        clearApiError();
+        await login(data.email, data.password);
         router.push('/dashboard');
-      }, 500);
-    } catch (error) {
-      let errorMessage = 'Login failed. Please try again.';
+      },
+      successMessage: 'Welcome back! Successfully logged in.',
+      errorMessage: 'Login failed. Please check your credentials.',
+    });
 
-      if (error instanceof Error) {
-        const message = error.message.toLowerCase();
-        if (
-          message.includes('invalid credentials') ||
-          message.includes('unauthorized')
-        ) {
-          errorMessage =
-            'Invalid email or password. Please check your credentials and try again.';
-        } else if (message.includes('network') || message.includes('fetch')) {
-          errorMessage =
-            'Network error. Please check your connection and try again.';
-        } else if (message.includes('timeout')) {
-          errorMessage = 'Request timed out. Please try again.';
-        } else if (message.includes('email')) {
-          errorMessage = 'Please enter a valid email address.';
-        } else {
-          errorMessage = error.message;
-        }
-      }
-
-      // Show error toast with actionable message
-      toast.error('Login Failed', {
-        description: errorMessage,
-        action: {
-          label: 'Try Again',
-          onClick: () => form.reset(),
-        },
-      });
-
-      // Also set local error for persistent display
-      setApiError(errorMessage);
-    }
-  }
+  const onSubmit = (data: LoginFormData) => {
+    handleSubmit(data);
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(loginOnSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -100,12 +60,14 @@ export default function LoginForm() {
                   type="email"
                   placeholder="aica@example.com"
                   {...field}
+                  disabled={isSubmitting}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="password"
@@ -118,17 +80,24 @@ export default function LoginForm() {
                   type="password"
                   placeholder="Enter your password"
                   {...field}
+                  disabled={isSubmitting}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         {apiError && (
-          <p className="text-sm font-medium text-destructive">{apiError}</p>
+          <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+            <div className="text-sm text-red-700 dark:text-red-300">
+              {apiError}
+            </div>
+          </div>
         )}
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing In...' : 'Sign In'}
         </Button>
       </form>
     </Form>
