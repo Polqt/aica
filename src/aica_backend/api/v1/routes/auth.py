@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import logging
-from datetime import datetime, timedelta
 
 from ....database.repositories.user import UserCRUD
 from ....core.security import (
@@ -10,44 +9,13 @@ from ....core.security import (
     token_manager,
     security_validator
 )
+from ....core.rate_limiter import rate_limiter
 from ....core.config import settings
 from .. import schemas
 from ... import dependencies
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-failed_login_attempts = {}
-
-class AuthenticationService:
-    @staticmethod
-    def check_rate_limit(request: Request, identifier: str) -> bool:
-        now = datetime.utcnow()
-        
-        cutoff_time = now - timedelta(minutes=settings.LOCKOUT_DURATION_MINUTES)
-        if identifier in failed_login_attempts:
-            failed_login_attempts[identifier] = [
-                attempt for attempt in failed_login_attempts[identifier]
-                if attempt > cutoff_time
-            ]
-        
-        attempts = failed_login_attempts.get(identifier, [])
-        if len(attempts) >= settings.MAX_LOGIN_ATTEMPTS:
-            return False
-        
-        return True
-    
-    @staticmethod
-    def record_failed_attempt(identifier: str):
-        now = datetime.utcnow()
-        if identifier not in failed_login_attempts:
-            failed_login_attempts[identifier] = []
-        failed_login_attempts[identifier].append(now)
-    
-    @staticmethod
-    def clear_failed_attempts(identifier: str):
-        if identifier in failed_login_attempts:
-            del failed_login_attempts[identifier]
 
 @router.post('/login/access-token', response_model=schemas.token.Token)
 def login_for_access_token(
@@ -63,19 +31,19 @@ def login_for_access_token(
     email = security_validator.sanitize_email(form_data.username)
     identifier = f"{email}:{client_ip}"
     
-    if not AuthenticationService.check_rate_limit(request, identifier):
+    if not rate_limiter.check_rate_limit(identifier):
+        remaining_time = rate_limiter.get_lockout_time_remaining(identifier)
         logger.warning(
             f"Login attempt blocked due to rate limiting: {email} from {client_ip}"
         )
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Too many login attempts. Please try again in {settings.LOCKOUT_DURATION_MINUTES} minutes.",
+            detail=f"Too many login attempts. Please try again in {remaining_time // 60} minutes.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Validate email format
     if not security_validator.validate_email_format(email):
-        AuthenticationService.record_failed_attempt(identifier)
+        rate_limiter.record_failed_attempt(identifier)
         logger.warning(f"Invalid email format attempted: {email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -86,16 +54,16 @@ def login_for_access_token(
     db_user = UserCRUD.get_user_by_email(db, email=email)
     
     if not db_user or not verify_password(form_data.password, db_user.hashed_password):
-        AuthenticationService.record_failed_attempt(identifier)
+        rate_limiter.record_failed_attempt(identifier)
         logger.warning(f"Failed login attempt for email: {email} from IP: {client_ip}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    AuthenticationService.clear_failed_attempts(identifier)
-    
+
+    rate_limiter.clear_failed_attempts(identifier)
+
     token_data = {"sub": db_user.email, "user_id": db_user.id}
     access_token = token_manager.create_access_token(data=token_data)
     refresh_token = token_manager.create_refresh_token(data=token_data)

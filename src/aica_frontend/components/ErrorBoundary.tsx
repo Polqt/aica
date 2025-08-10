@@ -1,4 +1,3 @@
-// Error Boundary Component for React Error Handling
 'use client';
 
 import React from 'react';

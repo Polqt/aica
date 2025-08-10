@@ -177,21 +177,3 @@ app.include_router(
         401: {"description": "Unauthorized"}
     }
 )
-
-# app.include_router(
-#     scraping.router,
-#     prefix="/api/v1/scraping",
-#     tags=["Scraping Management"],
-#     responses={
-#         401: {"description": "Unauthorized"}
-#     }
-# )
-
-# app.include_router(
-#     pipeline.router,
-#     prefix="/api/v1/pipeline",
-#     tags=["Pipeline Management"],
-#     responses={
-#         401: {"description": "Unauthorized"}
-#     }
-# )

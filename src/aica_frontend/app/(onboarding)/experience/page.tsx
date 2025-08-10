@@ -6,7 +6,6 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,7 +43,6 @@ const experienceItemSchema = z.object({
 const experienceFormSchema = z.object({
   experiences: z
     .array(experienceItemSchema)
-    .min(1, 'At least one work experience is required')
     .max(10, 'Maximum 10 work experiences allowed'),
 });
 
@@ -57,16 +55,7 @@ export default function Experience() {
   const form = useForm<z.infer<typeof experienceFormSchema>>({
     resolver: zodResolver(experienceFormSchema),
     defaultValues: {
-      experiences: [
-        {
-          job_title: '',
-          company_name: '',
-          start_date: '',
-          end_date: '',
-          description: [''],
-          is_current: false,
-        },
-      ],
+      experiences: [],
     },
     mode: 'onBlur',
   });
@@ -99,7 +88,6 @@ export default function Experience() {
       is_current: false,
     });
 
-    // Expand the newly added experience card
     setExpandedIndexes(prev => [...prev, fields.length]);
 
     toast.success('New experience record added!', {
@@ -114,14 +102,21 @@ export default function Experience() {
     try {
       updateData({ experiences: values.experiences });
 
-      toast.success('Work Experience Saved!', {
-        description: `Successfully added ${
-          values.experiences.length
-        } experience record${
-          values.experiences.length > 1 ? 's' : ''
-        }. Let's add your skills next.`,
-        duration: 3000,
-      });
+      const hasExperience = values.experiences.length > 0;
+
+      toast.success(
+        hasExperience ? 'Work Experience Saved!' : 'Skipping Work Experience',
+        {
+          description: hasExperience
+            ? `Successfully added ${
+                values.experiences.length
+              } experience record${
+                values.experiences.length > 1 ? 's' : ''
+              }. Let's add your skills next.`
+            : "No problem! You can always add work experience later. Let's continue with your skills.",
+          duration: 3000,
+        },
+      );
 
       setTimeout(() => {
         router.push('/skills');
@@ -138,10 +133,23 @@ export default function Experience() {
     }
   }
 
-  // Calculate completion percentage
+  const skipExperience = () => {
+    updateData({ experiences: [] });
+
+    toast.info('Skipping Work Experience', {
+      description:
+        'No worries! You can add work experience later from your profile.',
+      duration: 3000,
+    });
+
+    setTimeout(() => {
+      router.push('/skills');
+    }, 1000);
+  };
+
   const watchedExperiences = form.watch('experiences');
   const totalFields = watchedExperiences.reduce((acc, exp) => {
-    return acc + 4 + exp.description.length; // 4 basic fields + description count
+    return acc + 4 + exp.description.length;
   }, 0);
 
   const completedFields = watchedExperiences.reduce((acc, exp) => {
@@ -150,7 +158,7 @@ export default function Experience() {
     if (exp.company_name?.trim()) completed++;
     if (exp.start_date?.trim()) completed++;
     if (!exp.is_current && exp.end_date?.trim()) completed++;
-    if (exp.is_current) completed++; // Count is_current as completed if checked
+    if (exp.is_current) completed++; 
     completed += exp.description.filter(desc => desc?.trim()).length;
     return acc + completed;
   }, 0);
@@ -160,7 +168,6 @@ export default function Experience() {
 
   return (
     <div className="space-y-8">
-      {/* Header Section */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-violet-600 rounded-2xl mx-auto mb-4">
           <Briefcase className="w-8 h-8 text-white" />
@@ -302,30 +309,53 @@ export default function Experience() {
               </Card>
             )}
 
-            {/* Submit Button */}
-            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+            {/* Submit Buttons */}
+            <div className="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+              {fields.length > 0 && (
+                <Button
+                  type="submit"
+                  disabled={
+                    form.formState.isSubmitting || completionPercentage < 100
+                  }
+                  className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving Work Experience...
+                    </>
+                  ) : (
+                    <>
+                      Continue to Skills & Summary
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+
               <Button
-                type="submit"
-                disabled={
-                  form.formState.isSubmitting || completionPercentage < 100
-                }
-                className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                type="button"
+                onClick={skipExperience}
+                disabled={form.formState.isSubmitting}
+                variant="outline"
+                className="w-full h-12 text-base font-medium border-2 border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 flex items-center justify-center gap-2"
               >
-                {form.formState.isSubmitting ? (
+                {fields.length === 0 ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving Work Experience...
+                    I&apos;m new to the workforce - Continue
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 ) : (
                   <>
-                    Continue to Skills & Summary
+                    Skip for Now
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </Button>
-              {completionPercentage < 100 && (
+
+              {fields.length > 0 && completionPercentage < 100 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                  Please complete all experience details to continue
+                  Complete all experience details to save, or skip to continue
                 </p>
               )}
             </div>

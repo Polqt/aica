@@ -24,9 +24,9 @@ const initialState: ProfileUpdate = {
   linkedin_url: '',
   summary: '',
   educations: [],
-  experiences: [],
+  experiences: [], 
   skills: [],
-  certificates: [],
+  certificates: [], 
 };
 
 export const useOnboardingStore = create<OnboardingState>()(

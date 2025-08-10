@@ -49,7 +49,7 @@ class ExperienceBase(BaseModel):
     company_name: str
     start_date: date
     end_date: Optional[date] = None
-    description: List[str]
+    description: Optional[List[str]] = Field(default=[], description="Job responsibilities and achievements")
     is_current: bool = False
 
     @field_validator('start_date', 'end_date', mode='before')
@@ -150,9 +150,9 @@ class ProfileCreate(ProfileBase):
     profile_picture: Optional[str] = None
 
     educations: List[EducationCreate] = Field(..., min_length=1)
-    experiences: List[ExperienceCreate] = Field(..., min_length=1)
+    experiences: List[ExperienceCreate] = Field(default=[], description="Work experience (optional)")
     skills: List[SkillCreate] = Field(..., min_length=1)
-    certificates: List[CertificateCreate] = Field(..., min_length=1)
+    certificates: List[CertificateCreate] = Field(default=[], description="Certificates (optional)")
 
 class ProfileUpdate(ProfileBase):
     educations: Optional[List[EducationCreate]] = None

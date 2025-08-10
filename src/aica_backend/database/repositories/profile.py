@@ -14,26 +14,31 @@ def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
     return skill
 
 def update_profile(db: Session, user: models.User, profile_in: profile_schemas.ProfileUpdate) -> models.Profile:
+    """
+    Update user profile with improved validation and optional fields handling
+    Following KISS principle - simple and clear logic
+    """
     profile = user.profile
 
     if not profile:
         profile = models.Profile(user=user)
         db.add(profile)
 
+    # Update basic profile fields (excluding relations)
     profile_data = profile_in.model_dump(exclude_unset=True)
 
     for field, value in profile_data.items():
         if field not in ["skills", "educations", "experiences", "certificates"]:
             setattr(profile, field, value)
 
+    # Handle skills update
     if profile_in.skills is not None:
         # Extract skill names from SkillCreate objects
-        # PROBLEM: Frontend now sends skills as [{"name": "Python"}, {"name": "JavaScript"}]
-        # but this function was expecting simple strings
-        # SOLUTION: Extract the 'name' property from each SkillCreate object
+        # Frontend now sends skills as [{"name": "Python"}, {"name": "JavaScript"}]
         skill_names = [skill.name for skill in profile_in.skills]
         profile.skills = [get_or_create_skill(db, name) for name in skill_names]
 
+    # Handle educations update (required field)
     if profile_in.educations is not None:
         profile.educations.clear()
         for edu in profile_in.educations:
@@ -41,15 +46,19 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
             new_edu = models.Education(**edu_data)
             profile.educations.append(new_edu)
 
+    # Handle experiences update (now optional - can be empty)
     if profile_in.experiences is not None:
         profile.experiences.clear()
+        # Only add experiences if the list is not empty
         for exp in profile_in.experiences:
             exp_data = exp.model_dump(exclude={'profile_id'})
             new_exp = models.Experience(**exp_data)
             profile.experiences.append(new_exp)
 
+    # Handle certificates update (optional - can be empty)
     if profile_in.certificates is not None:
         profile.certificates.clear()
+        # Only add certificates if the list is not empty
         for cert in profile_in.certificates:
             cert_data = cert.model_dump(exclude={'profile_id'})
             new_cert = models.Certificate(**cert_data)
