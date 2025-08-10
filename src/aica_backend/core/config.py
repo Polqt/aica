@@ -1,5 +1,10 @@
 from typing import List
 from pydantic_settings import BaseSettings
+from pathlib import Path
+
+current_file = Path(__file__)
+project_root = current_file.parent.parent.parent.parent  
+env_file_path = project_root / ".env"
 
 class Settings(BaseSettings):
     # Database Configuration
@@ -86,7 +91,7 @@ class Settings(BaseSettings):
     FORCE_HTTPS: bool = False
 
     class Config:
-        env_file = ".env"
+        env_file = str(env_file_path)
         case_sensitive = True
         
     def __init__(self, **kwargs):

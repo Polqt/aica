@@ -13,7 +13,6 @@ cd c:/Users/poyhi/aica-thesis && docker-compose logs -f --tail=20 api
 
 docker system df
 
-
 # From the root directory
 cd c:/Users/poyhi/aica-thesis
 C:/Python313/python.exe -c "from src.aica_backend.database.init_db import init_db; init_db()"
