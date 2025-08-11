@@ -1,19 +1,11 @@
-import logging
-from api.main import app
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-logger = logging.getLogger(__name__)
+import uvicorn
+from .api.main import app
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(
-        app, 
-        host="0.0.0.0", 
-        port=8000, 
-        reload=False,  # Disabled reload to prevent import string requirement
+        app,
+        host="0.0.0.0",
+        port=8000,
+        reload=False,
         log_level="info"
     )

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+
 from ....database import models
 from ....database.repositories import jobs
 from ....services import job_management
@@ -8,6 +9,7 @@ from .. import schemas
 from ... import dependencies
 
 router = APIRouter()
+
 
 @router.get("/", response_model=List[schemas.jobs.Job])
 def get_jobs(
@@ -21,28 +23,31 @@ def get_jobs(
     salary_max: Optional[int] = Query(None),
     db: Session = Depends(dependencies.get_db),
 ):
+    """Get jobs with optional filtering."""
     filters = {
-        "location": location,
-        "work_type": work_type,
-        "employment_type": employment_type,
-        "experience_level": experience_level,
-        "salary_min": salary_min,
-        "salary_max": salary_max,
+        k: v for k, v in {
+            "location": location,
+            "work_type": work_type,
+            "employment_type": employment_type,
+            "experience_level": experience_level,
+            "salary_min": salary_min,
+            "salary_max": salary_max,
+        }.items() if v is not None
     }
-    filters = {k: v for k, v in filters.items() if v is not None}
     
     job_list = jobs.get_jobs(db=db, skip=skip, limit=limit, filters=filters)
     return [schemas.jobs.Job.model_validate(job) for job in job_list]
+
 
 @router.get("/{job_id}", response_model=schemas.jobs.Job)
 def get_job(
     job_id: int,
     db: Session = Depends(dependencies.get_db),
 ):
+    """Get job by ID."""
     job = jobs.get_job(db=db, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    return schemas.jobs.Job.model_validate(job)
 
 @router.get("/search/by-skills")
 def search_jobs_by_skills(
@@ -51,11 +56,12 @@ def search_jobs_by_skills(
     threshold: float = Query(0.7, ge=0.1, le=1.0),
     db: Session = Depends(dependencies.get_db),
 ):
+    """Search jobs by skills with similarity matching."""
     try:
         results = job_management.search_jobs_by_skills(
-            db=db, 
-            skills=skills, 
-            limit=limit, 
+            db=db,
+            skills=skills,
+            limit=limit,
             threshold=threshold
         )
         return {

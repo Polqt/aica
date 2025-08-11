@@ -2,9 +2,8 @@ from typing import List
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
-current_file = Path(__file__)
-project_root = current_file.parent.parent.parent.parent  
-env_file_path = project_root / ".env"
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+ENV_FILE_PATH = PROJECT_ROOT / ".env"
 
 class Settings(BaseSettings):
     # Database Configuration
@@ -89,24 +88,64 @@ class Settings(BaseSettings):
     # Additional Security Headers
     HSTS_MAX_AGE: int = 31536000  
     FORCE_HTTPS: bool = False
+    
+    DEV_TEST_EMAIL: str = "dev@aica.local"
+    DEV_TEST_PASSWORD: str = "DevTest123!"
+    DEV_BYPASS_RATE_LIMITING: bool = False
+    DEV_MOCK_EXTERNAL_APIS: bool = False
 
     class Config:
-        env_file = str(env_file_path)
+        env_file = str(ENV_FILE_PATH)
         case_sensitive = True
+        extra = "forbid"
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        
+        # Security-first environment configuration
         if self.ENVIRONMENT == "production":
-            self.DEBUG = False
-            self.DOCS_ENABLED = False
-            self.REDOC_ENABLED = False
-            self.SECURE_COOKIES = True
-            self.FORCE_HTTPS = True
-        elif self.ENVIRONMENT == "development":
-            self.DEBUG = True
-            self.DOCS_ENABLED = True
-            self.REDOC_ENABLED = True
-            self.SECURE_COOKIES = False
-            self.FORCE_HTTPS = False
+            self._configure_production_security()
+        elif self.ENVIRONMENT == "staging":
+            self._configure_staging_security()
+        else:  # development
+            self._configure_development_security()
+    
+    def _configure_production_security(self):
+        """Configure security settings for production environment"""
+        self.DEBUG = False
+        self.SECURE_COOKIES = True
+        self.FORCE_HTTPS = True
+        self.DOCS_ENABLED = False
+        self.REDOC_ENABLED = False
+        self.PASSWORD_HASH_ROUNDS = 14
+        self.SESSION_TIMEOUT_MINUTES = 60
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = 15
+        self.DEV_BYPASS_RATE_LIMITING = False
+        self.DEV_MOCK_EXTERNAL_APIS = False
+        
+    def _configure_staging_security(self):
+        """Configure security settings for staging environment"""
+        self.DEBUG = False
+        self.SECURE_COOKIES = True
+        self.FORCE_HTTPS = True
+        self.DOCS_ENABLED = True
+        self.REDOC_ENABLED = True
+        self.PASSWORD_HASH_ROUNDS = 12
+        self.SESSION_TIMEOUT_MINUTES = 120
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
+        self.DEV_BYPASS_RATE_LIMITING = False
+        self.DEV_MOCK_EXTERNAL_APIS = False
+        
+    def _configure_development_security(self):
+        """Configure security settings for development environment"""
+        self.DEBUG = True
+        self.SECURE_COOKIES = False
+        self.FORCE_HTTPS = False
+        self.DOCS_ENABLED = True
+        self.REDOC_ENABLED = True
+        self.PASSWORD_HASH_ROUNDS = 8  # Faster for development
+        self.SESSION_TIMEOUT_MINUTES = 480
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Longer for development
+        # Keep dev settings as configured
 
 settings = Settings()

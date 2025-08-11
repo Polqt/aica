@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-import logging
 from .config import settings
-
-logger = logging.getLogger(__name__)
 
 
 class RateLimiter:
@@ -14,16 +11,10 @@ class RateLimiter:
     
     def check_rate_limit(self, identifier: str) -> bool:
         now = datetime.utcnow()
-        
         self._cleanup_old_attempts(identifier, now)
         
         attempts = self._failed_attempts.get(identifier, [])
-        
-        if len(attempts) >= self._max_attempts:
-            logger.warning(f"Rate limit exceeded for {identifier}")
-            return False
-        
-        return True
+        return len(attempts) < self._max_attempts
     
     def record_failed_attempt(self, identifier: str) -> None:
         now = datetime.utcnow()
@@ -32,14 +23,14 @@ class RateLimiter:
             self._failed_attempts[identifier] = []
         
         self._failed_attempts[identifier].append(now)
-        logger.info(f"Failed attempt recorded for {identifier}")
     
     def clear_failed_attempts(self, identifier: str) -> None:
+        """Clear failed attempts for identifier."""
         if identifier in self._failed_attempts:
             del self._failed_attempts[identifier]
-            logger.info(f"Failed attempts cleared for {identifier}")
     
     def get_lockout_time_remaining(self, identifier: str) -> Optional[int]:
+        """Get remaining lockout time in seconds."""
         if not self.check_rate_limit(identifier):
             attempts = self._failed_attempts.get(identifier, [])
             if attempts:
@@ -51,6 +42,7 @@ class RateLimiter:
         return None
     
     def _cleanup_old_attempts(self, identifier: str, current_time: datetime) -> None:
+        """Remove attempts older than lockout duration."""
         if identifier in self._failed_attempts:
             cutoff_time = current_time - self._lockout_duration
             self._failed_attempts[identifier] = [
@@ -62,4 +54,5 @@ class RateLimiter:
                 del self._failed_attempts[identifier]
 
 
+# Global instance
 rate_limiter = RateLimiter()

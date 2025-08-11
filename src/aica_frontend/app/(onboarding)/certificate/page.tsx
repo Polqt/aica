@@ -75,7 +75,6 @@ export default function Certificate() {
         cert.issuing_organization.trim() !== '',
     );
 
-    console.log('Valid certificates to submit:', validCertificates);
     updateData({ certificates: validCertificates });
 
     try {
@@ -95,9 +94,6 @@ export default function Certificate() {
         router.push('/dashboard');
       }, 500);
     } catch (error) {
-      console.error('Certificate submission error:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -161,11 +157,6 @@ export default function Certificate() {
                     });
                     router.push('/dashboard');
                   } catch (error) {
-                    console.error('Skip certificates error:', error);
-                    console.error(
-                      'Error details:',
-                      JSON.stringify(error, null, 2),
-                    );
                     const errorMessage =
                       error instanceof Error
                         ? error.message
@@ -179,8 +170,8 @@ export default function Certificate() {
                           try {
                             await submitOnboardingData();
                             router.push('/dashboard');
-                          } catch (retryError) {
-                            console.error('Retry error:', retryError);
+                          } catch {
+                            // Silently handle retry errors
                           }
                         },
                       },
