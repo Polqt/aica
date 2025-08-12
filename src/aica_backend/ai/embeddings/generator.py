@@ -68,15 +68,6 @@ class EmbeddingGenerator:
             return [np.zeros(self.get_embedding_dimension()) for _ in texts]
     
     def generate_skill_embedding(self, skills: List[str]) -> np.ndarray:
-        """
-        Generate embedding for a list of skills
-        
-        Args:
-            skills: List of skill names
-            
-        Returns:
-            Combined embedding representing the skill set
-        """
         if not skills:
             return np.zeros(self.get_embedding_dimension())
         
@@ -87,15 +78,6 @@ class EmbeddingGenerator:
         return self.generate_embedding(skill_description)
     
     def generate_job_embedding(self, job_data: Dict[str, Any]) -> np.ndarray:
-        """
-        Generate comprehensive embedding for a job posting
-        
-        Args:
-            job_data: Dictionary containing job information
-            
-        Returns:
-            Job embedding
-        """
         try:
             # Combine relevant job fields into a comprehensive text
             text_parts = []
@@ -141,15 +123,6 @@ class EmbeddingGenerator:
             return np.zeros(self.get_embedding_dimension())
     
     def generate_profile_embedding(self, profile_data: Dict[str, Any]) -> np.ndarray:
-        """
-        Generate comprehensive embedding for a user profile
-        
-        Args:
-            profile_data: Dictionary containing profile information
-            
-        Returns:
-            Profile embedding
-        """
         try:
             text_parts = []
             

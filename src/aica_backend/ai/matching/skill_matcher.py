@@ -204,7 +204,6 @@ class SkillMatcher:
                                  job: models.JobPosting,
                                  profile_skills: Dict[str, List[str]],
                                  profile_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Calculate detailed match score between job and profile"""
         
         # Extract job skills
         job_data = self._job_to_dict(job)
@@ -436,8 +435,6 @@ class SkillMatcher:
         matches.sort(key=lambda x: x['overall_score'], reverse=True)
         return matches[:limit]
 
-
-# Global skill matcher instance
 _skill_matcher = None
 
 def get_skill_matcher() -> SkillMatcher:

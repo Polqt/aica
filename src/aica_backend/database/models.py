@@ -1,6 +1,5 @@
 from sqlalchemy import String, DateTime, Date, Text, ForeignKey, Boolean, JSON, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-# from pgvector.sqlalchemy import Vector  # Disabled for now - requires pgvector extension
 from .base_class import Base
 import datetime
 from typing import List, Dict, Any, Optional

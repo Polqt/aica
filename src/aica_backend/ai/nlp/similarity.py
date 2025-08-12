@@ -56,16 +56,6 @@ class SimilarityCalculator:
             return 0.0
     
     def skill_overlap_similarity(self, skills1: List[str], skills2: List[str]) -> float:
-        """
-        Calculate similarity based on skill overlap
-        
-        Args:
-            skills1: First skill list
-            skills2: Second skill list
-            
-        Returns:
-            Skill overlap similarity score between 0 and 1
-        """
         try:
             if not skills1 or not skills2:
                 return 0.0
@@ -89,17 +79,6 @@ class SimilarityCalculator:
     
     def weighted_skill_similarity(self, skills1: List[str], skills2: List[str], 
                                 skill_weights: Dict[str, float] = None) -> float:
-        """
-        Calculate weighted skill similarity
-        
-        Args:
-            skills1: First skill list
-            skills2: Second skill list
-            skill_weights: Dictionary of skill weights
-            
-        Returns:
-            Weighted skill similarity score
-        """
         try:
             if not skills1 or not skills2:
                 return 0.0
@@ -136,16 +115,6 @@ class SimilarityCalculator:
             return 0.0
     
     def fuzzy_string_similarity(self, str1: str, str2: str) -> float:
-        """
-        Calculate fuzzy string similarity using edit distance
-        
-        Args:
-            str1: First string
-            str2: Second string
-            
-        Returns:
-            Similarity score between 0 and 1
-        """
         try:
             if not str1 or not str2:
                 return 0.0
@@ -173,16 +142,6 @@ class SimilarityCalculator:
             return 0.0
     
     def semantic_text_similarity(self, text1: str, text2: str) -> float:
-        """
-        Calculate semantic text similarity using TF-IDF
-        
-        Args:
-            text1: First text
-            text2: Second text
-            
-        Returns:
-            Semantic similarity score between 0 and 1
-        """
         try:
             # Tokenize texts
             tokens1 = self._tokenize(text1.lower())
@@ -216,21 +175,6 @@ class SimilarityCalculator:
                                      embeddings1: np.ndarray = None,
                                      embeddings2: np.ndarray = None,
                                      weights: Dict[str, float] = None) -> Dict[str, float]:
-        """
-        Calculate composite similarity using multiple methods
-        
-        Args:
-            text1: First text
-            text2: Second text
-            skills1: First skill list
-            skills2: Second skill list
-            embeddings1: First embedding vector
-            embeddings2: Second embedding vector
-            weights: Weights for different similarity methods
-            
-        Returns:
-            Dictionary with individual and composite scores
-        """
         results = {}
         
         # Default weights
@@ -279,7 +223,6 @@ class SimilarityCalculator:
         return [token for token in tokens if len(token) > 1]
     
     def _calculate_tfidf(self, tokens: List[str], vocab: set) -> np.ndarray:
-        """Calculate TF-IDF vector for tokens"""
         # Term frequency
         tf_counter = Counter(tokens)
         tf_vector = np.array([tf_counter.get(term, 0) for term in vocab], dtype=float)
@@ -287,9 +230,7 @@ class SimilarityCalculator:
         # Normalize by document length
         if len(tokens) > 0:
             tf_vector = tf_vector / len(tokens)
-        
-        # Simple IDF (inverse document frequency)
-        # In a real implementation, this would be calculated from a corpus
+
         idf_vector = np.ones(len(vocab))
         
         # TF-IDF
@@ -298,7 +239,6 @@ class SimilarityCalculator:
         return tfidf_vector
     
     def _levenshtein_distance(self, str1: str, str2: str) -> int:
-        """Calculate Levenshtein distance between two strings"""
         if len(str1) < len(str2):
             return self._levenshtein_distance(str2, str1)
         
@@ -332,12 +272,9 @@ class SimilarityCalculator:
             'too', 'very', 'can', 'just', 'now', 'also'
         }
 
-
-# Global similarity calculator instance
 _similarity_calculator = None
 
 def get_similarity_calculator() -> SimilarityCalculator:
-    """Get global similarity calculator instance"""
     global _similarity_calculator
     if _similarity_calculator is None:
         _similarity_calculator = SimilarityCalculator()

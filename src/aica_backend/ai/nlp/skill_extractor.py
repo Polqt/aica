@@ -1,25 +1,12 @@
-"""
-Skill Extraction Module
-
-This module extracts skills from job postings and profiles using NLP techniques.
-Uses free, open-source libraries without requiring paid APIs.
-"""
-
 import re
 import spacy
-from typing import List, Set, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 import logging
 from collections import Counter
-import json
-import os
 
 logger = logging.getLogger(__name__)
 
 class SkillExtractor:
-    """
-    Extracts technical and soft skills from text using various NLP techniques
-    """
-    
     def __init__(self):
         self.nlp = None
         self.technical_skills = set()
@@ -42,7 +29,6 @@ class SkillExtractor:
     def _load_skill_databases(self):
         """Load skill databases from local files"""
         try:
-            # Technical skills database
             technical_skills_data = [
                 # Programming Languages
                 "Python", "JavaScript", "Java", "C++", "C#", "PHP", "Ruby", "Go", "Rust", "Kotlin",
@@ -99,7 +85,6 @@ class SkillExtractor:
             logger.error(f"Failed to load skill databases: {str(e)}")
     
     def _create_skill_patterns(self):
-        """Create regex patterns for skill matching"""
         self.skill_patterns = {}
         
         # Combine all skills
@@ -119,15 +104,6 @@ class SkillExtractor:
             self.skill_patterns[skill] = [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
     
     def extract_skills_from_text(self, text: str) -> Dict[str, List[str]]:
-        """
-        Extract skills from text
-        
-        Args:
-            text: Input text to analyze
-            
-        Returns:
-            Dictionary with 'technical' and 'soft' skill lists
-        """
         if not text:
             return {"technical": [], "soft": [], "all": []}
         
@@ -148,15 +124,6 @@ class SkillExtractor:
         }
     
     def extract_skills_from_job_posting(self, job_data: Dict[str, Any]) -> Dict[str, List[str]]:
-        """
-        Extract skills specifically from job posting data
-        
-        Args:
-            job_data: Job posting dictionary
-            
-        Returns:
-            Extracted skills with categorization
-        """
         # Combine relevant text fields
         text_parts = []
         
@@ -184,15 +151,6 @@ class SkillExtractor:
         return skills
     
     def extract_skills_from_profile(self, profile_data: Dict[str, Any]) -> Dict[str, List[str]]:
-        """
-        Extract skills from user profile data
-        
-        Args:
-            profile_data: Profile dictionary
-            
-        Returns:
-            Extracted skills with categorization
-        """
         text_parts = []
         
         # Professional title
@@ -235,7 +193,6 @@ class SkillExtractor:
         return skills
     
     def _extract_technical_skills(self, text: str) -> List[str]:
-        """Extract technical skills from text"""
         found_skills = set()
         
         for skill in self.technical_skills:
@@ -247,7 +204,6 @@ class SkillExtractor:
         return list(found_skills)
     
     def _extract_soft_skills(self, text: str) -> List[str]:
-        """Extract soft skills from text"""
         found_skills = set()
         
         for skill in self.soft_skills:
@@ -259,7 +215,6 @@ class SkillExtractor:
         return list(found_skills)
     
     def _clean_text(self, text: str) -> str:
-        """Clean and preprocess text for skill extraction"""
         if not text:
             return ""
         
@@ -273,8 +228,6 @@ class SkillExtractor:
         return cleaned
     
     def _enhance_job_skills(self, skills: Dict[str, List[str]], job_data: Dict[str, Any]) -> Dict[str, List[str]]:
-        """Enhance skill extraction with job-specific logic"""
-        
         # Infer skills from job title
         job_title = job_data.get('job_title', '').lower()
         
@@ -300,8 +253,6 @@ class SkillExtractor:
         return skills
     
     def _merge_skill_lists(self, extracted_skills: Dict[str, List[str]], explicit_skills: List[str]) -> Dict[str, List[str]]:
-        """Merge extracted skills with explicitly listed skills"""
-        
         # Categorize explicit skills
         for skill in explicit_skills:
             skill_lower = skill.lower()
@@ -342,12 +293,9 @@ class SkillExtractor:
         
         return dict(skill_counter)
 
-
-# Global skill extractor instance
 _skill_extractor = None
 
 def get_skill_extractor() -> SkillExtractor:
-    """Get global skill extractor instance"""
     global _skill_extractor
     if _skill_extractor is None:
         _skill_extractor = SkillExtractor()

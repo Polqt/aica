@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-from .v1.routes import auth, profiles, users, jobs, matching  
+from .v1.routes import auth, profiles, users, jobs, matching, ai_simple as ai  
 from .middleware import (
     SecurityHeadersMiddleware, 
     RequestSanitizationMiddleware,
@@ -135,5 +135,15 @@ app.include_router(
     tags=["Job Matching"],
     responses={
         401: {"description": "Unauthorized"}
+    }
+)
+
+app.include_router(
+    ai.router,
+    prefix="/api/v1",
+    tags=["AI/RAG"],
+    responses={
+        401: {"description": "Unauthorized"},
+        500: {"description": "AI Service Error"}
     }
 )

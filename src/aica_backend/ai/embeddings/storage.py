@@ -131,17 +131,6 @@ class VectorStorage:
             raise
     
     def search_similar(self, query_embedding: np.ndarray, k: int = 10, threshold: float = None) -> List[Tuple[int, float]]:
-        """
-        Search for similar vectors
-        
-        Args:
-            query_embedding: Query vector
-            k: Number of results to return
-            threshold: Minimum similarity threshold
-            
-        Returns:
-            List of tuples (vector_id, similarity_score)
-        """
         try:
             if self.index.ntotal == 0:
                 return []
@@ -180,14 +169,9 @@ class VectorStorage:
             return []
     
     def get_vector_metadata(self, vector_id: int) -> Optional[Dict[str, Any]]:
-        """Get metadata for a specific vector"""
         return self.metadata.get(vector_id)
     
     def remove_vector(self, vector_id: int):
-        """
-        Remove a vector from the index (rebuilds index)
-        Note: This is expensive for large indices
-        """
         try:
             # Find FAISS index for this vector_id
             faiss_idx_to_remove = None
@@ -246,8 +230,6 @@ class VectorStorage:
             "mapping_count": len(self.id_mapping)
         }
 
-
-# Global storage instances
 _job_storage = None
 _profile_storage = None
 _skill_storage = None

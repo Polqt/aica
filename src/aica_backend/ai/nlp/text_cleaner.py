@@ -1,21 +1,12 @@
-"""
-Text Cleaning and Preprocessing Module
-
-This module provides text cleaning and preprocessing utilities for NLP tasks.
-"""
-
 import re
 import html
-from typing import List, Optional, Dict, Any
+from typing import List
 import logging
 import unicodedata
 
 logger = logging.getLogger(__name__)
 
 class TextCleaner:
-    """
-    Handles text cleaning and preprocessing for NLP tasks
-    """
     
     def __init__(self):
         # Common patterns for cleaning
@@ -28,15 +19,6 @@ class TextCleaner:
         self.numbers_only = re.compile(r'^\d+$')
     
     def clean_job_posting_text(self, text: str) -> str:
-        """
-        Clean job posting text for processing
-        
-        Args:
-            text: Raw job posting text
-            
-        Returns:
-            Cleaned text
-        """
         if not text:
             return ""
         
@@ -57,15 +39,6 @@ class TextCleaner:
             return text
     
     def clean_profile_text(self, text: str) -> str:
-        """
-        Clean profile/resume text for processing
-        
-        Args:
-            text: Raw profile text
-            
-        Returns:
-            Cleaned text
-        """
         if not text:
             return ""
         
@@ -86,15 +59,6 @@ class TextCleaner:
             return text
     
     def basic_clean(self, text: str) -> str:
-        """
-        Perform basic text cleaning
-        
-        Args:
-            text: Input text
-            
-        Returns:
-            Cleaned text
-        """
         if not text:
             return ""
         
@@ -113,7 +77,6 @@ class TextCleaner:
         return cleaned
     
     def remove_urls_and_emails(self, text: str) -> str:
-        """Remove URLs and email addresses from text"""
         if not text:
             return ""
         
@@ -126,7 +89,6 @@ class TextCleaner:
         return text
     
     def normalize_whitespace(self, text: str) -> str:
-        """Normalize whitespace in text"""
         if not text:
             return ""
         
@@ -139,15 +101,6 @@ class TextCleaner:
         return text.strip()
     
     def extract_sentences(self, text: str) -> List[str]:
-        """
-        Extract sentences from text
-        
-        Args:
-            text: Input text
-            
-        Returns:
-            List of sentences
-        """
         if not text:
             return []
         
@@ -164,16 +117,6 @@ class TextCleaner:
         return cleaned_sentences
     
     def extract_keywords(self, text: str, min_length: int = 3) -> List[str]:
-        """
-        Extract potential keywords from text
-        
-        Args:
-            text: Input text
-            min_length: Minimum length for keywords
-            
-        Returns:
-            List of keywords
-        """
         if not text:
             return []
         
@@ -201,8 +144,6 @@ class TextCleaner:
         return unique_keywords
     
     def _remove_job_posting_artifacts(self, text: str) -> str:
-        """Remove common job posting artifacts"""
-        
         # Common phrases to remove or normalize
         artifacts = [
             r'\b(?:apply now|click here|visit our website)\b',
@@ -219,8 +160,6 @@ class TextCleaner:
         return text
     
     def _remove_personal_info(self, text: str) -> str:
-        """Remove personal information from profile text"""
-        
         # Remove phone numbers
         text = self.phone_pattern.sub('[PHONE]', text)
         
@@ -249,15 +188,6 @@ class TextCleaner:
         }
     
     def preprocess_for_embedding(self, text: str) -> str:
-        """
-        Preprocess text specifically for embedding generation
-        
-        Args:
-            text: Input text
-            
-        Returns:
-            Preprocessed text optimized for embeddings
-        """
         if not text:
             return ""
         
@@ -278,15 +208,6 @@ class TextCleaner:
         return cleaned.strip()
     
     def extract_technical_terms(self, text: str) -> List[str]:
-        """
-        Extract potential technical terms from text
-        
-        Args:
-            text: Input text
-            
-        Returns:
-            List of technical terms
-        """
         if not text:
             return []
         
@@ -306,12 +227,9 @@ class TextCleaner:
         
         return list(technical_terms)
 
-
-# Global text cleaner instance
 _text_cleaner = None
 
 def get_text_cleaner() -> TextCleaner:
-    """Get global text cleaner instance"""
     global _text_cleaner
     if _text_cleaner is None:
         _text_cleaner = TextCleaner()

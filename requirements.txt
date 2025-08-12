@@ -22,6 +22,10 @@ gevent
 crawl4ai
 sentence-transformers
 langchain
+langchain-community
+langchain-huggingface
+langchain-experimental
+ollama
 pgvector
 
 # AI/ML Dependencies
