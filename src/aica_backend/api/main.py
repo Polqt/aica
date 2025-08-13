@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-from .v1.routes import auth, profiles, users, jobs, matching, ai_simple as ai  
+from .v1.routes import ai as ai, auth, profiles, users, jobs, matching
 from .middleware import (
     SecurityHeadersMiddleware, 
     RequestSanitizationMiddleware,
