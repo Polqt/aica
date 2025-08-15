@@ -13,6 +13,15 @@ import { toast } from 'sonner';
 
 const certificateItemSchema = z.object({
   name: z.string().optional(),
+  middle_name: z.string().optional(),
+  email: z.string().email('Invalid email').optional(),
+  gender: z.string().optional(),
+  date_of_birth: z.string().optional(),
+  place_of_birth: z.string().optional(),
+  nationality: z.string().optional(),
+  marital_status: z.string().optional(),
+  id_type: z.string().optional(),
+  religion: z.string().optional(),
   issuing_organization: z.string().optional(),
   issue_date: z.string().optional(),
   credential_url: z
@@ -43,6 +52,15 @@ export default function Certificate() {
       certificates: [
         {
           name: '',
+          middle_name: '',
+          email: '',
+          gender: '',
+          date_of_birth: '',
+          place_of_birth: '',
+          nationality: '',
+          marital_status: '',
+          id_type: '',
+          religion: '',
           issuing_organization: '',
           issue_date: '',
           credential_url: '',
@@ -128,6 +146,15 @@ export default function Certificate() {
             onClick={() =>
               append({
                 name: '',
+                middle_name: '',
+                email: '',
+                gender: '',
+                date_of_birth: '',
+                place_of_birth: '',
+                nationality: '',
+                marital_status: '',
+                id_type: '',
+                religion: '',
                 issuing_organization: '',
                 issue_date: '',
                 credential_url: '',
