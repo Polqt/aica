@@ -41,28 +41,25 @@ import {
   AlertCircle,
   ArrowRight,
   Upload,
+  Mail,
+  Calendar,
+  Globe,
 } from 'lucide-react';
 
 const profileFormSchema = z.object({
-  first_name: z
-    .string()
-    .min(2, 'First name must be at least 2 characters')
-    .max(50, 'First name must be less than 50 characters')
-    .regex(/^[A-Za-z\s]+$/, 'First name should only contain letters'),
-  last_name: z
-    .string()
-    .min(2, 'Last name must be at least 2 characters')
-    .max(50, 'Last name must be less than 50 characters')
-    .regex(/^[A-Za-z\s]+$/, 'Last name should only contain letters'),
+  first_name: z.string().min(2, 'First name must be at least 2 characters').max(50, 'First name must be less than 50 characters').regex(/^[A-Za-z\s]+$/, 'First name should only contain letters'),
+  middle_name: z.string().optional(),
+  last_name: z.string().min(2, 'Last name must be at least 2 characters').max(50, 'Last name must be less than 50 characters').regex(/^[A-Za-z\s]+$/, 'Last name should only contain letters'),
+  email: z.string().email('Invalid email address'),
+  gender: z.string().optional(),
+  date_of_birth: z.string().optional(),
+  place_of_birth: z.string().optional(),
+  nationality: z.string().optional(),
+  marital_status: z.string().optional(),
+  religion: z.string().optional(),
   professional_title: z.string().min(1, 'Professional title is required'),
-  contact_number: z
-    .string()
-    .min(7, 'Invalid contact number')
-    .max(20, 'Contact number is too long'),
-  address: z
-    .string()
-    .min(5, 'Address must be at least 5 characters')
-    .max(200, 'Address must be less than 200 characters'),
+  contact_number: z.string().min(7, 'Invalid contact number').max(20, 'Contact number is too long'),
+  address: z.string().min(5, 'Address must be at least 5 characters').max(200, 'Address must be less than 200 characters'),
   linkedin_url: z
     .string()
     .optional()
@@ -72,13 +69,7 @@ const profileFormSchema = z.object({
         message: 'Enter a valid LinkedIn URL',
       },
     ),
-  summary: z
-    .string()
-    .min(
-      50,
-      'Summary must be at least 50 characters to give us a good overview',
-    )
-    .max(500, 'Summary must be less than 500 characters'),
+  summary: z.string().min(50, 'Summary must be at least 50 characters to give us a good overview').max(500, 'Summary must be less than 500 characters'),
   profile_picture: z.string().optional(),
 });
 
@@ -131,7 +122,15 @@ export default function Profile() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       first_name: '',
+      middle_name: '',
       last_name: '',
+      email: '',
+      gender: '',
+      date_of_birth: '',
+      place_of_birth: '',
+      nationality: '',
+      marital_status: '',
+      religion: '',
       professional_title: '',
       contact_number: '',
       address: '',
@@ -313,48 +312,193 @@ export default function Profile() {
                 </div>
 
                 {/* Personal Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <User className="w-4 h-4" />
-                          First Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter your first name"
-                            {...field}
-                            className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="last_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <User className="w-4 h-4" />
-                          Last Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter your last name"
-                            {...field}
-                            className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <span className="font-bold text-base text-gray-900 dark:text-white">Personal Information</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            First Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your first name" {...field} className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="middle_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            Middle Name / Initial
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter middle name / initial" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            Last Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your last name" {...field} className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <Mail className="w-4 h-4" />
+                            Email Address
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="Enter email address" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            Gender
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <SelectValue placeholder="Select gender..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="marital_status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            Marital Status
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <SelectValue placeholder="Select status..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Single">Single</SelectItem>
+                              <SelectItem value="Married">Married</SelectItem>
+                              <SelectItem value="Divorced">Divorced</SelectItem>
+                              <SelectItem value="Widowed">Widowed</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="date_of_birth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <Calendar className="w-4 h-4" />
+                            Date of Birth
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="place_of_birth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <MapPin className="w-4 h-4" />
+                            Place of Birth
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Manila, Philippines" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="nationality"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <Globe className="w-4 h-4" />
+                            Nationality / Citizenship
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Filipino" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="religion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <User className="w-4 h-4" />
+                            Religion
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Catholic" {...field} className="h-11 border-gray-300 dark:border-gray-600" />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 {/* Professional Title */}
