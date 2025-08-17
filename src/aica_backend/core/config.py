@@ -47,6 +47,17 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 384
     VECTOR_SIMILARITY_THRESHOLD: float = 0.75
     
+    # Scraping Configuration (ADDED MISSING FIELDS)
+    SCRAPING_ENABLED: bool = True
+    SCRAPING_RATE_LIMIT_DELAY: int = 2
+    SCRAPING_MAX_RETRIES: int = 3
+    SCRAPING_TIMEOUT: int = 120
+    
+    # Crawl4AI Configuration (ADDED MISSING FIELDS)
+    CRAWL4AI_HEADLESS: bool = True
+    CRAWL4AI_BROWSER_TYPE: str = "chromium"
+    CRAWL4AI_USER_AGENT: str = "AICA-JobBot/1.0"
+    
     # Pipeline Settings
     SCRAPING_BATCH_SIZE: int = 100
     MAX_RETRIES: int = 3
@@ -97,7 +108,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = str(ENV_FILE_PATH)
         case_sensitive = True
-        extra = "forbid"
+        extra = "ignore"
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

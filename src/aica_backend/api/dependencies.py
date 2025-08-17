@@ -16,7 +16,6 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 def get_db():
-    """Database dependency."""
     db = SessionLocal()
     try:
         yield db
@@ -42,7 +41,6 @@ def get_token_from_cookie_or_header(request: Request, token: str = Depends(oauth
         
         return token_value
     
-    # Check for token in Authorization header
     if token:
         if len(token) < 10:
             raise HTTPException(
@@ -52,7 +50,6 @@ def get_token_from_cookie_or_header(request: Request, token: str = Depends(oauth
             )
         return token
     
-    # No token found
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Authentication required",
@@ -77,7 +74,6 @@ def get_current_user(
         if not payload:
             raise credentials_exception
         
-        # Extract and validate email
         email: str = payload.get("sub")
         if not email:
             raise credentials_exception

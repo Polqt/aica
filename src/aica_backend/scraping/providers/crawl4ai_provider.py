@@ -53,7 +53,7 @@ class Crawl4AIProvider(BaseProvider):
             4. Detailed job description
             5. Required and preferred skills (extract as separate arrays)
             6. Experience level and educational requirements
-            7. Applicationd deadline and posting if available
+            7. Application deadline and posting if available
         
             Be through and accurate. If information is not available, leave the field empty or null.
         """
@@ -82,7 +82,7 @@ class Crawl4AIProvider(BaseProvider):
                             "window.scrollTo(0, document.body.scrollHeight);",
                             "await new Promise(resolve => setTimeout(resolve, 2000));"
                         ],
-                        wait_for="css:.job_listing, .job_card, [data-testid*='job']",
+                        wait_for="css:.job_listing, .job_card, [data-test_id*='job']",
                         page_timeout=3000,
                         js_only=True,
                     )
