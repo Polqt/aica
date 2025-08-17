@@ -21,7 +21,6 @@ export class HttpClient {
     const url = this.buildUrl(endpoint);
     const headers = this.buildHeaders(requestOptions.headers, includeAuth);
 
-    // Remove Content-Type header for FormData to let browser set it
     if (requestOptions.body instanceof FormData) {
       delete (headers as Record<string, string>)['Content-Type'];
     }

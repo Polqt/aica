@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Navbar } from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
-import { FileText, Download, Calendar, Users, Award, BookOpen, Target, Eye } from 'lucide-react';
+import { FileText, Download, Calendar, Users, BookOpen, Target, Eye } from 'lucide-react';
 import React from 'react';
 
 export default function PaperPage() {

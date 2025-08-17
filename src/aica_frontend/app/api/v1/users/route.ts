@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRepository } from '@/lib/db/user-repository';
-import { AuthUtils } from '@/lib/auth/utils';
+import { AuthUtils } from '@/lib/utils/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,10 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create user
     const newUser = await UserRepository.createUser({ email, password });
 
-    // Generate token
     const accessToken = AuthUtils.createAccessToken({
       sub: newUser.email,
       user_id: newUser.id,

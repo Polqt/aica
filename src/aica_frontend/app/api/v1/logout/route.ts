@@ -2,12 +2,10 @@ import { NextResponse } from 'next/server';
 
 export async function POST() {
   try {
-    // Create response
     const response = NextResponse.json({
       message: 'Successfully logged out',
     });
 
-    // Clear cookies
     response.cookies.set('access_token', '', {
       maxAge: 0,
       httpOnly: true,

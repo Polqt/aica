@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthUtils } from '@/lib/auth/utils';
 import { UserRepository } from '@/lib/db/user-repository';
+import { AuthUtils } from '@/lib/utils/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get refresh token from cookie
     const refreshToken = request.cookies.get('refresh_token')?.value;
 
     if (!refreshToken) {
@@ -14,7 +13,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify refresh token
     const payload = AuthUtils.verifyToken(refreshToken);
     if (!payload) {
       const response = NextResponse.json(
@@ -22,7 +20,6 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
 
-      // Clear invalid refresh token
       response.cookies.set('refresh_token', '', {
         maxAge: 0,
         httpOnly: true,
@@ -34,7 +31,6 @@ export async function POST(request: NextRequest) {
       return response;
     }
 
-    // Get user from database
     const user = await UserRepository.getUserByEmail(payload.sub);
     if (!user) {
       const response = NextResponse.json(
@@ -42,7 +38,6 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
 
-      // Clear refresh token for non-existent user
       response.cookies.set('refresh_token', '', {
         maxAge: 0,
         httpOnly: true,
@@ -54,13 +49,12 @@ export async function POST(request: NextRequest) {
       return response;
     }
 
-    // Generate new access token
     const newAccessToken = AuthUtils.createAccessToken({
       sub: user.email,
       user_id: user.id,
     });
 
-    const expiresIn = 30 * 60; // 30 minutes
+    const expiresIn = 30 * 60; 
 
     const response = NextResponse.json({
       access_token: newAccessToken,
@@ -68,7 +62,6 @@ export async function POST(request: NextRequest) {
       expires_in: expiresIn,
     });
 
-    // Set new access token cookie
     response.cookies.set('access_token', `Bearer ${newAccessToken}`, {
       maxAge: expiresIn,
       httpOnly: true,

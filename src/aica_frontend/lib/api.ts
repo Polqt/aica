@@ -1,7 +1,6 @@
 import { TokenManager } from './utils/token-manager';
 import { HttpClient } from './services/http-client';
 
-// Import centralized services
 import { apiClient } from './services/api-client';
 import { AuthService } from './services/auth.service';
 import { ProfileService } from './services/profile.service';

@@ -1,5 +1,5 @@
 import pool from '../db/connection';
-import { AuthUtils } from '../auth/utils';
+import { AuthUtils } from '../utils/auth';
 
 export interface User {
   id: number;
