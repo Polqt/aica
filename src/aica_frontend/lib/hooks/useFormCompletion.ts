@@ -99,7 +99,7 @@ export function useArrayFormCompletion<T extends Record<string, unknown>>({
       const itemMissing: string[] = [];
 
       for (const field of requiredFieldsPerItem) {
-        const value = item[field];
+        const value = (item as Record<string, unknown>)[field as string];
         if (!isFieldCompleted(value)) {
           itemCompleted = false;
           itemMissing.push(String(field));

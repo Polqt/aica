@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from ....database import models
 from ....database.repositories import jobs
 from ....services import job_management
 from .. import schemas
@@ -56,7 +55,6 @@ def search_jobs_by_skills(
     threshold: float = Query(0.7, ge=0.1, le=1.0),
     db: Session = Depends(dependencies.get_db),
 ):
-    """Search jobs by skills with similarity matching."""
     try:
         results = job_management.search_jobs_by_skills(
             db=db,

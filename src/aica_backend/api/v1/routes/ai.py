@@ -1,8 +1,4 @@
-"""
-AI/RAG API endpoints - Simple version without pipeline service
-Following REST principles and Clean Code
-"""
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel

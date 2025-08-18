@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, constr, Field, EmailStr, conlist, field_validator
+from pydantic import BaseModel, constr, Field, EmailStr, field_validator
 from datetime import datetime, date
 
 # Education

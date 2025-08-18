@@ -3,8 +3,9 @@ import logging
 
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
+from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, LLMConfig
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
+
 from .base import BaseProvider
 
 logger = logging.getLogger(__name__)
@@ -12,17 +13,18 @@ logger = logging.getLogger(__name__)
 class Crawl4AIProvider(BaseProvider):
     def __init__(self, config: Dict[str, Any]):
         super().__init__('crawl4ai', config)
+        self.browser_config = self._create_browser_config(config)
+        self.rate_limit_delay  = config.get('rate_limit_delay', 2)
+        self.max_retries = config.get('max_retries', 3)
         
-        self.browser_config = BrowserConfig(
+    def _create_browser_config(self, config: Dict[str, Any]) -> BrowserConfig:
+        return BrowserConfig(
             headless=config.get('headless', True),
             browser_type=config.get('browser_type', 'chromium'),
             viewport_width=config.get('viewport_width', 1920),
             viewport_height=config.get('viewport_height', 1080),
             user_agent=config.get('user_agent', 'AICA-JobBot/1.0 (Educational Research)')
         )
-        self.rate_limit_delay  = config.get('rate_limit_delay', 2)
-        self.max_retries = config.get('max_retries', 3)
-        self.extraction_strategy = self._create_extraction_strategy()
         
     def _create_extraction_strategy(self) -> LLMExtractionStrategy:
         schema = {
@@ -42,62 +44,79 @@ class Crawl4AIProvider(BaseProvider):
                 "job_url": {"type": "string"},
                 "posted_date": {"type": "string"}
             },
-            "required": ["job_title", "company_name", "job_description", "preferred_skills", "required_skills"]
+            "required": ["job_title", "company_name", "job_description"]
         }
         
         instruction = """
-            Extract job posting information from the provided content. Focus on:
+            Extract job posting information focusing on technology roles in:
+            - Computer Science, Computer Engineering
+            - Information Technology, Information Systems
+            - Software Development, Data Science, Cybersecurity
+            - Cloud Engineering, DevOps, AI/ML Engineering
+            - Data Engineering, Data Analyst, Machine Learning Engineer
+            - IT Support, Business System Analyst, Technical Writer
+            - System Architecture, Network Engineer, Database Administrator
+            - Mobile App Developer, Software Architect, Full Stack Developer
+            - Backend Developer, Frontend Developer
+            - Network Administrator, System Administrator, Cloud Architect,
+            - UI/UX Designer, Technical Support Specialist, Project Manager
+
+            Extract this important information below: 
             1. Job title and company name
             2. Location and employment type (full-time, part-time, contract, and etc.)
             3. Salary information if available
             4. Detailed job description
-            5. Required and preferred skills (extract as separate arrays)
+            5. Required and preferred skills (must have technical skills or soft skills)
             6. Experience level and educational requirements
             7. Application deadline and posting if available
         
             Be through and accurate. If information is not available, leave the field empty or null.
         """
         
-        return LLMExtractionStrategy(
+        llm_config = LLMConfig(
             provider="ollama",
-            api_token=self.config_get("llm_api_token", ""),
+            api_token=self.config.get("llm_api_token", ""),
+            model="llama3:latest"   
+        )
+        
+        return LLMExtractionStrategy(
+            llm_config=llm_config,
             schema=schema,
             extraction_type="schema",
             instruction=instruction,
         )
         
+    def scrape_job_listings(self, search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        urls = search_params.get('urls', [])
+        return asyncio.run(self.scrape_jobs(urls))
+    
+    def scrape_job_details(self, job_url: str) -> Optional[Dict[str, Any]]:
+        jobs = asyncio.run(self.scrape_jobs([job_url]))
+        return jobs[0] if jobs else None
+    
+        
     async def scrape_jobs(self, urls: List[str]) -> List[Dict[str, Any]]:
+        if not urls:
+            return []
+        
         jobs = []
         
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
             for url in urls:
+                if not await self._validate_url(url):
+                    logger.warning(f"Skipping invalid URL: {url}")
+                    continue
+                
                 try:
                     logger.info(f"Scraping URL: {url}")
-                    
                     await asyncio.sleep(self.rate_limit_delay)
                     
-                    run_config = CrawlerRunConfig(
-                        extraction_strategy=self.extraction_strategy,
-                        js_code=[
-                            "window.scrollTo(0, document.body.scrollHeight);",
-                            "await new Promise(resolve => setTimeout(resolve, 2000));"
-                        ],
-                        wait_for="css:.job_listing, .job_card, [data-test_id*='job']",
-                        page_timeout=3000,
-                        js_only=True,
-                    )
+                    job_data = await self._scrape_single_url(crawler, url)
                     
-                    result = await crawler.arun(
-                        url=url,
-                        config=run_config,
-                    )
+                    if job_data:
+                        jobs.extend(job_data)
+                        logger.info(f"Successfully scraped {len(job_data)} jobs from {url}")
                     
-                    if result.sucess and result.extracted_content:
-                        extracted_jobs = self._process_extracted_content(result.extracted_content, url)
-                        jobs.extend(extracted_jobs)
-                        logger.info(f"Successfully scraped {len(extracted_jobs)} jobs from {url}")
-                    else:
-                        logger.warning(f"Failed to scrape {url}: {result.errors}")
                         
                 except Exception as e:
                     logger.error(f"Error scraping {url}: {str(e)}")
@@ -105,14 +124,34 @@ class Crawl4AIProvider(BaseProvider):
         
         return jobs
     
+    async def _scrape_single_url(self, crawler: AsyncWebCrawler, url: str) -> List[Dict[str, Any]]:
+        run_config = CrawlerRunConfig(
+            extraction_strategy=self._create_extraction_strategy(),
+            js_code=[
+                "window.scrollTo(0, document.body.scrollHeight);",
+                "await new Promise(resolve => setTimeout(resolve, 2000));"
+            ],
+            wait_for="css:.job_listing, .job_card, [data-testid*='job']",
+            page_timeout=30000,
+            js_only=True,
+        )
+                    
+        result = await crawler.arun(
+            url=url,
+            config=run_config,
+        )
+        
+        if result.success and result.extracted_content:
+            return self._process_extracted_content(result.extracted_content, url)
+        else: 
+            logger.warning(f"Failed to scrape {url}: {getattr(result, 'error_message', 'Unknown error')}")
+            return []
+                
     def _process_extracted_content(self, extracted_content: Any, source_url: str) -> List[Dict[str, Any]]:
         jobs = []
         
         try:
-            if isinstance(extracted_content, list):
-                job_data_list = extracted_content
-            else:
-                job_data_list = [extracted_content]
+            job_data_list = extracted_content if isinstance(extracted_content, list) else [extracted_content]
             
             for job_data in job_data_list:
                 if not isinstance(job_data, dict):
@@ -143,12 +182,12 @@ class Crawl4AIProvider(BaseProvider):
                 'preferred_skills': self._clean_skills_array(job_data.get('preferred_skills', [])),
                 'experience_level': self._clean_text(job_data.get('experience_level', '')),
                 'education_requirements': self._clean_text(job_data.get('education_requirements', '')),
-                'application_deadline': self._parse_date(job_data.get('application_deadline', '')),
-                'posted_date': self._parse_date(job_data.get('posted_date', '')),
+                'application_deadline': self._clean_text(job_data.get('application_deadline', '')),
+                'posted_date': self._clean_text(job_data.get('posted_date', '')),
                 'job_url': job_data.get('job_url', source_url),
                 'source_url': source_url,
                 'scraped_at': datetime.now().isoformat(),
-                'provider': 'crawl4ai'
+                'provider': self.name
             }
             
             return cleaned_job
@@ -158,8 +197,8 @@ class Crawl4AIProvider(BaseProvider):
             return None
     
     def _clean_text(self, text: str) -> str:
-        if not isinstance(text, str):
-            return str(text) if text else ' '
+        if not text:
+            return ''
         return text.strip().replace('\n', ' ').replace('\r', ' ')
 
     def _clean_skills_array(self, skills: List[str]) -> List[str]:
@@ -167,14 +206,13 @@ class Crawl4AIProvider(BaseProvider):
             return []
         return [self._clean_text(skill) for skill in skills if isinstance(skill, str) and self._clean_text(skill)]
     
-    def _parse_date(self, date_str: str) -> Optional[str]:
-        if not date_str or not isinstance(date_str, str):
-            return None
+    async def _validate_url(self, url: str) -> bool:
+        if not url or not (url.startswith('http://') or url.startswith('https://')):
+            return False
         
-        try:
-            return date_str.strip()
-        except:
-            return None
+        supported_sites = await self.get_supported_sites()
+        return any(site in url.lower() for site in supported_sites)
+
         
     async def get_supported_sites(self) -> List[str]:
         return [
@@ -183,18 +221,9 @@ class Crawl4AIProvider(BaseProvider):
             'glassdoor.com',
             'monster.com',
             'careerbuilder.com',
+            'jobstreet.com.ph',
+            'kalibrr.com'
         ]
-    
-    async def validate_site_access(self, url: str) -> bool:
-        try:
-            if not url.startswith('http://', 'https://'):
-                return False
-            
-            supported_sites = await self.get_supported_sites()
-            return any(site in url for site in supported_sites)
-        except Exception as e:
-            logger.error(f"Error validating site access for {url}: {str(e)}")
-            return False
         
-        
-        
+    def get_test_url(self) -> str:
+        return "https://www.jobstreet.com.ph/jobs/information-technology"

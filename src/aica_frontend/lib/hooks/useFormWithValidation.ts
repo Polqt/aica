@@ -83,7 +83,9 @@ export function useAsyncOperation() {
     }
   };
 
-  const clearError = () => setError(null);
+  const clearError = () => {
+    setError(null);
+  };
 
   return {
     isLoading,

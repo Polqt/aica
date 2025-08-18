@@ -1,4 +1,4 @@
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from typing import List
 import logging
 
@@ -16,7 +16,7 @@ class CORSMiddleware:
         
         # Configure CORS middleware
         self.app.add_middleware(
-            CORSMiddleware,
+            FastAPICORSMiddleware,
             allow_origins=allowed_origins,
             allow_credentials=True,  
             allow_methods=self._get_allowed_methods(),

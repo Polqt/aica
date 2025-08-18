@@ -11,8 +11,8 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
     
-    def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+    def get(self, db: Session, obj_id: Any) -> Optional[ModelType]:
+        return db.query(self.model).filter(self.model.id == obj_id).first()
     
     def get_by_field(self, db: Session, field: str, value: Any) -> Optional[ModelType]:
         return db.query(self.model).filter(getattr(self.model, field) == value).first()
@@ -36,8 +36,8 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.refresh(db_obj)
         return db_obj
     
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
+    def remove(self, db: Session, *, obj_id: int) -> ModelType:
+        obj = db.query(self.model).get(obj_id)
         db.delete(obj)
         db.commit()
         return obj

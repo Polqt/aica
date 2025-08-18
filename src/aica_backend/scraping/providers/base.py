@@ -49,6 +49,13 @@ class BaseProvider(ABC):
                 "errors": [str(e)]
             }
     
+    def _create_test_result(self, success: bool, data: Dict[str, Any], errors: List[str]) -> Dict[str, Any]:
+        return {
+            "success": success,
+            "data": data,
+            "errors": errors
+        }
+    
     def is_active(self) -> bool:
         return self.active
     
@@ -58,5 +65,4 @@ class BaseProvider(ABC):
             "base_url": self.base_url,
             "rate_limit": self.rate_limit,
             "active": self.active,
-            "config": self.config
         }

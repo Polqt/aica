@@ -70,7 +70,6 @@ export default function EducationCard({
 }: EducationCardProps) {
   const { control, watch, formState } = useFormContext();
 
-  // Watch field values for dynamic display
   const institution = watch(`educations.${index}.institution_name`);
   const location = watch(`educations.${index}.address`);
   const degree = watch(`educations.${index}.degree`);
@@ -88,11 +87,9 @@ export default function EducationCard({
 
   const educationErrors = formState.errors?.educations;
   const hasErrors =
-    educationErrors && Array.isArray(educationErrors)
-      ? (educationErrors[index] as
-          | Record<string, { message?: string }>
-          | undefined)
-      : undefined;
+    Array.isArray(educationErrors) && index >= 0 && index < educationErrors.length
+    ? (educationErrors[index] as Record<string, { message?: string }> | undefined)
+    : undefined;
 
   const handleRemove = () => {
     toast('Remove Education Record?', {
@@ -108,7 +105,6 @@ export default function EducationCard({
       cancel: {
         label: 'Cancel',
         onClick: () => {
-          // No action needed, toast will close
         },
       },
     });

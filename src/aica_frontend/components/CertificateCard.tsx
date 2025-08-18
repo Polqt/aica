@@ -55,7 +55,9 @@ export default function CertificateCard({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => toggleExpand(index)}
+            onClick={() => {
+              toggleExpand(index);
+            }}
           >
             {isExpanded ? 'Collapse' : 'Expand'}
           </Button>
