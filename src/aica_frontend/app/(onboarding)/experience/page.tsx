@@ -33,11 +33,20 @@ const experienceItemSchema = z.object({
     .max(100, 'Company name must be less than 100 characters'),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().optional(),
+  projects: z.string().optional(),
   description: z
     .array(z.string().min(1, 'Description cannot be empty'))
     .min(1, 'At least one accomplishment is required')
     .max(10, 'Maximum 10 accomplishments allowed'),
   is_current: z.boolean(),
+  key_responsibilities: z
+    .array(z.string().max(200, 'Each responsibility must be less than 200 characters'))
+    .max(10, 'Maximum 10 responsibilities allowed')
+    .optional(),
+  key_achievements: z
+    .array(z.string().max(200, 'Each achievement must be less than 200 characters'))
+    .max(10, 'Maximum 10 achievements allowed')
+    .optional(),
 });
 
 const experienceFormSchema = z.object({
@@ -84,6 +93,7 @@ export default function Experience() {
       company_name: '',
       start_date: '',
       end_date: '',
+      projects: '',
       description: [''],
       is_current: false,
     });
@@ -158,6 +168,7 @@ export default function Experience() {
     if (exp.company_name?.trim()) completed++;
     if (exp.start_date?.trim()) completed++;
     if (!exp.is_current && exp.end_date?.trim()) completed++;
+    if (exp.projects?.trim()) completed++;
     if (exp.is_current) completed++; 
     completed += exp.description.filter(desc => desc?.trim()).length;
     return acc + completed;
