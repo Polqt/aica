@@ -170,7 +170,46 @@ class RAGPipeline:
                 "analysis_timestamp": datetime.now().isoformat()
             }
         
-    
+    async def generate_career_insights(self,
+                                       session: AsyncSession,
+                                       user_profile: Dict[str, Any],
+                                       recent_job_matches: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+            Generate comprehensive career insights based on user profile and market data.
+        """
+        
+        try:
+            user_skills = user_profile.get('skills', [])
+            
+            # Get market trends based on user's skills
+            job_trends = await self._analyze_job_market_trends(
+                session,
+                user_skills
+            )
+            
+            # Generate career recommendations
+            career_recommendations = await self.llm_service.generate_career_recommendations(
+                user_skills=user_skills,
+                user_profile=user_profile,
+                job_trends=job_trends
+            )
+            
+            # Analyze skill market value
+            skill_market_analysis = await self._analyze_skill_market_value(
+                session,
+                user_skills
+            )
+            
+            return {
+                "career_recommendations": career_recommendations,
+                "job_market_trends": job_trends,
+                "skill_market_analysis": skill_market_analysis,
+                "generated_at": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error generating career insights: {str(e)}")
+            return {"error": str(e)}
+
     async def process_job_batch_for_embedding(self,
                                               session: AsyncSession,
                                               job_batch: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -314,6 +353,93 @@ class RAGPipeline:
         except Exception as e:
             logger.error(f"Error fetching job by ID {job_id}: {str(e)}")
             return None
+        
+    async def _analyze_job_market_trends(self,
+                                        session: AsyncSession,
+                                        user_skills: List[str]) -> List[Dict[str, Any]]:
+        """
+            Analyze job market trends based on user skills.
+        """
+        
+        try:
+            query = text("""
+                            SELECT
+                                title,
+                                COUNT(*) AS job_count,
+                                AVG(EXTRACT(EPOCH FROM (CURRENT-DATE - posted_date))/86400) AS avg_days_since_posted,
+                                COUNT(CASE WHEN posted_date >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) AS recent_postings
+                        FROM job_postings
+                        WHERE is_active = true
+                            AND (required_skills && :user_skills OR preferred_skills && :user_skills)
+                        GROUP BY title
+                        HAVING COUNT(*) >= 2
+                        ORDER BY recent_postings DESC, job_count DESC
+                        LIMIT 10
+                        """)
+            
+            result = await session.execute(query, {"user_skills": user_skills})
+            
+            trends = []
+            for row in result.fetchall():
+                trends.append({
+                    'job_title': row.title,
+                    'total_postings': row.job_count,
+                    'recent_postings': row.recent_postings,
+                    'trend': 'Growing' if row.recent_postings > row.job_count * 0.5 else 'Stable',
+                    'avg_days_since_posted': round(row.avg_days_since_posted, 1)
+                })
+            
+            return trends
+        except Exception as e:
+            logger.error(f"Error analyzing job market trends: {str(e)}")
+            return []
+    
+    async def _analyze_skill_market_value(self,
+                                          session: AsyncSession,
+                                          user_skills: List[str]) -> Dict[str, Any]:
+        """
+            Analyze market value of user's skills
+        """
+        
+        try:
+            skill_analysis = {}
+            
+            for skill in user_skills:
+                query = text("""
+                                SELECT
+                                    COUNT(*) as demand,
+                                    AVG(salary_min) as avg_min_salary,
+                                    AVG(salary_max) AS avg_max_salary,
+                                    COUNT(CASE WHEN posted_date >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent_demand
+                                FROM job_postings
+                                WHERE is_active = true
+                                    AND (required_skills @> ARRAY[:skill]::varchar[]
+                                        OR preferred_skills @> ARRAY[:skill]::varchar[])
+                                    AND salary_min IS NOT NULL
+                            """)
+                
+                result = await session.execute(query, {"skill": skill})
+                row = result.fetchone()
+                
+                if row and row.demand > 0:
+                    skill_analysis[skill] = {
+                        'demand_score': min(row.demand / 10.0, 1.0),  
+                        'avg_salary_range': {
+                            'min': int(row.avg_min_salary) if row.avg_min_salary else None,
+                            'max': int(row.avg_max_salary) if row.avg_max_salary else None
+                        },
+                        'market_trend': 'High' if row.recent_demand > row.demand * 0.3 else 'Moderate',
+                        'total_opportunities': row.demand
+                    }
+                
+                return {
+                    'individual_skills': skill_analysis,
+                    'overall_market_value': 'High' if len(skill_analysis) > len(user_skills) * 0.7 else 'Moderate',
+                    'analysis_date': datetime.utcnow().isoformat()
+                }
+        except Exception as e:
+            logger.error(f"Error analyzing skill market value: {str(e)}")
+            return {}
         
 rag_pipeline = RAGPipeline()
 
