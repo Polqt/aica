@@ -5,13 +5,14 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, LLMConfig
 from crawl4ai.extraction_strategy import LLMExtractionStrategy
+from crawl4ai.models import LLMConfig
 
 from .base import BaseProvider
 
 logger = logging.getLogger(__name__)
 
 class Crawl4AIProvider(BaseProvider):
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]): 
         super().__init__('crawl4ai', config)
         self.browser_config = self._create_browser_config(config)
         self.rate_limit_delay  = config.get('rate_limit_delay', 2)
@@ -76,7 +77,7 @@ class Crawl4AIProvider(BaseProvider):
         llm_config = LLMConfig(
             provider="ollama",
             api_token=self.config.get("llm_api_token", ""),
-            model="llama3:latest"   
+            model="llama3:latest"  
         )
         
         return LLMExtractionStrategy(
@@ -133,7 +134,7 @@ class Crawl4AIProvider(BaseProvider):
             ],
             wait_for="css:.job_listing, .job_card, [data-testid*='job']",
             page_timeout=30000,
-            js_only=True,
+            js_only=False,
         )
                     
         result = await crawler.arun(

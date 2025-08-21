@@ -141,7 +141,7 @@ export default function Education() {
   }
 
   const watchedEducations = form.watch('educations');
-  const totalFields = watchedEducations.length * 6; // 6 required fields per education
+  const totalFields = watchedEducations.length * 6; 
   const completedFields = watchedEducations.reduce((acc, edu) => {
     let completed = 0;
     if (edu.institution_name?.trim()) completed++;

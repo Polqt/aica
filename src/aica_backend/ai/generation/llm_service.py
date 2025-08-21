@@ -1,10 +1,7 @@
 import logging
-import json
-import asyncio
-import httpx
-import asyncpg
+# import asyncpg
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from datetime import datetime
 
 from ...core.config import settings
@@ -64,7 +61,7 @@ class LLMService:
         """
             Generate a career development recommendations.
         """
-        
+                 
     def _create_fallback_explanation(self, user_skills: List[str],
                                     job_data: Dict[str, Any],
                                     similarity_scores: Dict[str, float]) -> Dict[str, Any]:
