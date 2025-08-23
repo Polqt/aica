@@ -68,13 +68,25 @@ export default function EducationCard({
   remove,
   canRemove,
 }: EducationCardProps) {
-  const { control, watch, formState } = useFormContext();
+  const { control, watch, setValue, formState } = useFormContext();
 
   const institution = watch(`educations.${index}.institution_name`);
   const location = watch(`educations.${index}.address`);
   const degree = watch(`educations.${index}.degree`);
   const startDate = watch(`educations.${index}.start_date`);
   const endDate = watch(`educations.${index}.end_date`);
+  // State for custom degree and custom field input
+  const [showCustomDegree, setShowCustomDegree] = React.useState(degree && !DEGREE_SUGGESTIONS.includes(degree));
+  const [showCustomField, setShowCustomField] = React.useState(false);
+
+  // Watch field_of_study for custom handler
+  const fieldOfStudy = watch(`educations.${index}.field_of_study`);
+  React.useEffect(() => {
+    setShowCustomDegree(degree === 'Others');
+  }, [degree]);
+  React.useEffect(() => {
+    setShowCustomField(fieldOfStudy === 'Others');
+  }, [fieldOfStudy]);
 
   const requiredFields = [institution, location, degree, startDate, endDate];
   const completedFields = requiredFields.filter(
@@ -113,16 +125,18 @@ export default function EducationCard({
   return (
     <Card
       className={cn(
-        'group transition-all duration-300 hover:shadow-lg border border-gray-200 dark:border-gray-700',
+        'group transition-all duration-300 hover:shadow-xl border border-gray-300 dark:border-gray-600 relative overflow-hidden',
         isExpanded
-          ? 'shadow-lg ring-2 ring-emerald-500/20 dark:ring-emerald-400/20'
-          : 'hover:border-emerald-300 dark:hover:border-emerald-600',
+          ? 'shadow-lg ring-2 ring-blue-500/30 dark:ring-blue-400/30 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-blue-900/20'
+          : 'hover:border-blue-400 dark:hover:border-blue-500 bg-white dark:bg-gray-900',
         hasErrors &&
           'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10',
       )}
     >
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-100/20 to-transparent dark:from-blue-900/10 dark:to-transparent opacity-50 pointer-events-none" />
       <CardHeader
-        className="cursor-pointer"
+        className="cursor-pointer relative z-10"
         onClick={() => toggleExpand(index)}
       >
         <div className="flex items-center justify-between">
@@ -130,20 +144,20 @@ export default function EducationCard({
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  'flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200',
+                  'flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 shadow-md',
                   isComplete
-                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                    ? 'bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 text-blue-600 dark:text-blue-300 shadow-blue-200/50 dark:shadow-blue-700/30'
                     : hasErrors
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400',
+                    ? 'bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/40 dark:to-red-800/40 text-red-600 dark:text-red-300 shadow-red-200/50 dark:shadow-red-700/30'
+                    : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/40 dark:to-gray-700/40 text-gray-500 dark:text-gray-400 shadow-gray-200/50 dark:shadow-gray-700/30',
                 )}
               >
                 {isComplete ? (
-                  <CheckCircle2 className="w-5 h-5" />
+                  <CheckCircle2 className="w-6 h-6" />
                 ) : hasErrors ? (
-                  <AlertCircle className="w-5 h-5" />
+                  <AlertCircle className="w-6 h-6" />
                 ) : (
-                  <GraduationCap className="w-5 h-5" />
+                  <GraduationCap className="w-6 h-6" />
                 )}
               </div>
 
@@ -155,7 +169,7 @@ export default function EducationCard({
                   {isComplete && (
                     <Badge
                       variant="outline"
-                      className="text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-600"
+                      className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600"
                     >
                       Complete
                     </Badge>
@@ -205,24 +219,48 @@ export default function EducationCard({
                     </span>
                   </div>
                 )}
+
+                {/* Education Completion Progress - Matches Profile Page Style */}
+                <div className="mt-3 p-3 bg-gradient-to-r from-blue-50/40 via-purple-50/30 to-indigo-50/20 dark:from-blue-900/20 dark:via-purple-900/15 dark:to-indigo-900/10 rounded-lg border border-blue-100/50 dark:border-blue-800/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                        <span className="text-white font-semibold text-xs">
+                          {completionPercentage}%
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                          Education Completion
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {completedFields}/{requiredFields.length} fields completed
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
+                  
+                  {completionPercentage < 100 && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Complete all required fields
+                    </p>
+                  )}
+                  {completionPercentage === 100 && (
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                      ✓ Education record complete
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {!isComplete && (
-              <div className="mt-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Completion: {completionPercentage}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 h-1 rounded-full transition-all duration-300"
-                    style={{ width: `${completionPercentage}%` }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -262,14 +300,14 @@ export default function EducationCard({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <School className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <School className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Institution Name *
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., University of the Philippines"
                         {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
@@ -283,14 +321,14 @@ export default function EducationCard({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Location *
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g., Quezon City, Philippines"
                         {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
@@ -301,55 +339,109 @@ export default function EducationCard({
 
             {/* Degree Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Degree select with 'Others' option */}
               <FormField
                 control={control}
                 name={`educations.${index}.degree`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <GraduationCap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Degree *
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., Bachelor of Science"
-                        {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        list={`degree-suggestions-${index}`}
-                      />
+                      <div>
+                        <select
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full px-3 rounded block bg-white dark:bg-gray-900"
+                          value={DEGREE_SUGGESTIONS.includes(field.value) ? field.value : (field.value ? 'Others' : '')}
+                          onChange={e => {
+                            if (e.target.value === 'Others') {
+                              setShowCustomDegree(true);
+                              field.onChange('Others');
+                              setValue(`educations.${index}.degree`, 'Others');
+                            } else {
+                              setShowCustomDegree(false);
+                              field.onChange(e.target.value);
+                              setValue(`educations.${index}.degree`, e.target.value);
+                            }
+                          }}
+                        >
+                          <option value="" disabled>Select degree</option>
+                          {DEGREE_SUGGESTIONS.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                          <option value="Others">Others</option>
+                        </select>
+                        {showCustomDegree && (
+                          <div className="pt-3">
+                            <FormLabel className="text-sm text-gray-700 dark:text-gray-300 mb-1 block">Specify Degree</FormLabel>
+                            <Input
+                              className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full"
+                              placeholder="Enter your degree"
+                              value={field.value && field.value !== 'Others' ? field.value : ''}
+                              onChange={e => {
+                                setValue(`educations.${index}.degree`, e.target.value);
+                                field.onChange(e.target.value);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
-                    <datalist id={`degree-suggestions-${index}`}>
-                      {DEGREE_SUGGESTIONS.map(suggestion => (
-                        <option key={suggestion} value={suggestion} />
-                      ))}
-                    </datalist>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
 
+              {/* Field of Study select with 'Others' option */}
               <FormField
                 control={control}
                 name={`educations.${index}.field_of_study`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Field of Study
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., Computer Science"
-                        {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                        list={`field-suggestions-${index}`}
-                      />
+                      <div>
+                        <select
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full px-3 rounded block bg-white dark:bg-gray-900"
+                          value={FIELD_SUGGESTIONS.includes(field.value) ? field.value : (field.value ? 'Others' : '')}
+                          onChange={e => {
+                            if (e.target.value === 'Others') {
+                              setShowCustomField(true);
+                              field.onChange('Others');
+                              setValue(`educations.${index}.field_of_study`, 'Others');
+                            } else {
+                              setShowCustomField(false);
+                              field.onChange(e.target.value);
+                              setValue(`educations.${index}.field_of_study`, e.target.value);
+                            }
+                          }}
+                        >
+                          <option value="" disabled>Select field of study</option>
+                          {FIELD_SUGGESTIONS.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                          <option value="Others">Others</option>
+                        </select>
+                        {showCustomField && (
+                          <div className="pt-3">
+                            <FormLabel className="text-sm text-gray-700 dark:text-gray-300 mb-1 block">Specify Field of Study</FormLabel>
+                            <Input
+                              className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full"
+                              placeholder="Enter your field of study"
+                              value={field.value && field.value !== 'Others' ? field.value : ''}
+                              onChange={e => {
+                                setValue(`educations.${index}.field_of_study`, e.target.value);
+                                field.onChange(e.target.value);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
-                    <datalist id={`field-suggestions-${index}`}>
-                      {FIELD_SUGGESTIONS.map(suggestion => (
-                        <option key={suggestion} value={suggestion} />
-                      ))}
-                    </datalist>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
@@ -364,14 +456,14 @@ export default function EducationCard({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       Start Date *
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="month"
                         {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
@@ -385,14 +477,14 @@ export default function EducationCard({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       End Date *
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="month"
                         {...field}
-                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </FormControl>
                     <FormMessage className="text-xs" />
@@ -412,7 +504,7 @@ export default function EducationCard({
                     <Textarea
                       placeholder="Describe relevant coursework, projects, achievements, GPA, honors, etc..."
                       {...field}
-                      className="min-h-[100px] border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none"
+                      className="min-h-[100px] border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                       maxLength={500}
                     />
                   </FormControl>
