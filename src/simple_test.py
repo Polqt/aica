@@ -1,122 +1,194 @@
 import asyncio
 import json
 import sys
+import logging
 from pathlib import Path
-from typing import Any, Dict
 
-sys.path.append(str(Path(__file__).parent))
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-try:
-    from aica_backend.scraping.providers.crawl4ai_provider import Crawl4AIProvider
-    REAL_SCRAPING = True
-except ImportError:
-    print("⚠️  Could not import Crawl4AIProvider. Using mock mode.")
-    print("Make sure you're running from the src/ directory")
-    REAL_SCRAPING = False
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-async def test_tech_job_scraping():
-    """Test scraping technology jobs from Philippine job sites."""
-    
-    config = {
-        'headless': True,
-        'browser_type': 'chromium',
-        'rate_limit_delay': 2,
-        'max_retries': 3,
-        'user_agent': 'AICA-JobBot/1.0 (Educational Research)',
-        'llm_api_token': ''  # Add your Ollama token if needed
-    }
-    
-    # Test URLs for Philippine tech jobs
-    test_urls = [
-        'https://www.jobstreet.com.ph/jobs/information-technology',
-        'https://www.kalibrr.com/jobs?q=software+engineer&l=philippines',
-        'https://www.linkedin.com/jobs/search/?keywords=developer%20philippines'
-    ]
-    
-    print("🚀 Testing Technology Job Scraping")
+def check_imports():
+    """Check if required modules can be imported"""
+    try:
+        from aica_backend.scraping.providers.crawl4ai_provider import Crawl4AIProvider
+        from aica_backend.core.config import settings 
+        print("✅ Successfully imported required modules!")
+        return True, Crawl4AIProvider, settings
+    except ImportError as e:
+        print(f"❌ Import failed: {e}")
+        print("💡 Run from project root and ensure crawl4ai is installed")
+        return False, None, None
+
+async def test_ollama_connection(settings):
+    """Simple Ollama connection test"""
+    try:
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{settings.OLLAMA_BASE_URL}/api/tags", timeout=5) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    models = [model['name'] for model in data.get('models', [])]
+                    print(f"🦙 Ollama connected! Models: {models}")
+                    
+                    if settings.OLLAMA_MODEL_NAME in models:
+                        print(f"✅ Target model '{settings.OLLAMA_MODEL_NAME}' is available")
+                        return True
+                    else:
+                        print(f"❌ Model '{settings.OLLAMA_MODEL_NAME}' not found")
+                        return False
+                else:
+                    print(f"❌ Ollama returned status: {response.status}")
+                    return False
+    except Exception as e:
+        print(f"❌ Ollama connection failed: {e}")
+        print(f"💡 Ensure Ollama is running at: {settings.OLLAMA_BASE_URL}")
+        return False
+
+async def test_job_scraping(provider, max_jobs: int = 10):
+    """Test the improved scraping with validation"""
+    print(f"\n🚀 Testing job scraping (max {max_jobs} jobs)")
     print("=" * 50)
-    print(f"🌐 Testing {len(test_urls)} URLs")
-    print(f"🔧 Real scraping: {'Yes' if REAL_SCRAPING else 'No (Mock mode)'}")
-    print()
-    
-    if REAL_SCRAPING:
-        provider = Crawl4AIProvider(config)
-    else:
-        # Mock provider for testing
-        class MockProvider:
-            async def scrape_jobs(self, urls):
-                await asyncio.sleep(1)  # Simulate delay
-                return [
-                    {
-                        'job_title': 'Software Engineer',
-                        'company_name': 'Tech Corp',
-                        'location': 'Cebu City',
-                        'required_skills': ['Python', 'JavaScript'],
-                        'provider': 'mock'
-                    }
-                ]
-        provider = MockProvider()
     
     try:
-        # Run the scraping
-        jobs = await provider.scrape_jobs(test_urls)
+        # Test URL generation
+        search_urls = provider.get_tech_job_search_urls()
+        print(f"📋 Testing with {len(search_urls)} search URLs:")
+        for url in search_urls:
+            print(f"   📌 {url}")
         
-        print(f"✅ Scraping completed!")
-        print(f"📊 Total jobs found: {len(jobs)}")
-        print()
+        # Run scraping
+        jobs = await provider.scrape_all_jobs(max_jobs)
         
-        # Filter and display technology jobs
-        tech_jobs = [job for job in jobs if is_tech_job(job)]
+        if not jobs:
+            print("⚠️  No jobs found - possible issues:")
+            print("   • Network connectivity")
+            print("   • Ollama not responding")
+            print("   • JobStreet blocking requests")
+            print("   • Website structure changed")
+            return []
         
-        print(f"🖥️  Technology jobs: {len(tech_jobs)}")
-        print("-" * 30)
+        # Analyze results
+        print(f"\n📊 Results Summary:")
+        print(f"   Total jobs found: {len(jobs)}")
         
-        for i, job in enumerate(tech_jobs[:5], 1):  # Show first 5
+        # Tech categories
+        categories = {}
+        for job in jobs:
+            cat = job.get('tech_category', 'Unknown')
+            categories[cat] = categories.get(cat, 0) + 1
+        
+        if categories:
+            print(f"   Tech categories:")
+            for cat, count in sorted(categories.items(), key=lambda x: x[1], reverse=True):
+                print(f"     • {cat}: {count}")
+        
+        # Show sample jobs
+        print(f"\n📝 Sample Jobs (first {min(3, len(jobs))}):")
+        print("-" * 50)
+        
+        for i, job in enumerate(jobs[:3], 1):
             print(f"{i}. {job.get('job_title', 'N/A')}")
-            print(f"   🏢 Company: {job.get('company_name', 'N/A')}")
-            print(f"   📍 Location: {job.get('location', 'N/A')}")
+            print(f"   🏢 {job.get('company_name', 'N/A')}")
+            print(f"   📍 {job.get('location', 'N/A')}")
+            print(f"   💼 {job.get('employment_type', 'N/A')}")
+            
             skills = job.get('required_skills', [])
-            print(f"   🔧 Skills: {', '.join(skills[:3]) if skills else 'N/A'}")
+            if skills:
+                skills_preview = ', '.join(skills[:3])
+                if len(skills) > 3:
+                    skills_preview += f" (+{len(skills)-3} more)"
+                print(f"   🔧 Skills: {skills_preview}")
+            
+            print(f"   🔗 URL: {job.get('job_url', 'N/A')}")
             print()
         
-        # Save results
-        if tech_jobs:
-            output_file = 'tech_jobs_scraped.json'
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(tech_jobs, f, indent=2, ensure_ascii=False)
-            print(f"💾 Results saved to: {output_file}")
+        # Data validation check
+        valid_count = 0
+        for job in jobs:
+            if (job.get('job_title') and 
+                job.get('company_name') and 
+                job.get('job_url') and 
+                job.get('is_tech_job')):
+                valid_count += 1
         
-        return tech_jobs
+        print(f"✅ Data quality: {valid_count}/{len(jobs)} jobs have all required fields")
+        
+        # Save results
+        output_file = 'improved_tech_jobs.json'
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(jobs, f, indent=2, ensure_ascii=False)
+        print(f"💾 Results saved to: {output_file}")
+        
+        return jobs
         
     except Exception as e:
-        print(f"❌ Error during scraping: {str(e)}")
-        raise
+        print(f"❌ Scraping failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return []
 
-def is_tech_job(job: Dict[str, Any]) -> bool:
-    """Check if a job is technology-related."""
-    tech_keywords = [
-        'software', 'developer', 'engineer', 'programmer', 'analyst',
-        'data', 'devops', 'cloud', 'cybersecurity', 'machine learning',
-        'ai', 'database', 'system', 'network', 'it support',
-        'information technology', 'computer science', 'full stack',
-        'backend', 'frontend', 'mobile', 'web', 'architect'
-    ]
+def main():
+    print("🤖 AICA Tech Job Scraper - Improved Version")
+    print("=" * 50)
     
-    job_title = job.get('job_title', '').lower()
-    job_desc = job.get('job_description', '').lower()
+    # Check imports
+    imports_ok, Crawl4AIProvider, settings = check_imports()
+    if not imports_ok:
+        sys.exit(1)
     
-    return any(keyword in job_title or keyword in job_desc for keyword in tech_keywords)
+    # Test Ollama
+    print("\n🔍 Checking Ollama connection...")
+    ollama_ok = asyncio.run(test_ollama_connection(settings))
+    if not ollama_ok:
+        print("\n❌ Fix Ollama setup first:")
+        print("   1. Start Ollama: ollama serve")
+        print("   2. Install model: ollama pull llama3:latest")
+        sys.exit(1)
+    
+    # Create provider
+    try:
+        config = settings.model_dump()
+        provider = Crawl4AIProvider(config)
+        print("✅ Provider initialized successfully")
+    except Exception as e:
+        print(f"❌ Provider initialization failed: {e}")
+        sys.exit(1)
+    
+    # Run scraping test
+    TARGET_JOBS = 10  # Small number for testing
+    jobs = asyncio.run(test_job_scraping(provider, TARGET_JOBS))
+    
+    # Final summary
+    if jobs:
+        print(f"\n🎉 Test completed successfully!")
+        print(f"📈 Success rate: {len(jobs)}/{TARGET_JOBS} = {(len(jobs)/TARGET_JOBS)*100:.1f}%")
+        
+        # Quality metrics
+        tech_jobs = sum(1 for job in jobs if job.get('is_tech_job'))
+        complete_jobs = sum(1 for job in jobs if all([
+            job.get('job_title'),
+            job.get('company_name'),
+            job.get('job_url'),
+            job.get('location')
+        ]))
+        
+        print(f"🎯 Tech jobs: {tech_jobs}/{len(jobs)} ({(tech_jobs/len(jobs))*100:.1f}%)")
+        print(f"📋 Complete data: {complete_jobs}/{len(jobs)} ({(complete_jobs/len(jobs))*100:.1f}%)")
+    else:
+        print(f"\n⚠️  No jobs scraped - check the issues above")
 
 if __name__ == "__main__":
-    print("🤖 AICA Technology Job Scraper")
-    print("Testing scraping for tech jobs in the Philippines\n")
-    
     try:
-        jobs = asyncio.run(test_tech_job_scraping())
-        print(f"\n🎉 Test completed! Found {len(jobs)} technology jobs.")
-        
+        main()
     except KeyboardInterrupt:
         print("\n⏹️  Test interrupted by user")
     except Exception as e:
-        print(f"\n💥 Test failed: {str(e)}")
+        print(f"\n💥 Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)

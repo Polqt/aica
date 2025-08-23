@@ -17,7 +17,6 @@ import {
   GraduationCap,
   ArrowRight,
   BookOpen,
-  CheckCircle2,
   Lightbulb,
 } from 'lucide-react';
 

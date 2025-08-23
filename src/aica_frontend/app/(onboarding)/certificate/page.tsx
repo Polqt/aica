@@ -150,7 +150,8 @@ export default function Certificate() {
     updateData({ certificates: [] });
 
     toast.info('Skipping Certificates', {
-      description: 'No worries! You can add certificates later from your profile.',
+      description:
+        'No worries! You can add certificates later from your profile.',
       duration: 3000,
     });
 
@@ -170,47 +171,42 @@ export default function Certificate() {
     if (cert.credential_url?.trim()) completed++;
     return acc + completed;
   }, 0);
-  const completionPercentage = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+  const completionPercentage =
+    totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
-      {/* Sophisticated Multi-layer Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        {/* Base Gradient Layer */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/15 to-purple-50/25 dark:from-blue-900/10 dark:via-indigo-900/8 dark:to-purple-900/12"></div>
-        
-        {/* Animated Gradient Orbs */}
+
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
+          transition={{ duration: 2, ease: 'easeOut' }}
           className="absolute left-[15%] top-[20%] h-96 w-96 rounded-full bg-gradient-to-br from-blue-300/25 to-purple-300/20 dark:from-blue-700/15 dark:to-purple-700/12 blur-3xl animate-float-slow"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+          transition={{ duration: 2, delay: 0.3, ease: 'easeOut' }}
           className="absolute right-[20%] top-[30%] h-80 w-80 rounded-full bg-gradient-to-br from-pink-300/20 to-orange-300/15 dark:from-pink-700/12 dark:to-orange-700/10 blur-3xl animate-float-medium"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.6, ease: "easeOut" }}
+          transition={{ duration: 2, delay: 0.6, ease: 'easeOut' }}
           className="absolute bottom-[25%] left-[25%] h-88 w-88 rounded-full bg-gradient-to-br from-green-300/30 to-cyan-300/20 dark:from-green-700/18 dark:to-cyan-700/15 blur-3xl animate-float-fast"
         />
-        
-        {/* Geometric Grid Pattern */}
+
         <div className="absolute inset-0 opacity-15 dark:opacity-10">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         </div>
-        
-        {/* Subtle Corner Accents */}
+
         <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-indigo-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute bottom-0 right-0 w-44 h-44 bg-gradient-to-tl from-pink-400/10 to-transparent rounded-full blur-xl"></div>
-        
-        {/* Animated Particles - Fixed deterministic positions */}
+
         <div className="absolute inset-0">
           {[
             { left: 10, top: 20, duration: 4, delay: 0.5 },
@@ -239,7 +235,7 @@ export default function Certificate() {
                 duration: particle.duration,
                 repeat: Infinity,
                 delay: particle.delay,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
               style={{
                 left: `${particle.left}%`,
@@ -249,7 +245,7 @@ export default function Certificate() {
           ))}
         </div>
       </div>
-      
+
       <div className="max-w-4xl mx-auto">
         {/* Enhanced Header Section */}
         <motion.div
@@ -258,16 +254,16 @@ export default function Certificate() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 200 }}
+            transition={{ duration: 0.8, type: 'spring', stiffness: 200 }}
             className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-xl"
           >
             <Award className="w-12 h-12 text-white" />
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg animate-pulse"></div>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -286,8 +282,8 @@ export default function Certificate() {
           >
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-semibold">
               Showcase your professional credentials
-            </span>
-            {' '}— add certifications that validate your expertise
+            </span>{' '}
+            — add certifications that validate your expertise
           </motion.p>
         </motion.div>
 
@@ -358,7 +354,6 @@ export default function Certificate() {
                       ))}
                     </div>
 
-                    {/* Add Another Certificate Button */}
                     <Card className="border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
                       <CardContent className="p-6">
                         <Button
@@ -372,7 +367,9 @@ export default function Certificate() {
                             <Plus className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                           </div>
                           <div className="text-left">
-                            <p className="font-medium">Add Another Certificate</p>
+                            <p className="font-medium">
+                              Add Another Certificate
+                            </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               {fields.length >= 10
                                 ? 'Maximum limit reached'
@@ -383,7 +380,6 @@ export default function Certificate() {
                       </CardContent>
                     </Card>
 
-                    {/* Error Display */}
                     {apiError && (
                       <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                         <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
@@ -419,8 +415,20 @@ export default function Certificate() {
                           )}
                         </Button>
                       </div>
+                      <div className="mt-4">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-2">
+                          Completion: {completionPercentage}%
+                        </p>
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${completionPercentage}%` }}
+                          />
+                        </div>
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-3">
-                        Certificates are optional. You can skip this step and add them later.
+                        Certificates are optional. You can skip this step and
+                        add them later.
                       </p>
                     </div>
                   </form>

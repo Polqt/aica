@@ -2,7 +2,7 @@
 
 import z from 'zod';
 import React, { useState } from 'react';
-import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -18,8 +18,6 @@ import {
   AlertCircle,
   ArrowRight,
   TrendingUp,
-  CheckCircle2,
-  Lightbulb,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 

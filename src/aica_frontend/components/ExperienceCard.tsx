@@ -27,8 +27,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Target,
-  Award,
-  ListChecks,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

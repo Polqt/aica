@@ -1,72 +1,61 @@
-from typing import Optional
-from fastapi import Request, HTTPException, status
-from fastapi.security.utils import get_authorization_scheme_param
-from jose import jwt, JWTError
 import logging
 
+from typing import Optional, Set
+from fastapi import Request
+from jose import jwt, JWTError
+
+from ...api.dependencies import extract_token_from_request
+from ...database import models
 from ...core.config import settings
-from ...database.session import SessionLocal
 from ...database.repositories.user import UserCRUD
+from ...database.session import SessionLocal
 
 logger = logging.getLogger(__name__)
 
 class AuthMiddleware:
+    PUBLIC_PATHS: Set[str] = {
+        "/docs", "/redoc", "/openapi.json", "/health", "/",
+        "/api/v1/users/", "/api/v1/login/access-token", "/api/v1/logout"
+    }
+    
     def __init__(self):
-        self.public_paths = {
-            "/docs", "/redoc", "/openapi.json", "/health", "/",
-            "/api/v1/users/", "/api/v1/login/access-token", "/api/v1/logout"
-        }
+        pass
     
     async def __call__(self, request: Request, call_next):
-        """Main middleware function that processes each request"""
         if self._is_public_path(request.url.path):
             return await call_next(request)
         
+        # Extract and validate token
         token = self._extract_token(request)
-        if token:
-            user = await self._validate_token(token)
-            if user:
-                request.state.user = user
-                request.state.is_authenticated = True
-            else:
-                request.state.is_authenticated = False
-        else:
-            request.state.is_authenticated = False
+        user = await self._validate_token(token) if token else None
+        
+        # Set request state
+        request.state.is_authenticated = user is not None
+        if user:
+            request.state.user = user
         
         return await call_next(request)
-    
+
     def _is_public_path(self, path: str) -> bool:
-        """Check if the request path is a public endpoint that doesn't need authentication"""
-        return any(path.startswith(public_path) for public_path in self.public_paths)
+        return any(path.startswith(public_path) for public_path in self.PUBLIC_PATHS)
     
     def _extract_token(self, request: Request) -> Optional[str]:
-        """Extract JWT token from httpOnly cookie or Authorization header"""
-        cookie_token = request.cookies.get("access_token")
-        if cookie_token:
-            if cookie_token.startswith("Bearer "):
-                return cookie_token[7:] 
-            return cookie_token
-        
-        authorization = request.headers.get("Authorization")
-        if authorization:
-            scheme, token = get_authorization_scheme_param(authorization)
-            if scheme.lower() == "bearer":
-                return token
-        
-        return None
+        return extract_token_from_request(request)
     
-    async def _validate_token(self, token: str) -> Optional[dict]:
-        """Validate JWT token and return user data if valid"""
+    async def _validate_token(self, token: str) -> Optional[models.User]:
+        if not token:
+            return None
+        
         try:
             payload = jwt.decode(
-                token, 
-                settings.SECRET_KEY, 
+                token,
+                settings.SECRET_KEY,
                 algorithms=[settings.ALGORITHM]
             )
             
             email: str = payload.get("sub")
             if not email:
-                logger.warning("Token missing subject (email)")
+                logger.warning("Token payload missing 'sub' field")
                 return None
             
             with SessionLocal() as db:
@@ -75,25 +64,10 @@ class AuthMiddleware:
                     logger.warning(f"User not found for email: {email}")
                     return None
                 
-                return {
-                    "id": db_user.id,
-                    "email": db_user.email,
-                    "created_at": db_user.created_at
-                }
-                
+                return db_user
         except JWTError as e:
-            logger.warning(f"JWT validation failed: {str(e)}")
+            logger.warning(f"Token validation error: {e}")
             return None
         except Exception as e:
-            logger.error(f"Token validation error: {str(e)}")
-            return None
-
-def get_current_user_from_request(request: Request) -> dict:
-    if not getattr(request.state, 'is_authenticated', False):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return request.state.user
+            logger.error(f"Unexpected error during token validation: {e}") 
+            return None       

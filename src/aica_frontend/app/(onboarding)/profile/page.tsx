@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';

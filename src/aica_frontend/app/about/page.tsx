@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/Navbar';
+import Image from 'next/image';
 import React from 'react';
 
 export default function AboutPage() {
@@ -47,7 +48,7 @@ export default function AboutPage() {
             className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-6"
           >
             <div className="flex justify-center">
-              <img
+              <Image
                 src="/aica-square-color.png"
                 alt="AICA Logo"
                 width={100} 

@@ -29,7 +29,13 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
     
     def update(self, db: Session, *, db_obj: ModelType, obj_in: UpdateSchemaType) -> ModelType:
-        obj_data = obj_in.model_dump(exclude_unset=True) if hasattr(obj_in, 'model_dump') else obj_in.dict(exclude_unset=True)
+        if hasattr(obj_in, 'model_dump'):
+            obj_data = obj_in.model_dump(exclude_unset=True)
+        elif isinstance(obj_in, dict):
+            obj_data = obj_in
+        else:
+            obj_data = obj_in.dict(exclude_unset=True)
+
         for key, value in obj_data.items():
             setattr(db_obj, key, value)
         db.commit()

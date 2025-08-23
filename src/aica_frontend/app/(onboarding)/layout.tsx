@@ -2,18 +2,17 @@
 
 import { OnboardingProvider } from '@/lib/context/OnboardingContext';
 import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { User, GraduationCap, Briefcase, Cog, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import React from 'react';
 
 const steps = [
   {
@@ -129,7 +128,7 @@ export default function OnboardingLayout({
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">
                     Welcome to AICA (Automated Internship and Career Assistance)!
-                    Here's a quick guide to help you make the most out of our system.
+                    Here&apos;s a quick guide to help you make the most out of our system.
                   </p>
                   
                   <div className="space-y-2">
@@ -245,7 +244,6 @@ export default function OnboardingLayout({
                 </div>
               </div>
 
-              {/* Clean Visual Step Indicator */}
               <div className="flex items-center justify-between">
                 {steps.map((step, index) => {
                   const StepIcon = step.icon;
@@ -343,13 +341,10 @@ export default function OnboardingLayout({
             </CardContent>
           </Card>
 
-          {/* Enhanced Current Step Information - More Visible but Compact */}
           {currentStep && (
-            <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-50/90 via-indigo-50/80 to-purple-50/90 dark:from-blue-900/50 dark:via-indigo-900/40 dark:to-purple-900/50 backdrop-blur-sm border border-blue-200/60 dark:border-blue-700/40 relative overflow-hidden">
-              {/* Gradient overlay */}
+            <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-50/90 via-indigo-50/80 to-purple-50/90 dark:from-blue-900/50 dark:via-indigo-900/40 dark:to-purple-900/50 backdrop-blur-sm border-blue-200/60 dark:border-blue-700/40 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-100/30 via-indigo-100/20 to-purple-100/30 dark:from-blue-800/20 dark:via-indigo-800/15 dark:to-purple-800/20 opacity-50"></div>
               
-              {/* Background pattern */}
               <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/25 to-purple-400/25 rounded-full -translate-y-16 translate-x-16 blur-lg"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-400/20 to-blue-400/20 rounded-full translate-y-12 -translate-x-12 blur-lg"></div>
@@ -365,10 +360,8 @@ export default function OnboardingLayout({
                       )}
                     >
                       <currentStep.icon className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" />
-                      {/* Gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50"></div>
                     </div>
-                    {/* Glow effect */}
                     <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-xl blur-lg animate-pulse"></div>
                   </div>
                   <div className="flex-1">
@@ -395,14 +388,12 @@ export default function OnboardingLayout({
                   </div>
                 </div>
                 
-                {/* Decorative elements */}
                 <div className="absolute top-4 right-4 w-3 h-3 bg-blue-400/20 rounded-full blur-sm"></div>
                 <div className="absolute bottom-4 left-4 w-2 h-2 bg-purple-400/20 rounded-full blur-sm"></div>
               </CardContent>
             </Card>
           )}
 
-          {/* Main Content */}
           <Card className="border-0 shadow-xl bg-white dark:bg-slate-800 overflow-hidden">
             <CardContent className="p-0">
               <div className="p-8 md:p-12">{children}</div>

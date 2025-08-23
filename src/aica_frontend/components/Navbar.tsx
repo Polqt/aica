@@ -31,7 +31,6 @@ export function Navbar() {
   return (
     <div className="relative w-full">
       <ResizableNavbar>
-        {/* Desktop Navigation */}
         <NavBody>
           <NavbarLogo />
           <NavItems items={navItems} />
@@ -45,7 +44,6 @@ export function Navbar() {
           </div>
         </NavBody>
 
-        {/* Mobile Navigation */}
         <MobileNav>
           <MobileNavHeader>
             <NavbarLogo />
