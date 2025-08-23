@@ -156,9 +156,9 @@ export default function Education() {
     totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
 
   return (
-    <div className="space-y-8">
+<div className="space-y-8 bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15">
       <div className="text-center space-y-4">
-        <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl mx-auto mb-4">
+        <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
         <div className="space-y-2">
@@ -171,37 +171,6 @@ export default function Education() {
           </p>
         </div>
       </div>
-
-      {/* Progress Card */}
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                Education Completion
-              </span>
-            </div>
-            <Badge
-              variant="secondary"
-              className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-            >
-              {completionPercentage}%
-            </Badge>
-          </div>
-          <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-emerald-500 to-teal-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-          {completionPercentage < 100 && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">
-              Complete all education details to continue
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Tips Card */}
       <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
@@ -239,7 +208,7 @@ export default function Education() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Education Records ({fields.length})
               </h2>
               {fields.length > 1 && (
@@ -262,17 +231,17 @@ export default function Education() {
           </div>
 
           {/* Add Another Education Button */}
-          <Card className="border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors">
+          <Card className="border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
             <CardContent className="p-6">
-              <Button
+<Button
                 type="button"
                 variant="ghost"
                 onClick={addEducation}
                 disabled={fields.length >= 5}
-                className="w-full h-16 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border-0 flex items-center gap-3"
+                className="w-full h-16 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-0 flex items-center gap-3"
               >
-                <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-                  <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="text-left">
                   <p className="font-medium">Add Another Education</p>
@@ -293,7 +262,7 @@ export default function Education() {
               disabled={
                 form.formState.isSubmitting || completionPercentage < 100
               }
-              className="w-full h-12 text-base font-medium bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full h-12 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
             >
               {form.formState.isSubmitting ? (
                 <>
