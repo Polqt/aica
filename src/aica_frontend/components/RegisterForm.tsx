@@ -16,13 +16,13 @@ import {
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { apiClient } from '@/lib/services/api-client';
-import { useAuth } from '@/lib/context/AuthContext';
 import { useFormSubmission } from '@/lib/hooks/useFormWithValidation';
 import { registerSchema, RegisterFormData } from '@/lib/schemas/validation';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { setAuthToken } = useAuth();
+  const { refreshAuth } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -39,25 +39,21 @@ export default function RegisterForm() {
       onSubmit: async data => {
         clearApiError();
 
-        const response = await apiClient.auth.register({
+        await apiClient.auth.register({
           email: data.email,
           password: data.password,
         });
 
-        setAuthToken(response.access_token);
+        await refreshAuth();
         router.push('/profile');
       },
       successMessage: 'Account created successfully! Welcome to AICA.',
       errorMessage: 'Failed to create account. Please try again.',
     });
 
-  const onSubmit = (data: RegisterFormData) => {
-    handleSubmit(data);
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"

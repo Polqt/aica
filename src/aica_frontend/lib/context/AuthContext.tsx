@@ -1,86 +1,103 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiClient } from '@/lib/services/api-client';
-import { TokenManager } from '@/lib/utils/token-manager';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { User } from '../types/api';
+import { toast } from 'sonner';
+import { apiClient } from '../services/api-client';
 
-interface AuthContextProps {
-  isAuthenticated: boolean;
+interface AuthContextType {
+  user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setAuthToken: (token: string) => void;
+  refreshAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = () => {
-      const hasToken = TokenManager.hasValidToken();
-      setIsAuthenticated(hasToken);
-      setIsLoading(false);
-    };
+  const isAuthenticated = user !== null;
 
-    initializeAuth();
+  useEffect(() => {
+    checkAuthStatus();
   }, []);
 
-  const setAuthToken = (token: string) => {
-    TokenManager.setAccessToken(token);
-    setIsAuthenticated(true);
+  const checkAuthStatus = async () => {
+    try {
+      const currentUser = await apiClient.auth.getCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const login = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
-
     try {
       await apiClient.auth.login({ email, password });
 
-
-      setIsAuthenticated(true);
+      const currentUser = await apiClient.auth.getCurrentUser();
+      setUser(currentUser);
     } catch (error) {
-      setIsAuthenticated(false);
-      throw error; 
-    } finally {
-      setIsLoading(false);
+      const message = error instanceof Error ? error.message : 'Login failed';
+      throw new Error(message);
     }
   };
 
-  const logout = async () => {
-    setIsLoading(true);
-
+  const logout = async (): Promise<void> => {
     try {
       await apiClient.auth.logout();
-    } catch (error) {
-      console.warn('Logout request failed:', error);
+    } catch {
+      toast.error(
+        'Logout request failed, but you have been logged out locally',
+      );
     } finally {
-      setIsAuthenticated(false);
-      setIsLoading(false);
+      setUser(null);
     }
   };
 
-  const contextValue: AuthContextProps = {
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-    setAuthToken,
+  const refreshAuth = async (): Promise<void> => {
+    try {
+      await apiClient.auth.refresh();
+      const currentUser = await apiClient.auth.getCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+      throw new Error('Session refresh failed, please log in again.');
+    }
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated,
+        login,
+        logout,
+        refreshAuth,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = (): AuthContextProps => {
+export function useAuth() {
   const context = useContext(AuthContext);
-
-  if (context === undefined) {
+  if (context == undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
   return context;
-};
+}

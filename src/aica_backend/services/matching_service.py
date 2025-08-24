@@ -1,302 +1,452 @@
-from typing import Dict, List, Any, Optional
 import logging
-from datetime import datetime
-from dataclasses import dataclass
+
+from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+from sqlalchemy import text, and_, or_
+
+from ai.pipeline.rag_pipeline import rag_pipeline
+from ..core.config import settings
+from ..database.models import User, UserProfile, JobPosting
 
 logger = logging.getLogger(__name__)
 
-@dataclass
-class MatchResult:
-    job_id: int
-    match_score: float
-    compatibility_score: float
-    skill_match_percentage: float
-    experience_match: bool
-    location_match: bool
-    explanation: str
-    skill_gaps: List[str]
-    recommendations: List[str]
-    rag_insights: Optional[str] = None
-
-class MatchingService:
-    def __init__(self, rag_service=None):
-        self.rag_service = rag_service
-        
-        # Configurable weights 
-        self.weights = {
-            "skills": 0.4,
-            "experience": 0.3,
-            "location": 0.1,
-            "work_type": 0.1,
-            "salary": 0.1
-        }
+class JobMatchingService:
+    def __init__(self):
+        self.rag_pipeline = rag_pipeline
+        self._cache = {}
+        self._cache_ttle = timedelta(minutes=30)
     
-    def find_matches(self, user_profile: Dict[str, Any], jobs: List[Dict[str, Any]], 
-                    top_k: int = 10) -> List[MatchResult]:
+    async def get_job_matches_for_user(self,
+                                       session: AsyncSession,
+                                       user_id: int,
+                                       filters: Optional[Dict[str, Any]] = None,
+                                       limit: int = 20,
+                                       use_cache: bool = True) -> Dict[str, Any]:
+        
         try:
-            matches = []
+            # Check cache
+            cache_key: f"job_matches_{user_id}_{hash(str(filters))}_{limit}"
+            if use_cache and self._is_cache_valid(cache_key):
+                logger.info(f"Returning cached results for user {user_id}")
+                return self._cache[cache_key]['data']
             
-            for job in jobs:
-                match_result = self._calculate_match(user_profile, job)
-                if match_result.match_score > 0.2:  # Minimum threshold
-                    matches.append(match_result)
+            # Get user profile and skills
+            user_profile = await self._get_user_profile(session, user_id)
+            if not user_profile:
+                return {
+                    "error": "User profile not found",
+                    "matches": [],
+                    "total_matches": 0
+                }
             
-            # Sort by match score (descending)
-            matches.sort(key=lambda x: x.match_score, reverse=True)
+            user_skills = user_profile.get('skills', [])
+            if not user_skills:
+                return {
+                    "error": "User skills not found",
+                    "matches": [],
+                    "total_matches": 0,
+                    "suggestion": "Please add skills to your profile to get job recommendations"
+                }
+                
+            # Applying business logic to filters
+            enhanced_filters = self._enhance_filters_with_business_logic(
+                filters or {},
+                user_profile
+            )
             
-            return matches[:top_k]
+            rag_results = await self.rag_pipeline.find_matching_jobs(
+                session=session,
+                user_id=user_id,
+                user_skills=user_skills,
+                filters=enhanced_filters,
+                limit=limit,
+                generate_explanation=True
+            )
             
+            # Apply business enhancements
+            enhanced_results = await self._enhance_results_with_business_data(
+                session,
+                rag_results,
+                user_profile
+            )
+            
+            # Cache results
+            if use_cache:
+                self._cache[cache_key] = {
+                    'data': enhanced_results,
+                    'timestamp': datetime.now()
+                }
+            
+            await self._record_job_search_interaction(
+                session,
+                user_id,
+                len(enhanced_results['matches'], filters)
+            )
+            
+            return enhanced_results
+            
+            # Record user interaction
         except Exception as e:
-            logger.error(f"Failed to find matches: {str(e)}")
-            return []
+            logger.error(f"Error occurred while getting job matches for user {user_id}: {e}")
+            return {
+                "error": str(e),
+                "matches": [],
+                "total_matches": 0
+            }
     
-    def _calculate_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> MatchResult:
-        scores = {}
+    async def get_detailed_job_analysis(self,
+                                        session: AsyncSession,
+                                        user_id: int,
+                                        job_id: int) -> Dict[str, Any]:
+        """
+            Get detailed compatibility analysis for a specific job.
+        """
         
-        # Calculate individual scores
-        scores["skills"] = self._calculate_skill_match(user_profile, job)
-        scores["experience"] = self._calculate_experience_match(user_profile, job)
-        scores["location"] = self._calculate_location_match(user_profile, job)
-        scores["work_type"] = self._calculate_work_type_match(user_profile, job)
-        scores["salary"] = self._calculate_salary_match(user_profile, job)
-        
-        # Calculate weighted overall score
-        overall_score = sum(scores[key] * self.weights[key] for key in scores)
-        
-        # Generate explanation and recommendations
-        explanation = self._generate_basic_explanation(scores, job)
-        skill_gaps = self._identify_skill_gaps(user_profile, job)
-        recommendations = self._generate_recommendations(scores, skill_gaps)
-        
-        # Get RAG insights if available
-        rag_insights = None
-        if self.rag_service:
-            try:
-                rag_insights = self.rag_service.explain_job_match(job, user_profile)
-            except Exception as e:
-                logger.warning(f"RAG insights failed: {str(e)}")
-        
-        return MatchResult(
-            job_id=job.get("id", 0),
-            match_score=overall_score,
-            compatibility_score=overall_score,  # Same for now (YAGNI)
-            skill_match_percentage=scores["skills"] * 100,
-            experience_match=scores["experience"] > 0.7,
-            location_match=scores["location"] > 0.8,
-            explanation=explanation,
-            skill_gaps=skill_gaps,
-            recommendations=recommendations,
-            rag_insights=rag_insights
-        )
-    
-    def _calculate_skill_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> float:
-        user_skills = self._extract_user_skills(user_profile)
-        job_text = job.get("full_text", "").lower()
-        
-        if not user_skills or not job_text:
-            return 0.0
-        
-        # Simple keyword matching (RAG provides contextual understanding)
-        matches = 0
-        total_skills = len(user_skills)
-        
-        for skill in user_skills:
-            if skill.lower() in job_text:
-                matches += 1
-        
-        return matches / total_skills if total_skills > 0 else 0.0
-    
-    def _calculate_experience_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> float:
-        """Calculate experience level matching"""
-        user_years = self._calculate_total_experience(user_profile)
-        job_level = job.get("experience_level", "").lower()
-
-        level_requirements = {
-            "entry": (0, 2),
-            "junior": (1, 3),
-            "mid": (3, 6),
-            "senior": (5, 10),
-            "lead": (7, 15),
-            "executive": (10, 20)
-        }
-        
-        for level, (min_years, max_years) in level_requirements.items():
-            if level in job_level:
-                if min_years <= user_years <= max_years:
-                    return 1.0
-                elif user_years < min_years:
-                    return max(0.0, 1.0 - (min_years - user_years) * 0.2)
-                else:
-                    return max(0.0, 1.0 - (user_years - max_years) * 0.1)
-        
-        return 0.5  # Neutral if can't determine
-    
-    def _calculate_location_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> float:
-        user_location = user_profile.get("location", "").lower()
-        job_location = job.get("location", "").lower()
-        work_type = job.get("work_type", "").lower()
-        
-        # Remote work gets high score
-        if "remote" in work_type or "hybrid" in work_type:
-            return 0.9
-        
-        # Simple location matching
-        if user_location and job_location:
-            if user_location in job_location or job_location in user_location:
-                return 1.0
-            else:
-                return 0.3  # Different location but still possible
-        
-        return 0.5  # Neutral if location not specified
-    
-    def _calculate_work_type_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> float:
-        """Calculate work type preference match"""
-        user_prefs = user_profile.get("work_preferences", {})
-        preferred_types = user_prefs.get("work_types", [])
-        job_work_type = job.get("work_type", "").lower()
-        
-        if not preferred_types:
-            return 0.5  # Neutral if no preference
-        
-        # Check if job work type matches user preferences
-        for pref in preferred_types:
-            if pref.lower() in job_work_type:
-                return 1.0
-        
-        return 0.3  # Lower score for non-preferred work type
-    
-    def _calculate_salary_match(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> float:
-        """Calculate salary expectation match"""
-        user_prefs = user_profile.get("work_preferences", {})
-        min_expected = user_prefs.get("minimum_salary")
-        
-        job_min = job.get("salary_min")
-        job_max = job.get("salary_max")
-        
-        if not min_expected or not job_min:
-            return 0.5  # Neutral if salary not specified
-        
-        # Check if job salary meets expectations
-        if job_max and job_max >= min_expected:
-            return 1.0
-        elif job_min >= min_expected * 0.8:  # Within 20% of expectation
-            return 0.8
-        else:
-            return 0.2  # Below expectations
-    
-    def _extract_user_skills(self, user_profile: Dict[str, Any]) -> List[str]:
-        """Extract skill names from user profile"""
-        skills = user_profile.get("skills", [])
-        
-        if not skills:
-            return []
-        
-        skill_names = []
-        for skill in skills:
-            if isinstance(skill, dict):
-                skill_names.append(skill.get("name", ""))
-            else:
-                skill_names.append(str(skill))
-        
-        return [s for s in skill_names if s]  # Remove empty strings
-    
-    def _calculate_total_experience(self, user_profile: Dict[str, Any]) -> float:
-        """Calculate total years of experience"""
-        experiences = user_profile.get("experiences", [])
-        
-        if not experiences:
-            return 0.0
-        
-        total_months = 0
-        for exp in experiences:
-            start_date = exp.get("start_date")
-            end_date = exp.get("end_date") or datetime.now().date()
+        try:
+            # Get user profile
+            user_profile = await self._get_user_profile(session, user_id)
+            if not user_profile:
+                return {
+                    "error": "User profile not found",
+                    "analysis": {}
+                }
             
-            if start_date:
-                if isinstance(start_date, str):
-                    try:
-                        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-                    except:
-                        continue
-                
-                if isinstance(end_date, str):
-                    try:
-                        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-                    except:
-                        end_date = datetime.now().date()
-                
-                duration = end_date - start_date
-                total_months += duration.days / 30.44  # Average days per month
-        
-        return total_months / 12  # Convert to years
+            user_skills = user_profile.get('skills', [])
+            
+            # Get compatibility analysis from RAG pipeline
+            analysis = await self.rag_pipeline.analyze_job_compatibility(
+                session,
+                user_skills,
+                job_id
+            )
+            
+            if 'error' in analysis:
+                return analysis
+            
+            # Enhance with business insights
+            enhanced_analysis = await self._enhance_job_analysis(
+                session,
+                analysis,
+                user_profile
+            )
+            
+            await self._record_job_view_interaction(
+                session,
+                user_id,
+                job_id
+            )
+            
+            return enhanced_analysis
+        except Exception as e:
+            logger.error(f"Error occurred while getting detailed job analysis for user {user_id} and job {job_id}: {e}")
+            return {
+                "error": str(e),
+                "analysis": {}
+            }
     
-    def _generate_basic_explanation(self, scores: Dict[str, float], job: Dict[str, Any]) -> str:
-        """Generate human-readable explanation"""
-        explanations = []
+    async def get_career_dashboard(self,
+                                   session: AsyncSession,
+                                   user_id: int) -> Dict[str, Any]:
+        """
+            Generate comprehensive career dashboard for user
+        """
         
-        if scores["skills"] > 0.7:
-            explanations.append("Strong skill alignment")
-        elif scores["skills"] > 0.4:
-            explanations.append("Good skill match with some gaps")
-        else:
-            explanations.append("Limited skill overlap")
-        
-        if scores["experience"] > 0.8:
-            explanations.append("excellent experience fit")
-        elif scores["experience"] > 0.5:
-            explanations.append("suitable experience level")
-        else:
-            explanations.append("experience level mismatch")
-        
-        if scores["location"] > 0.8:
-            explanations.append("great location compatibility")
-        
-        job_title = job.get("job_title", "this position")
-        return f"This {job_title} shows {', '.join(explanations)}."
-    
-    def _identify_skill_gaps(self, user_profile: Dict[str, Any], job: Dict[str, Any]) -> List[str]:
-        """Identify missing skills (basic implementation)"""
-        # This is where RAG shines - understanding skills from context
-        # For now, simple keyword extraction
-        user_skills = [s.lower() for s in self._extract_user_skills(user_profile)]
-        job_text = job.get("full_text", "").lower()
-        
-        # Common tech skills to look for
-        common_skills = [
-            "python", "javascript", "react", "node.js", "sql", "mongodb",
-            "aws", "docker", "kubernetes", "git", "agile", "scrum",
-            "machine learning", "data analysis", "api", "rest"
-        ]
-        
-        gaps = []
-        for skill in common_skills:
-            if skill in job_text and skill not in user_skills:
-                gaps.append(skill.title())
-        
-        return gaps[:5]  # Limit to top 5
-    
-    def _generate_recommendations(self, scores: Dict[str, float], skill_gaps: List[str]) -> List[str]:
-        """Generate actionable recommendations"""
-        recommendations = []
-        
-        if scores["skills"] < 0.5:
-            recommendations.append("Consider developing relevant technical skills")
-        
-        if skill_gaps:
-            recommendations.append(f"Focus on learning: {', '.join(skill_gaps[:3])}")
-        
-        if scores["experience"] < 0.4:
-            recommendations.append("Gain more experience in this field")
-        
-        if scores["salary"] < 0.5:
-            recommendations.append("Salary expectations may need adjustment")
-        
-        return recommendations
+        try:
+            # Get user profile
+            user_profile = await self._get_user_profile(session, user_id)
+            if not user_profile:
+                return {
+                    "error": "User profile not found",
+                    "dashboard": {}
+                }
 
-_matching_service = None
+            # Get recent job matches for context
+            recent_matches = await self.get_job_matches_for_user(
+                session,
+                user_id,
+                limit=10,
+                use_cache=False
+            )
+            
+            # Generate career insights 
+            career_insights = await self.rag_pipeline.generate_career_insights(
+                session,
+                user_profile,
+                recent_matches.get('matches', [])
+            )
+            
+            # Get user statistics
+            user_stats = await self._get_user_statistics(session, user_id)
+            
+            # Get skill trends
+            skill_trends = await self._get_skill_market_trends(
+                session,
+                user_profile.get('skills', [])
+            )
+            
+            dashboard = {
+                "user_profile": user_profile,
+                "career_insights": career_insights,
+                "recent_matches": {
+                    "total": recent_matches.get('total_matches', 0),
+                    "top_matches": recent_matches.get('matches', [])[:5]
+                },
+                "user_statistics": user_stats,
+                "skill_market_trends": skill_trends,
+                "generated_at": datetime.utcnow().isoformat()
+            }
+            
+            return dashboard
+        except Exception as e:
+            logger.error(f"Error generating career dashboard for user {user_id}: {str(e)}")
+            return {"error": str(e)}
+        
+    async def batch_process_new_jobs(self,
+                                    session: AsyncSession,
+                                    job_batch: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+            Process a batch of new jobs for embedding generation.
+        """
+        
+        try:
+            # Processing embeddings
+            processing_result = await self.rag_pipeline.process_job_batch_for_embedding(
+                session,
+                job_batch
+            )
+            
+            # Clear relevant caches since new jobs are available
+            self._clear_all_user_caches()
+            
+            # Update job processing stats
+            await self._update_job_processing_stats(session, processing_result)
+            
+            return {
+                **processing_result,
+                "cached_cleared": True,
+                "processed_at": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error batch processing jobs: {str(e)}")
+            return {"error": str(e)}
+        
+    async def _get_user_profile(self, session: AsyncSession, user_id: int) -> Optional[Dict[str, Any]]:
+        try:
+            query = text("""
+                         SELECT
+                            up.user_id,
+                            up.full_name,
+                            up.title,
+                            up.skills,
+                            up.experience_years,
+                            up.location,
+                            up.preferred_job_types,
+                            up.preferred_locations,
+                            up.salary_expectations,
+                            up.work_style_preferences,
+                            u.email
+                        FROM user_profile AS up
+                        JOIN users AS u 
+                            ON u.id = up.user_id
+                        WHERE up.user_id = :user_id AND up.is_active = true
+                        """)
+            
+            result = await session.execute(query, {'user_id': user_id})
+            row = result.fetchone()
+            
+            if not row:
+                return None
+            
+            return {
+                'user_id': row.user_id,
+                'full_name': row.full_name,
+                'title': row.title,
+                'skills': row.skills or [],
+                'experience_years': row.experience_years,
+                'location': row.location,
+                'preferred_job_types': row.preferred_job_types or [],
+                'preferred_locations': row.preferred_locations or [],
+                'salary_expectations': row.salary_expectations,
+                'work_style_preferences': row.work_style_preferences,
+                'email': row.email
+            }
+        except Exception as e:
+            logger.error(f"Error fetching user profile for user {user_id}: {e}")
+            return None
+        
+    def _enhance_filters_with_business_logic(self,
+                                            filters: Dict[str, Any],
+                                            user_profile: Dict[str, Any]) -> Dict[str, Any]:
+        
+        enhanced_filters = filters.copy()
+        
+        # Add user preferences if not specified
+        if not enhanced_filters.get('location') and user_profile.get('preferred_locations'):
+            enhanced_filters['preferred_locations'] = user_profile['preferred_locations']
+        
+        if not enhanced_filters.get('job_type') and user_profile.get('preferred_job_types'):
+            enhanced_filters['preferred_job_types'] = user_profile['preferred_job_types']
+            
+        # Add salary expectations
+        if user_profile.get('salary_expectations'):
+            if not enhanced_filters.get('min_salary'):
+                enhanced_filters['min_salary'] = user_profile['salary_expectations'].get('min')
+            if not enhanced_filters.get('max_salary'):
+                enhanced_filters['max_salary'] = user_profile['salary_expectations'].get('max')
+            
+        # Experience level matching
+        experience_years = user_profile.get('experience_years', 0)
+        if not enhanced_filters.get('experience_level'):
+            if experience_years < 2:
+                enhanced_filters['experience_level'] = ['Entry Level', 'Junior']
+            elif experience_years < 5:
+                enhanced_filters['experience_level'] = ['Mid Level', 'Intermediate']
+            else:
+                enhanced_filters['experience_level'] = ['Senior', 'Lead', 'Principal']
+        
+        return enhanced_filters
+    
+    async def _enhance_results_with_business_data(self,
+                                                  session: AsyncSession,
+                                                  rag_results: Dict[str, Any],
+                                                  user_profile: Dict[str, Any]) -> Dict[str, Any]:
+        
+        enhanced_results = rag_results.copy()
+        
+        for match in enhanced_results.get('matches', []):
+            # Calculate business match score
+            business_score = self._calculate_business_match_score(match, user_profile)
+            match['business_match_score'] = business_score
+            
+            # Application difficulty estimate
+            match['application_difficulty'] = self._estimate_application_difficulty(
+                match,
+                user_profile
+            )
+            
+            # Estimated response time
+            match['estimated_response_time'] = self._estimated_response_time(match)
+            
+            # Company insights
+            company_insights = await self._get_company_insights(session, match['company_name'])
+            if company_insights:
+                match['company_insights'] = company_insights
+        
+        # Sort it using combined score
+        enhanced_results['matches'].sort(
+            key=lambda x: (
+                x.get('similarity_scores', {}).get('combined_similarity', 0) * 0.6 +
+                x.get('business_match_score', 0) * 0.4
+            ),
+            reverse=True
+        )
+        
+        return enhanced_results
+    
+    def _calculate_business_match_score(self,
+                                        job_match: Dict[str, Any],
+                                        user_profile: Dict[str, Any]) -> float:
+        
+        score = 0.0
+        
+        # Location preference match
+        user_locations = user_profile.get('preferred_locations', [])
+        job_location = job_match.get('location', '')
+        if any(loc.lower() in job_location.lower() for loc in user_locations):
+            score += 0.2
+        
+        # Job type preference match
+        user_job_types = user_profile.get('preferred_job_types', [])
+        job_type = job_match.get('job_type', '')
+        if job_type in user_job_types:
+            score += 0.2
+        
+        # Experience level alignment
+        user_experience = user_profile.get('experience_years', 0)
+        job_experience_level = job_match.get('experience_level', '').lower()
+        
+        if user_experience < 2 and any(level in job_experience_level for level in ['entry', 'junior']):
+            score += 0.2
+        elif 2 <= user_experience < 5 and any(level in job_experience_level for level in ['mid', 'intermediate']):
+            score += 0.2
+        elif user_experience >= 5 and any(level in job_experience_level for level in ['senior', 'lead']):
+            score += 0.2
+        
+        # Salary expectations alignment
+        salary_expectations = user_profile.get('salary_expectations', {})
+        job_salary_min = job_match.get('salary_min')
+        if salary_expectations.get('min') and job_salary_min:
+            if job_salary_min >= salary_expectations['min'] * 0.8:  # Within 20% tolerance
+                score += 0.2
+        
+        # Recent posting bonus (shows active hiring)
+        posted_date = job_match.get('posted_date')
+        if posted_date and isinstance(posted_date, datetime):
+            days_since_posted = (datetime.utcnow() - posted_date).days
+            if days_since_posted <= 7:
+                score += 0.2
+        
+        return min(score, 1.0)
 
-def get_matching_service(rag_service=None):
-    global _matching_service
-    if _matching_service is None:
-        _matching_service = MatchingService(rag_service)
-    return _matching_service
+    def _estimate_response_time(self, job_match: Dict[str, Any]) -> str:
+        posted_date = job_match.get('posted_date')
+        if posted_date and isinstance(posted_date, datetime):
+            days_since_posted = (datetime.now() - posted_date).days
+            if days_since_posted <= 3:
+                return "1-3 days"
+            elif days_since_posted <= 7:
+                return "3-7 days"
+            else:
+                return "1-2 weeks"
+        return "Unknown"
+    
+    async def _get_company_insights(self,
+                                    session: AsyncSession,
+                                    company_name: str) -> Optional[Dict[str, Any]]:
+        try:
+            query = text("""
+                            SELECT
+                                COUNT(*) AS total_postings,
+                                COUNT(CASE WHEN posted_date >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent_postings,
+                                AVG(salary_min) AS avg_min_salary,
+                                AVG(salary_max) AS avg_max_salary
+                            FROM job_postings
+                            WHERE company_name = :company_name AND is_active = true
+                        """)
+            
+            result = await session.execute(query, {'company_name': company_name})
+            row = result.fetchone()
+            
+            if row and row.total_postings > 0:
+                return {
+                    'total_job_postings': row.total_postings,
+                    'recent_activity': row.recent_postings,
+                    'hiring_activity': 'High' if row.recent_postings > 5 else 'Moderate',
+                    'avg_salary_range': {
+                        'min': int(row.avg_min_salary) if row.avg_min_salary else None,
+                        'max': int(row.avg_max_salary) if row.avg_max_salary else None
+                    }
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting company insights for {company_name}: {str(e)}")
+            return None
+    
+    def _is_cache_valid(self, cache_key: str) -> bool:
+        if cache_key not in self._cache:
+            return False
+        
+        cached_time = self._cache[cache_key]['timestamp']
+        return datetime.now() - cached_time < self._cache_ttle
+    
+    def _clear_user_cache(self, user_id: int):
+        keys_to_remove = [key for key in self._cache.keys() if f"_{user_id}_" in key]
+        for key in keys_to_remove:
+            del self._cache[key]
+    
+    def _clear_all_user_caches(self):
+        self._cache.clear()
+    
+job_matching_service = JobMatchingService()

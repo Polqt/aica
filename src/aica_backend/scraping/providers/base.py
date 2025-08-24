@@ -12,18 +12,6 @@ class BaseProvider(ABC):
         self.rate_limit = config.get('rate_limit', 10)
         self.active = config.get('active', True)
     
-    @abstractmethod
-    def scrape_job_listings(self, search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
-        pass
-    
-    @abstractmethod
-    def scrape_job_details(self, job_url: str) -> Optional[Dict[str, Any]]:
-        pass
-    
-    @abstractmethod
-    def get_test_url(self) -> str:
-        pass
-    
     def test_scraping(self, url: Optional[str] = None) -> Dict[str, Any]:
         try:
             test_url = url or self.get_test_url()
@@ -49,6 +37,13 @@ class BaseProvider(ABC):
                 "errors": [str(e)]
             }
     
+    def _create_test_result(self, success: bool, data: Dict[str, Any], errors: List[str]) -> Dict[str, Any]:
+        return {
+            "success": success,
+            "data": data,
+            "errors": errors
+        }
+    
     def is_active(self) -> bool:
         return self.active
     
@@ -58,5 +53,4 @@ class BaseProvider(ABC):
             "base_url": self.base_url,
             "rate_limit": self.rate_limit,
             "active": self.active,
-            "config": self.config
         }

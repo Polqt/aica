@@ -9,6 +9,9 @@ import Image from 'next/image';
 import { FileText, Download, Calendar, Users } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { FileText, Download, Calendar, Users, BookOpen, Target, Eye } from 'lucide-react';
+import React from 'react';
+
   
 /*******  3ef966da-43fe-4a54-9a03-4f530f574d3b  *******/
 export default function PaperPage() {

@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -42,6 +41,7 @@ import {
   ArrowRight,
   Upload,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 
 const profileFormSchema = z.object({
   first_name: z
@@ -145,7 +145,8 @@ export default function Profile() {
   const watchedFields = form.watch();
   const completedFields = Object.entries(watchedFields).filter(
     ([key, value]) => {
-      if (key === 'linkedin_url' || key === 'profile_picture') return true;
+      // Count only required fields (excluding optional fields)
+      if (key === 'linkedin_url' || key === 'profile_picture') return false;
       return value && value.toString().trim() !== '';
     },
   ).length;
@@ -221,313 +222,493 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
-            <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Complete Your Profile
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
-            Let&apos;s get to know you better. This information will help us
-            match you with the perfect opportunities.
-          </p>
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
+      {/* Sophisticated Multi-layer Background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        {/* Base Gradient Layer */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/15 to-purple-50/25 dark:from-blue-900/10 dark:via-indigo-900/8 dark:to-purple-900/12"></div>
+        
+        {/* Animated Gradient Orbs */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute left-[15%] top-[20%] h-96 w-96 rounded-full bg-gradient-to-br from-blue-300/25 to-purple-300/20 dark:from-blue-700/15 dark:to-purple-700/12 blur-3xl animate-float-slow"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+          className="absolute right-[20%] top-[30%] h-80 w-80 rounded-full bg-gradient-to-br from-pink-300/20 to-orange-300/15 dark:from-pink-700/12 dark:to-orange-700/10 blur-3xl animate-float-medium"
+        />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 2, delay: 0.6, ease: "easeOut" }}
+          className="absolute bottom-[25%] left-[25%] h-88 w-88 rounded-full bg-gradient-to-br from-green-300/30 to-cyan-300/20 dark:from-green-700/18 dark:to-cyan-700/15 blur-3xl animate-float-fast"
+        />
+        
+        {/* Geometric Grid Pattern */}
+        <div className="absolute inset-0 opacity-15 dark:opacity-10">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         </div>
+        
+        {/* Subtle Corner Accents */}
+        <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-indigo-400/10 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 right-0 w-44 h-44 bg-gradient-to-tl from-pink-400/10 to-transparent rounded-full blur-xl"></div>
+        
+        {/* Animated Particles - Fixed deterministic positions */}
+        <div className="absolute inset-0">
+          {[
+            { left: 10, top: 20, duration: 4, delay: 0.5 },
+            { left: 80, top: 30, duration: 5, delay: 1.0 },
+            { left: 25, top: 70, duration: 6, delay: 1.5 },
+            { left: 70, top: 15, duration: 3, delay: 0.2 },
+            { left: 40, top: 50, duration: 5, delay: 0.8 },
+            { left: 90, top: 60, duration: 4, delay: 1.2 },
+            { left: 15, top: 40, duration: 7, delay: 1.8 },
+            { left: 60, top: 80, duration: 4, delay: 0.3 },
+          ].map((particle, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-blue-400/40 to-purple-400/30 rounded-full"
+              initial={{
+                opacity: 0,
+                x: particle.left - 50,
+                y: particle.top - 50,
+              }}
+              animate={{
+                opacity: [0, 0.6, 0],
+                x: [particle.left - 50, particle.left - 30, particle.left - 70],
+                y: [particle.top - 50, particle.top - 30, particle.top - 70],
+              }}
+              transition={{
+                duration: particle.duration,
+                repeat: Infinity,
+                delay: particle.delay,
+                ease: "easeInOut",
+              }}
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      
+      <div className="max-w-2xl mx-auto">
+        {/* Enhanced Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8"
+        >
+          <motion.div 
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ duration: 0.8, type: "spring", stiffness: 200 }}
+            className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-xl"
+          >
+            <User className="w-12 h-12 text-white" />
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg animate-pulse"></div>
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-4"
+          >
+            Complete Your{' '}
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-300 dark:via-purple-300 dark:to-indigo-300 bg-clip-text text-transparent">
+              Profile
+            </span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-lg text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed"
+          >
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-semibold">
+              Let&apos;s get to know you better
+            </span>
+            {' '}— this information helps us match you with perfect opportunities
+          </motion.p>
+        </motion.div>
 
-        <Card className="mb-6 border-0 shadow-sm bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Profile Completion
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {completionPercentage}%
-              </span>
-            </div>
-            <Progress value={completionPercentage} className="w-full h-2" />
-            {completionPercentage < 100 && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Complete all required fields to continue
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-white dark:bg-gray-800">
-          <CardContent className="p-8">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <div className="flex flex-col items-center space-y-4 pb-6 border-b border-gray-200 dark:border-gray-700">
-                  <FormField
-                    control={form.control}
-                    name="profile_picture"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col items-center">
-                        <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Profile Picture (Optional)
-                        </FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <div className="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-gray-600 overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                              {imagePreview || field.value ? (
-                                <Image
-                                  src={imagePreview || field.value || ''}
-                                  alt="Profile"
-                                  width={96}
-                                  height={96}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <Camera className="w-8 h-8 text-gray-400" />
-                              )}
-                            </div>
-                            <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg">
-                              <Upload className="w-4 h-4 text-white" />
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                disabled={isUploading}
-                                onChange={e => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleImageUpload(file);
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </FormControl>
-                        {isUploading && (
-                          <p className="text-xs text-blue-600 dark:text-blue-400">
-                            Uploading...
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Personal Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <User className="w-4 h-4" />
-                          First Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter your first name"
-                            {...field}
-                            className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="last_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <User className="w-4 h-4" />
-                          Last Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter your last name"
-                            {...field}
-                            className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Professional Title */}
-                <FormField
-                  control={form.control}
-                  name="professional_title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <FileText className="w-4 h-4" />
-                        Professional Title
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <SelectValue placeholder="Select your professional title" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60">
-                          {PROFESSIONAL_TITLES.map(title => (
-                            <SelectItem
-                              key={title}
-                              value={title}
-                              className="py-2"
-                            >
-                              {title}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Contact Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="contact_number"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <Phone className="w-4 h-4" />
-                          Contact Number
-                        </FormLabel>
-                        <FormControl>
-                          <PhoneInput
-                            country={'ph'}
-                            value={field.value}
-                            onChange={field.onChange}
-                            containerClass="!w-full"
-                            inputClass="!w-full !h-11 !bg-background !text-foreground !border-gray-300 dark:!border-gray-600 !focus:ring-2 !focus:ring-blue-500 !focus:border-transparent !transition-all"
-                            buttonClass="!border-gray-300 dark:!border-gray-600 !bg-background"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <MapPin className="w-4 h-4" />
-                          Address
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. Manila, Philippines"
-                            {...field}
-                            className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* LinkedIn URL */}
-                <FormField
-                  control={form.control}
-                  name="linkedin_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <Linkedin className="w-4 h-4" />
-                        LinkedIn URL
-                        <Badge variant="secondary" className="text-xs">
-                          Optional
-                        </Badge>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="https://linkedin.com/in/your-profile"
-                          {...field}
-                          className="h-11 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Summary */}
-                <FormField
-                  control={form.control}
-                  name="summary"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <FileText className="w-4 h-4" />
-                        Professional Summary
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tell us about your professional background, key skills, and career goals. This helps us understand what makes you unique..."
-                          {...field}
-                          className="min-h-[120px] border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                          maxLength={500}
-                        />
-                      </FormControl>
-                      <div className="flex justify-between items-center">
-                        <FormMessage className="text-xs" />
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {field.value?.length || 0}/500
-                        </span>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {apiError && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {apiError}
+        {/* Enhanced Progress Indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="mb-6 border-0 shadow-lg bg-gradient-to-r from-blue-50/40 via-purple-50/30 to-indigo-50/20 dark:from-blue-900/20 dark:via-purple-900/15 dark:to-indigo-900/10 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
+                    <span className="text-white font-semibold text-sm">
+                      {completionPercentage}%
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                      Profile Completion
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      {completedFields}/{totalRequiredFields} fields completed
                     </p>
                   </div>
-                )}
-
-                <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <Button
-                    type="submit"
-                    disabled={
-                      form.formState.isSubmitting || completionPercentage < 100
-                    }
-                    className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    {form.formState.isSubmitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Saving Profile...
-                      </>
-                    ) : (
-                      <>
-                        Continue to Education
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </Button>
                 </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                <Badge 
+                  variant="secondary" 
+                  className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 dark:from-blue-900/50 dark:to-purple-900/50 dark:text-blue-200 border-blue-200/60 dark:border-blue-700/30 px-3 py-1 text-xs font-semibold"
+                >
+                  Step 1 of 5
+                </Badge>
+              </div>
+              
+              <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+              
+              {completionPercentage < 100 && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Complete all required fields to continue to the next step
+                </p>
+              )}
+              {completionPercentage === 100 && (
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                  ✓ All required fields completed! Ready to continue
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="border-0 shadow-xl bg-white dark:bg-slate-800 overflow-hidden">
+            <CardContent className="p-8">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  {/* Profile Picture Section */}
+                  <div className="flex flex-col items-center space-y-4 pb-8 border-b border-slate-200/60 dark:border-slate-700/50">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                        Profile Picture
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Add a professional photo to personalize your profile
+                      </p>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="profile_picture"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center">
+                          <FormControl>
+                            <div className="relative group">
+                              <div className="w-28 h-28 rounded-full border-4 border-slate-200/80 dark:border-slate-600/60 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
+                                {imagePreview || field.value ? (
+                                  <Image
+                                    src={imagePreview || field.value || ''}
+                                    alt="Profile"
+                                    width={112}
+                                    height={112}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <Camera className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+                                )}
+                              </div>
+                              <label className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl">
+                                <Upload className="w-5 h-5 text-white" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  disabled={isUploading}
+                                  onChange={e => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleImageUpload(file);
+                                  }}
+                                />
+                              </label>
+                              <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-sm group-hover:blur-md transition-all duration-300"></div>
+                            </div>
+                          </FormControl>
+                          {isUploading && (
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                              Uploading...
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Personal Information Section */}
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                        Personal Information
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Tell us about yourself
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="first_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              First Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your first name"
+                                {...field}
+                                className="h-12 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/80 dark:bg-slate-700/80"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="last_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              Last Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your last name"
+                                {...field}
+                                className="h-12 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/80 dark:bg-slate-700/80"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="professional_title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            Professional Title
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/80 dark:bg-slate-700/80">
+                                <SelectValue placeholder="Select your professional title" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-60 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                              {PROFESSIONAL_TITLES.map(title => (
+                                <SelectItem
+                                  key={title}
+                                  value={title}
+                                  className="py-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                  {title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Contact Information Section */}
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                        Contact Information
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        How can we reach you?
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="contact_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <Phone className="w-4 h-4 text-green-600 dark:text-green-400" />
+                              Contact Number
+                            </FormLabel>
+                            <FormControl>
+                              <PhoneInput
+                                country={'ph'}
+                                value={field.value}
+                                onChange={field.onChange}
+                                containerClass="!w-full"
+                                inputClass="!w-full !h-12 !bg-white/80 dark:!bg-slate-700/80 !text-foreground !border-slate-300 dark:!border-slate-600 !focus:ring-2 !focus:ring-blue-500 !focus:border-transparent !transition-all"
+                                buttonClass="!border-slate-300 dark:!border-slate-600 !bg-white/80 dark:!bg-slate-700/80"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                              Address
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. Manila, Philippines"
+                                {...field}
+                                className="h-12 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/80 dark:bg-slate-700/80"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="linkedin_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <Linkedin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            LinkedIn URL
+                            <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                              Optional
+                            </Badge>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://linkedin.com/in/your-profile"
+                              {...field}
+                              className="h-12 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/80 dark:bg-slate-700/80"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Professional Summary Section */}
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                        Professional Summary
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Share your story and career aspirations
+                      </p>
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="summary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                            Professional Summary
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Tell us about your professional background, key skills, and career goals. This helps us understand what makes you unique..."
+                              {...field}
+                              className="min-h-[140px] border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none bg-white/80 dark:bg-slate-700/80"
+                              maxLength={500}
+                            />
+                          </FormControl>
+                          <div className="flex justify-between items-center">
+                            <FormMessage className="text-xs" />
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              {field.value?.length || 0}/500
+                            </span>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {apiError && (
+                    <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        {apiError}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="pt-6 border-t border-slate-200/60 dark:border-slate-700/50">
+                    <Button
+                      type="submit"
+                      disabled={
+                        form.formState.isSubmitting || completionPercentage < 100
+                      }
+                      className="w-full h-14 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
+                    >
+                      {form.formState.isSubmitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Saving Profile...
+                        </>
+                      ) : (
+                        <>
+                          Continue to Education
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
