@@ -14,13 +14,14 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useAuth } from '@/lib/context/AuthContext';
 import { useFormSubmission } from '@/lib/hooks/useFormWithValidation';
 import { loginSchema, LoginFormData } from '@/lib/schemas/validation';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -41,13 +42,9 @@ export default function LoginForm() {
       errorMessage: 'Login failed. Please check your credentials.',
     });
 
-  const onSubmit = (data: LoginFormData) => {
-    handleSubmit(data);
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -103,3 +100,4 @@ export default function LoginForm() {
     </Form>
   );
 }
+

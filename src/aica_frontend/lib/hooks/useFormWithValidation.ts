@@ -38,7 +38,7 @@ export function useFormSubmission<T>({
         error instanceof Error ? error.message : 'An error occurred';
       setApiError(errorMsg);
 
-      if (errorMessage) {
+      if (errorMessage && !errorMsg.includes('401')) {
         toast.error(errorMessage);
       } else {
         toast.error(errorMsg);
@@ -58,39 +58,5 @@ export function useFormSubmission<T>({
     handleSubmit,
     clearApiError,
     setApiError,
-  };
-}
-
-export function useAsyncOperation() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const execute = async <T>(operation: () => Promise<T>): Promise<T | null> => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await operation();
-      return result;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      toast.error(errorMessage);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearError = () => {
-    setError(null);
-  };
-
-  return {
-    isLoading,
-    error,
-    execute,
-    clearError,
   };
 }

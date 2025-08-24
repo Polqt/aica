@@ -8,7 +8,6 @@ from .config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
-
 class SecurityValidator:
     """Handles password and email validation with security best practices."""
 

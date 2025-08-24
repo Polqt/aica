@@ -9,6 +9,7 @@ from ....core.config import settings
 from .. import schemas
 from ... import dependencies
 from ....database import models
+from aica_backend.database.repositories import user
 
 router = APIRouter()
 
@@ -24,9 +25,7 @@ def _create_auth_response(user: models.User, response: Response) -> dict:
     token_data = {"sub": user.email, "user_id": user.id}
     access_token = token_manager.create_access_token(token_data)
     refresh_token = token_manager.create_refresh_token(token_data)
-    
-    cookie_max_age = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-    refresh_max_age = settings.REFRESH_TOKEN_EXPIRE_DAYS* 24 * 60 * 60
+
     
     cookie_settings = {
         "httponly": True,
@@ -37,7 +36,7 @@ def _create_auth_response(user: models.User, response: Response) -> dict:
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
-        max_age=cookie_max_age,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
         **cookie_settings
     )
@@ -45,7 +44,7 @@ def _create_auth_response(user: models.User, response: Response) -> dict:
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        max_age=refresh_max_age,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path="/api/v1/refresh",
         **cookie_settings
     )
@@ -53,9 +52,20 @@ def _create_auth_response(user: models.User, response: Response) -> dict:
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "expires_in": cookie_max_age
+        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }
     
+@staticmethod
+def clear_auth_cookies(response: Response):
+    cookie_settings = {
+        "httponly": True,
+        "secure": settings.ENVIRONMENT == "production",
+        "samesite": "strict",
+    }
+    
+    response.delete_cookie("access_token", path="/", **cookie_settings)
+    response.delete_cookie("refresh_token", path="/api/v1/refresh", **cookie_settings)
+
 @router.post('/login/access-token', response_model=schemas.token.Token)
 def login_access_token(
     request: Request,
@@ -83,18 +93,17 @@ def login_access_token(
         )
     
     if not security_validator.validate_email_format(email):
-        _handle_failed_login(identifier)
+        _handle_failed_login(identifier, 'Invalid email format')
     
     # Authenticate user
-    db_user = UserCRUD.get_user_by_email(db, email=email)
-    
-    if not db_user or not verify_password(form_data.password, db_user.hashed_password):
+    user = UserCRUD.get_user_by_email(db, email=email)
+    if not user or not verify_password(form_data.password, user.hashed_password):
         _handle_failed_login(identifier)
     
     # Clear failed attempts on successful login
     rate_limiter.clear_failed_attempts(identifier)
     
-    return _create_auth_response(db_user, response)
+    return _create_auth_response(user, response)
 
 @router.post('/refresh', response_model=schemas.token.Token)
 def refresh_access_token(
@@ -119,15 +128,15 @@ def refresh_access_token(
         )
     
     email = payload.get("sub")
-    db_user = UserCRUD.get_user_by_email(db, email=email)
-    if not db_user:
+    user = UserCRUD.get_user_by_email(db, email=email)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"}
         )
     
-    return _create_auth_response(db_user, response)
+    return _create_auth_response(user, response)
 
 @router.post('/logout')
 def logout(
@@ -138,17 +147,9 @@ def logout(
     token = dependencies.extract_token_from_request(request)
     if token:
         token_manager.blacklist_token(token)
-        
-    # Clear cookies
-    cookie_settings = {
-        "httponly": True,
-        "secure": settings.ENVIRONMENT == "production",
-        "samesite": "strict",
-    }
-    
-    response.delete_cookie("access_token", path="/", **cookie_settings)
-    response.delete_cookie("refresh_token", path="/api/v1/refresh", **cookie_settings)
-    
+                
+    clear_auth_cookies(response)
+
     return {"message": "Successfully logged out"}
 
 @router.get("/verify")

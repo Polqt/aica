@@ -54,5 +54,4 @@ class RateLimiter:
                 del self._failed_attempts[identifier]
 
 
-# Global instance
 rate_limiter = RateLimiter()

@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, constr, Field, EmailStr, field_validator
 from datetime import datetime, date
+from ....utils.date_validator import parse_date_string
 
 # Education
 class EducationBase(BaseModel):
@@ -15,26 +16,19 @@ class EducationBase(BaseModel):
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
     def parse_dates(cls, v):
-        if v is None or v == '':
-            return None
-        if isinstance(v, str):
-            try:
-                return datetime.strptime(v, '%Y-%m-%d').date()
-            except ValueError:
-                raise ValueError('Invalid date format, expected YYYY-MM-DD')
-        return v
+        return parse_date_string(v)
 
 class EducationCreate(EducationBase):
-    pass
+    end_date: date
 
 class EducationUpdate(BaseModel):
     institution_name: Optional[str] = None
     address: Optional[str] = None
-    degree: str
-    field_of_study: str
-    start_date: date
-    end_date: date
-    description: str
+    degree: Optional[str] = None
+    field_of_study: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    description: Optional[str] = None
 
 class Education(EducationBase):
     id: int
@@ -49,20 +43,13 @@ class ExperienceBase(BaseModel):
     company_name: str
     start_date: date
     end_date: Optional[date] = None
-    description: Optional[List[str]] = Field(default=[], description="Job responsibilities and achievements")
+    description: Optional[List[str]] = Field(default=[], description="Job responsibilities")
     is_current: bool = False
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
     def parse_dates(cls, v):
-        if v is None or v == '':
-            return None
-        if isinstance(v, str):
-            try:
-                return datetime.strptime(v, '%Y-%m-%d').date()
-            except ValueError:
-                raise ValueError('Invalid date format, expected YYYY-MM-DD')
-        return v
+        return parse_date_string(v)
 
 class ExperienceCreate(ExperienceBase):
     pass
@@ -106,20 +93,14 @@ class CertificateBase(BaseModel):
     @field_validator('issue_date', mode='before')
     @classmethod
     def parse_issue_date(cls, v):
-        if v is None or v == '':
-            return None
-        if isinstance(v, str):
-            try:
-                return datetime.strptime(v, '%Y-%m-%d').date()
-            except ValueError:
-                raise ValueError('Invalid date format, expected YYYY-MM-DD')
-        return v
+        return parse_date_string(v)
 
 class CertificateCreate(CertificateBase):
     pass
 
 class CertificateUpdate(CertificateBase):
-    pass
+    name: Optional[str] = None
+    issuing_organization: Optional[str] = None
 
 class Certificate(CertificateBase):
     id: int
@@ -185,18 +166,5 @@ class ProfileSummary(BaseModel):
     last_name: str
     professional_title: str
 
-    class Config:
-        from_attributes = True
-
-
-# User
-class UserBase(BaseModel):
-    email: EmailStr
-
-class UserCreate(UserBase):
-    password: str
-
-class User(UserBase):
-    id: int
     class Config:
         from_attributes = True

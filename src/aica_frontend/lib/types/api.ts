@@ -1,5 +1,5 @@
 export interface ApiError {
-  detail?: string | Array<{ msg: string; loc?: string[] }>;
+  detail?: string;
   message?: string;
 }
 
@@ -22,15 +22,6 @@ export interface RegisterData {
 export interface User {
   id: number;
   email: string;
+  name?: string;
   created_at: string;
-}
-
-export interface RequestConfig extends RequestInit {
-  timeout?: number;
-  includeAuth?: boolean;
-}
-
-export interface HttpClientConfig {
-  baseURL: string;
-  timeout?: number;
 }
