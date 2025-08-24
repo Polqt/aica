@@ -27,6 +27,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Target,
+  Award,
+  ListChecks,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -253,21 +255,44 @@ export default function ExperienceCard({
               )}
             </div>
 
-            {!isComplete && (
-              <div className="mt-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Completion: {completionPercentage}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-violet-600 h-1 rounded-full transition-all duration-300"
-                    style={{ width: `${completionPercentage}%` }}
-                  />
+            {/* Experience Completion Progress - Matches Education Card Style */}
+            <div className="mt-3 p-3 bg-gradient-to-r from-blue-50/40 via-purple-50/30 to-indigo-50/20 dark:from-blue-900/20 dark:via-purple-900/15 dark:to-indigo-900/10 rounded-lg border border-blue-100/50 dark:border-blue-800/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                    <span className="text-white font-semibold text-xs">
+                      {completionPercentage}%
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                      Experience Completion
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {completedFields}/{totalRequiredFields} fields completed
+                    </p>
+                  </div>
                 </div>
               </div>
-            )}
+              
+              <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+              
+              {completionPercentage < 100 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Complete all required fields
+                </p>
+              )}
+              {completionPercentage === 100 && (
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                  ✓ Experience record complete
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
