@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
-from typing import Optional
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., description="User's email address")
@@ -15,6 +14,7 @@ class UserCreate(UserBase):
     )
     
     @field_validator('password')
+    @classmethod
     def validate_password_complexity(cls, v):
         """Validate password meets complexity requirements"""
         if not any(c.isupper() for c in v):
@@ -30,7 +30,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     """Schema for user data in responses (excludes sensitive info)"""
     id: int
-    name: Optional[str] = None
+    email: str
     created_at: datetime
 
     class Config:
@@ -55,3 +55,4 @@ class UserLogin(BaseModel):
     """Schema for login requests"""
     email: EmailStr = Field(..., description="User's email address")
     password: str = Field(..., description="User's password")
+    

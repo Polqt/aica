@@ -8,7 +8,7 @@ from .. import dependencies
 
 router = APIRouter()
 
-@router.get('/profile', response_model=schemas.prfiles.Profile)
+@router.get('/profile', response_model=schemas.profiles.Profile)
 def read_current_user_profile(
     current_user: models.User = Depends(dependencies.get_current_user),
 ):

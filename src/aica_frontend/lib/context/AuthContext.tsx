@@ -13,11 +13,13 @@ import { apiClient } from '../services/api-client';
 
 interface AuthContextType {
   user: User | null;
+  setUser: (user: User | null) => void;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  fetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,12 +45,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchUser = async (): Promise<void> => {
+    try {
+      const currentUser = await apiClient.auth.getCurrentUser();
+      setUser(currentUser);
+    } catch {
+      setUser(null);
+      throw new Error('Failed to fetch user data');
+    }
+  };
+
   const login = async (email: string, password: string): Promise<void> => {
     try {
       await apiClient.auth.login({ email, password });
-
-      const currentUser = await apiClient.auth.getCurrentUser();
-      setUser(currentUser);
+      await fetchUser()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       throw new Error(message);
@@ -70,8 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshAuth = async (): Promise<void> => {
     try {
       await apiClient.auth.refresh();
-      const currentUser = await apiClient.auth.getCurrentUser();
-      setUser(currentUser);
+      await fetchUser();
     } catch {
       setUser(null);
       throw new Error('Session refresh failed, please log in again.');
@@ -82,11 +91,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         isLoading,
         isAuthenticated,
         login,
         logout,
         refreshAuth,
+        fetchUser,
       }}
     >
       {children}

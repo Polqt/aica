@@ -1,18 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
 
-from ....core.security import token_manager, security_validator, verify_password
-from ....database.repositories.user import UserCRUD
-from ....database import models
-from .. import schemas
-from .. import dependencies
+from core.security import security_validator, verify_password
+from database.repositories.user import UserCRUD
+from database import models
+from api.v1 import schemas
+from api import dependencies
+from api.v1.routes.auth import _create_auth_response
 
 router = APIRouter()
 
-@router.post('/', response_model=schemas.token.Token)
+@router.post('/', response_model=schemas.users.UserResponse)
 def create_user(
-    user_data: schemas.user.UserCreate,
+    user_data: schemas.users.UserCreate,
     request: Request,
+    response: Response,
     db: Session = Depends(dependencies.get_db),
 ):
     if hasattr(request.app.state, 'limiter'):
@@ -32,41 +34,37 @@ def create_user(
         if not new_user:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create user"
+                detail="Failed to create account"
             )
         
-        # Generate access token
-        token_data = {"sub": new_user.email, "user_id": new_user.id}
-        access_token = token_manager.create_access_token(data=token_data)
+        _create_auth_response(new_user, response)
         
-        return {
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
+        return new_user
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
     except Exception as e:
+        print(f"User creation error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
     
-@router.get('/me', response_model=schemas.user.UserResponse)
+@router.get('/me', response_model=schemas.users.UserResponse)
 def get_current_user_info(
     current_user: models.User = Depends(dependencies.get_current_user)
 ):
     return {
         "id": current_user.id,
         "email": current_user.email,
-        "name": current_user.name
+        "created_at": current_user.created_at
     }
 
 @router.put('/me/password')
 def change_password(
-    password_data: schemas.user.PasswordChange,
+    password_data: schemas.users.PasswordChange,
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(dependencies.get_db),
 ):
@@ -102,8 +100,8 @@ def change_password(
 
         return {"message": "Password updated successfully"}
     except Exception as e:
+        print(f"Password change error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
-        

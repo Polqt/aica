@@ -21,5 +21,7 @@ C:/Python313/python.exe -c "from src.aica_backend.database.init_db import init_d
 cd c:/Users/poyhi/aica-thesis/src
 C:/Python313/python.exe -m uvicorn aica_backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 
+
+python -m uvicorn api.main:app --reload
 -->
 

@@ -137,7 +137,8 @@ export class HttpClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `HTTP ${response.status}`)
+      const errorMessage = errorData.detail || 'An unknown error occurred.';
+      throw new Error(errorMessage);
     }
 
     return await response.json()

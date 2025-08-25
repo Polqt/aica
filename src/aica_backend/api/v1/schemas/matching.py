@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from .jobs import Job
+from jobs import Job
 
 class JobMatch(BaseModel):
     job: Job

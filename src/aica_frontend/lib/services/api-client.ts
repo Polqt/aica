@@ -25,8 +25,8 @@ class ApiClient {
       return this.http.postForm<AuthResponse>('/login/access-token', formData);
     },
 
-    register: async (data: RegisterData): Promise<AuthResponse> => {
-      return this.http.post<AuthResponse>('/users/', data, false);
+    register: async (data: RegisterData): Promise<User> => {
+      return this.http.post<User>('/users/', data, false);
     },
 
     logout: async (): Promise<{ message: string }> => {

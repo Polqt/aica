@@ -16,7 +16,6 @@ class RefreshToken(BaseModel):
     refresh_token: str = Field(..., description="JWT refresh token")
 
 class TokenResponse(BaseModel):
-    """Enhanced token response with additional metadata"""
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field(default="bearer", description="Token type")
     expires_in: int = Field(..., description="Access token expiration time in seconds")

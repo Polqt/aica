@@ -22,7 +22,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { refreshAuth } = useAuth();
+  const { setUser } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -39,13 +39,20 @@ export default function RegisterForm() {
       onSubmit: async data => {
         clearApiError();
 
-        await apiClient.auth.register({
-          email: data.email,
-          password: data.password,
-        });
+        try {
+          const authResponse = await apiClient.auth.register({
+            email: data.email,
+            password: data.password,
+          });
 
-        await refreshAuth();
-        router.push('/profile');
+          console.log('Registration successful:', authResponse);
+
+          await setUser(authResponse);
+          router.push('/profile');
+        } catch (error) {
+          console.error('Registration error: ', error)
+          throw error;
+        }
       },
       successMessage: 'Account created successfully! Welcome to AICA.',
       errorMessage: 'Failed to create account. Please try again.',

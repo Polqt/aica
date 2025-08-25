@@ -19,5 +19,3 @@ class User(Base):
         uselist=False
     )
     
-    
-    

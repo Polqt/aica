@@ -1,7 +1,8 @@
 from typing import Dict
 import logging
 
-from ...core.config import settings
+
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +32,8 @@ class SecurityHeadersMiddleware:
             # Prevent MIME type sniffing
             "X-Content-Type-Options": "nosniff",
             
-            # Prevent clickjacking attacks
-            "X-Frame-Options": "DENY",
+            # Prevent clickjacking attacks - Changed from DENY to SAMEORIGIN for dev
+            "X-Frame-Options": "SAMEORIGIN" if settings.ENVIRONMENT != "production" else "DENY",
             
             # Enable XSS protection in browsers
             "X-XSS-Protection": "1; mode=block",
@@ -47,15 +48,20 @@ class SecurityHeadersMiddleware:
             "X-Permitted-Cross-Domain-Policies": "none",
         }
         
-        # Add HSTS only in production with HTTPS
         if settings.ENVIRONMENT == "production":
             base_headers.update({
                 "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
                 "Content-Security-Policy": self._get_csp_policy(),
             })
         else:
-            # Relaxed CSP for development
-            base_headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval'"
+            base_headers["Content-Security-Policy"] = (
+                "default-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                "connect-src 'self' http://localhost:3000 http://localhost:8000 ws://localhost:3000; "
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https: http:; "
+                "font-src 'self' data:; "
+            )
         
         return base_headers
     
@@ -63,7 +69,7 @@ class SecurityHeadersMiddleware:
         if settings.ENVIRONMENT == "production":
             return (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline'; "
+                "script-src 'self'; "
                 "style-src 'self' 'unsafe-inline'; "
                 "img-src 'self' data: https:; "
                 "font-src 'self'; "
@@ -73,7 +79,11 @@ class SecurityHeadersMiddleware:
                 "form-action 'self'"
             )
         else:
-            return "default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:"
+            return (
+                "default-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                "connect-src 'self' http://localhost:3000 http://localhost:8000 ws://localhost:3000; "
+                "img-src 'self' data: https: http:"
+            )
 
 class RequestSanitizationMiddleware:
     def __init__(self, app):

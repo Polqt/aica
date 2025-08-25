@@ -2,8 +2,8 @@ from fastapi import HTTPException, status, Request
 from fastapi.security.utils import get_authorization_scheme_param
 from typing import Optional
 
-from ..database.session import SessionLocal
-from ..database import models
+from database.session import SessionLocal
+from database import models
 
 def get_db():
     db = SessionLocal()

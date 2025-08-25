@@ -1,8 +1,7 @@
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-# Common response models
 class SuccessResponse(BaseModel):
     success: bool = True
     message: str
