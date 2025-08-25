@@ -1,4 +1,5 @@
 "use client";
+
 import { cn } from "@/lib/utils";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import {
@@ -11,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import React, { useRef, useState } from "react";
-
+import { usePathname } from "next/navigation";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -70,7 +71,6 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   return (
     <motion.div
       ref={ref}
-      // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn("fixed inset-x-0 top-2 z-40 w-full", className)}
     >
       {React.Children.map(children, (child) =>
@@ -105,7 +105,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         minWidth: "800px",
       }}
       className={cn(
-        "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 lg:flex dark:bg-transparent",
+        "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-6 py-4 lg:flex dark:bg-transparent",
         visible && "bg-white/80 dark:bg-neutral-950/80",
         className,
       )}
@@ -117,32 +117,52 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
 
 export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
+  const pathname = usePathname();
+
+  // Add Home item only
+  const allItems = [{ name: "Home", link: "/" }, ...items];
 
   return (
     <motion.div
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 lg:flex lg:space-x-2",
+        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-6 text-lg font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 lg:flex lg:space-x-6",
         className,
       )}
     >
-      {items.map((item, idx) => (
-        <a
-          onMouseEnter={() => setHovered(idx)}
-          onClick={onItemClick}
-          className="relative px-4 py-2 text-neutral-600 dark:text-neutral-300"
-          key={`link-${idx}`}
-          href={item.link}
-        >
-          {hovered === idx && (
-            <motion.div
-              layoutId="hovered"
-              className="absolute inset-0 h-full w-full rounded-full bg-gray-100 dark:bg-neutral-800"
-            />
-          )}
-          <span className="relative z-20">{item.name}</span>
-        </a>
-      ))}
+      {allItems.map((item, idx) => {
+        const isActive = pathname === item.link;
+        
+        return (
+          <a
+            onMouseEnter={() => setHovered(idx)}
+            onClick={onItemClick}
+            className={cn(
+             "relative px-4 py-2 text-neutral-600 dark:text-neutral-300 transition-all duration-200",
+              isActive && "text-purple-600 dark:text-purple-400"
+            )}
+            key={`link-${idx}`}
+            href={item.link}
+          >
+            {/* Black line with white inside for non-active items */}
+            {!isActive && (
+              <motion.div
+                layoutId={`transparent-${idx}`}
+                className="absolute inset-0 h-full w-full rounded-full bg-white/90 dark:bg-white/95 border border-black/30 dark:border-black/50"
+              />
+            )}
+            
+            {/* Purple background for active items */}
+            {isActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="absolute inset-0 h-full w-full rounded-full bg-purple-200/90 dark:bg-purple-800/50 border-2 border-purple-500 dark:border-purple-400"
+              />
+            )}
+            <span className="relative z-20">{item.name}</span>
+          </a>
+        );
+      })}
     </motion.div>
   );
 };
@@ -197,7 +217,10 @@ export const MobileNavMenu = ({
   children,
   className,
   isOpen,
+  onClose,
 }: MobileNavMenuProps) => {
+  const pathname = usePathname();
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -238,12 +261,11 @@ export const NavbarLogo = () => {
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
       <Image
-        src="/cat.jpg"
-        alt="logo"
-        width={30}
-        height={30}
+        src="/aica-full-color.png"
+        alt="AICA Logo"
+        width={80}
+        height={80}
       />
-      <span className="font-medium text-black dark:text-white">AI Career Assistant</span>
     </Link>
   );
 };

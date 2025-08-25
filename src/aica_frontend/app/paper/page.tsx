@@ -1,35 +1,27 @@
+
 'use client';
 
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
+import { FileText, Download, Calendar, Users } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { FileText, Download, Calendar, Users, BookOpen, Target, Eye } from 'lucide-react';
 import React from 'react';
 
+  
+/*******  3ef966da-43fe-4a54-9a03-4f530f574d3b  *******/
 export default function PaperPage() {
+  const [showPDF, setShowPDF] = useState(false);
+  
   const paperData = {
     title: "AICA: AI-Powered Career Assistant for Skills-Based Job Matching",
-    authors: ["April Faith J. Gamboa",  "Janpol S. Hidalgo", "Heidine Marie J. Mahandog", "Nathania Elouise A. Santia"],
+    authors: ["Gamboa, A.F.",  "Hidalgo, J.", "Mahandog, H.M.", "Santia, N.E."],
     abstract: "This paper presents AICA (AI Career Assistant), an innovative platform that leverages artificial intelligence to revolutionize job matching by focusing on skills compatibility rather than traditional keyword matching. The system employs advanced NLP techniques, including semantic analysis and skill extraction algorithms, to create comprehensive skill profiles from both job descriptions and candidate resumes. Our approach demonstrates significant improvements in matching accuracy, reducing time-to-hire by 40% and increasing candidate-job fit satisfaction scores by 65%. The platform addresses critical gaps in current recruitment systems by providing personalized career guidance, skill gap analysis, and targeted learning recommendations.",
     keywords: ["Artificial Intelligence", "Natural Language Processing", "Job Matching", "Skills Assessment", "Career Guidance"],
-    sections: [
-      {
-        title: "Introduction",
-        content: "Traditional job matching systems rely heavily on keyword matching, often leading to poor candidate-job fit and lengthy hiring processes. AICA addresses these limitations by implementing a skills-based approach that analyzes the semantic meaning of job requirements and candidate capabilities.",
-        icon: BookOpen
-      },
-      {
-        title: "Methodology",
-        content: "Our system employs a multi-stage pipeline: (1) Resume parsing using advanced NLP to extract skills and experiences, (2) Job description analysis to identify required competencies, (3) Semantic matching using transformer-based embeddings, and (4) Personalized recommendations based on skill gaps and career trajectories.",
-        icon: Target
-      },
-      {
-        title: "Conclusion",
-        content: "AICA represents a significant advancement in AI-powered recruitment, demonstrating that skills-based matching can dramatically improve hiring outcomes while providing valuable career guidance to job seekers.",
-        icon: Eye
-      }
-    ],
     publicationDate: "December 2024",
     conference: "International Conference on AI Applications",
     paperUrl: "#",
@@ -65,8 +57,8 @@ export default function PaperPage() {
               <Image
                 src="/aica-square-color.png"
                 alt="AICA Logo"
-                width={200} 
-                height={200}
+                width={100} 
+                height={100}
                 className="object-contain"
                 priority
               />
@@ -114,32 +106,60 @@ export default function PaperPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={() => setShowPDF(!showPDF)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-100 dark:border-blue-800/30 transition-all duration-200"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {showPDF ? 'Hide PDF' : 'View PDF'}
+                </motion.button>
                 <motion.a
                   href="/aica-research-paper.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <FileText className="h-5 w-5 mr-2" />
-                  View Paper
-                </motion.a>
-                <motion.a
-                  href="/papers/aica-research-paper.pdf"
                   download="AICA-Research-Paper.pdf"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-100 dark:border-blue-800/30 transition-all duration-200"
                 >
-                  <Download className="h-5 w-5 mr-2" />
+                  <Download className="h-4 w-4 mr-2" />
                   Download PDF
                 </motion.a>
               </div>
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* PDF Viewer Section */}
+        {showPDF && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-6xl mx-auto mb-12"
+          >
+            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                  PDF Viewer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative w-full" style={{ height: '800px' }}>
+                  <iframe
+                    src="/aica-research-paper.pdf"
+                    className="w-full h-full rounded-lg border border-slate-200 dark:border-slate-700"
+                    title="AICA Research Paper"
+                  />
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 text-center">
+                  Use the controls above to navigate through the document
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Abstract Section */}
         <motion.section
@@ -148,16 +168,26 @@ export default function PaperPage() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="max-w-5xl mx-auto mb-12"
         >
-          <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <Image
+                src="/aica-square-black-color.png"
+                alt="AICA Icon"
+                width={30}
+                height={30}
+                className="object-contain opacity-80"
+                priority
+              />
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
                 Abstract
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+              </h2>
+            </div>
+            
+            <div className="space-y-6">
+              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300 max-w-5xl text-justify">
                 {paperData.abstract}
               </p>
+              
               <div>
                 <h4 className="font-semibold text-slate-700 dark:text-slate-200 mb-3">Keywords:</h4>
                 <div className="flex flex-wrap gap-2">
@@ -167,89 +197,105 @@ export default function PaperPage() {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
-                      className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
+                      className="px-3 py-1 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-100 dark:border-blue-800/30"
                     >
                       {keyword}
                     </motion.span>
                   ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.section>
-
-        {/* Paper Sections */}
-        <div className="max-w-5xl mx-auto space-y-8">
-          {paperData.sections.map((section, index) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-            >
-              <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50">
-                      <section.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                      {section.title}
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-                    {section.content}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Citation Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.9 }}
-          className="max-w-5xl mx-auto mt-12"
+          className="max-w-5xl mx-auto mb-12"
         >
-          <Card className="border-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <Image
+                src="/aica-square-black-color.png"
+                alt="AICA Icon"
+                width={30}
+                height={30}
+                className="object-contain opacity-80"
+                priority
+              />
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">
                 Citation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white/60 dark:bg-slate-800/60 p-6 rounded-lg backdrop-blur-sm">
-                <p className="text-base font-mono text-slate-700 dark:text-slate-300 leading-relaxed">
-                  Gamayon, A. R. A., Chua, H. B., Calamba, N., & Cantil, J. (2024). 
-                  <em> AICA: AI-Powered Career Assistant for Skills-Based Job Matching</em>. 
-                  International Conference on AI Applications, December 2024.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </h2>
+            </div>
+            
+            <div className="space-y-6">
+              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300 max-w-5xl text-justify">
+                Gamayon, A. R. A., Chua, H. B., Calamba, N., & Cantil, J. (2024). 
+                <em> AICA: AI-Powered Career Assistant for Skills-Based Job Matching</em>. 
+                International Conference on AI Applications, December 2024.
+              </p>
+            </div>
+          </div>
         </motion.section>
 
-        {/* Footer */}
+        {/* Footer Section */}
         <motion.footer
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.0 }}
-          className="max-w-5xl mx-auto mt-16 pt-12 border-t border-slate-200 dark:border-slate-700"
+          className="border-t border-slate-200 dark:border-slate-700 pt-12 text-center"
         >
-          <div className="text-center space-y-4">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              This research paper is part of the AICA project by University of St. La Salle - College of Computing Studies
-            </p>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              All Rights Reserved © 2024
-            </p>
+          <div className="max-w-4xl mx-auto space-y-8">
+            <div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                This research paper is part of an undergraduate research paper by Gamboa, Hidalgo, Mahandog, Santia for University of Saint La Salle - College of Computing Studies.
+              </p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                All Rights Reserved.
+              </p>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1.1 }}
+                className="flex flex-col items-center"
+              >
+                <div className="relative h-24 w-24 md:h-32 md:w-32">
+                  <Image
+                    src="/usls.png"
+                    alt="University of St. La Salle"
+                    fill
+                    className="object-contain"
+                    sizes="128px"
+                  />
+                </div>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+                className="flex flex-col items-center"
+              >
+                <div className="relative h-24 w-24 md:h-32 md:w-32">
+                  <Image
+                    src="/ccs.png"
+                    alt="College of Computing Studies"
+                    fill
+                    className="object-contain"
+                    sizes="128px"
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </motion.footer>
       </div>
+      <Footer />
     </div>
   );
 }
