@@ -47,7 +47,7 @@ export default function RegisterForm() {
 
           console.log('Registration successful:', authResponse);
 
-          await setUser(authResponse);
+          setUser(authResponse);
           router.push('/profile');
         } catch (error) {
           console.error('Registration error: ', error)

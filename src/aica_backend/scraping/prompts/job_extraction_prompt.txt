@@ -1,0 +1,21 @@
+Extract job posting information focusing on the technology roles listed below.
+For each job posting you find on the page, extract the following details accurately.
+
+TARGET ROLES:
+- Software Development (Frontend, Backend, Full Stack, Mobile, Web)
+- Data & AI (Data Scientist, Data Engineer, ML Engineer)
+- Infrastructure & DevOps (DevOps Engineer, Cloud Engineer, SRE)
+- Cybersecurity (Security Analyst, Security Engineer)
+- IT Support & Management (IT Support, Systems Analyst)
+- Specialized Tech (QA Engineer, UI/UX Designer, Tech Product Manager)
+
+EXTRACTION RULES:
+1.  **is_tech_job**: Must be `true` if the role clearly falls into the TARGET ROLES. Exclude non-tech roles like sales, marketing, HR, or administrative positions. If unsure, set to `false`.
+2.  **job_url**: CRITICAL. You MUST extract the unique and direct URL for EACH job posting. This should lead to the detailed job description page. Do not reuse URLs. If a URL is relative (e.g., '/job/123'), provide it as is.
+3.  **job_title**: The title of the position. Be concise.
+4.  **company_name**: The name of the hiring company.
+5.  **location**: The physical location (e.g., "Makati City", "Remote").
+6.  **required_skills**: Extract a list of key technical skills mentioned (e.g., ["Python", "React", "AWS", "SQL"]). Be specific. Ski
+7.  **Accuracy**: Ensure all extracted details (title, company, location) correctly correspond to the same job posting.
+
+Return the data in a JSON object with a single key "jobs" containing an array of job objects.

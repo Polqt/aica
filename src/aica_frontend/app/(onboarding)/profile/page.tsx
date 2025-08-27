@@ -145,7 +145,6 @@ export default function Profile() {
   const watchedFields = form.watch();
   const completedFields = Object.entries(watchedFields).filter(
     ([key, value]) => {
-      // Count only required fields (excluding optional fields)
       if (key === 'linkedin_url' || key === 'profile_picture') return false;
       return value && value.toString().trim() !== '';
     },
@@ -197,7 +196,8 @@ export default function Profile() {
   async function onSubmit(values: z.infer<typeof profileFormSchema>) {
     setApiError(null);
     try {
-      updateData(values);
+      const cleanData = JSON.parse(JSON.stringify(values));
+      updateData(cleanData)
 
       toast.success('Profile Completed!', {
         description:

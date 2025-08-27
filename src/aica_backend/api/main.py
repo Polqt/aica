@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware as FastAPICORSMiddleware
 from .middleware.cors import CORSConfig
 from .middleware.security_headers import SecurityHeadersMiddleware
 from .middleware.auth import AuthMiddleware
-from .v1.routes import auth, users
+from .v1.routes import auth, users, profiles
 
 app = FastAPI(
     title="AICA API",
@@ -20,6 +20,7 @@ app.add_middleware(AuthMiddleware)
 
 app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(profiles.router, prefix="/api/v1", tags=["profile"])
 
 @app.get("/")
 async def root():

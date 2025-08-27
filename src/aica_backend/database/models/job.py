@@ -29,6 +29,8 @@ class JobPosting(Base):
     employment_type: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)  # full-time, part-time, contract
     experience_level: Mapped[Optional[str]] = mapped_column(String(50), index=True, nullable=True)  # entry, mid, senior
     
+    tech_category: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
+    
     # Salary information
     salary_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     salary_max: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

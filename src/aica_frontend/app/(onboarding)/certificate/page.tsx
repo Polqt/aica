@@ -110,7 +110,8 @@ export default function Certificate() {
         cert.issuing_organization.trim() !== '',
     );
 
-    updateData({ certificates: validCertificates });
+    const cleanCertificates = JSON.parse(JSON.stringify(validCertificates));
+    updateData({ certificates: cleanCertificates });
 
     try {
       await submitOnboardingData();

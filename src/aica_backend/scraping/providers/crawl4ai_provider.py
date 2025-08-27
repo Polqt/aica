@@ -89,31 +89,7 @@ class Crawl4AIProvider(BaseProvider):
                 'https://www.jobstreet.com.ph/jobs/data-scientist',
                 'https://www.jobstreet.com.ph/jobs/web-developer',
                 'https://www.jobstreet.com.ph/jobs/mobile-developer',
-            ],
-            # 'kalibrr': [
-            #     'https://www.kalibrr.com/jobs?q=software+engineer',
-            #     'https://www.kalibrr.com/jobs?q=data+scientist',
-            #     'https://www.kalibrr.com/jobs?q=web+developer',
-            #     'https://www.kalibrr.com/jobs?q=mobile+developer',
-            #     'https://www.kalibrr.com/jobs?q=devops',
-            #     # 'https://www.kalibrr.com/jobs?q=cybersecurity',
-            #     # 'https://www.kalibrr.com/jobs?q=full+stack',
-            #     # 'https://www.kalibrr.com/jobs?q=backend+developer',
-            #     # 'https://www.kalibrr.com/jobs?q=frontend+developer',
-            #     # 'https://www.kalibrr.com/jobs?q=database',
-            # ],
-            # 'indeed': [
-            #     # 'https://ph.indeed.com/jobs?q=software+engineer',
-            #     # 'https://ph.indeed.com/jobs?q=data+analyst',
-            #     # 'https://ph.indeed.com/jobs?q=web+developer',
-            #     # 'https://ph.indeed.com/jobs?q=IT+support',
-            #     # 'https://ph.indeed.com/jobs?q=system+administrator',
-            #     'https://ph.indeed.com/jobs?q=cybersecurity',
-            #     'https://ph.indeed.com/jobs?q=devops',
-            #     'https://ph.indeed.com/jobs?q=database+administrator',
-            #     'https://ph.indeed.com/jobs?q=mobile+developer',
-            #     'https://ph.indeed.com/jobs?q=cloud+engineer',
-            # ]
+            ]
         }
 
     def scrape_job_listings(self, search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -290,4 +266,3 @@ class Crawl4AIProvider(BaseProvider):
                 unique_jobs.append(job)
                 
         return unique_jobs
-             

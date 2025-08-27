@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from .. import models
-from ...api.v1.schemas import profiles as profile_schemas
+from api.v1.schemas import profiles as profile_schemas
 
 
 def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
@@ -9,15 +9,9 @@ def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
     if not skill:
         skill = models.Skill(name=skill_name)
         db.add(skill)
-        db.commit()
-        db.refresh(skill)
     return skill
 
 def update_profile(db: Session, user: models.User, profile_in: profile_schemas.ProfileUpdate) -> models.Profile:
-    """
-    Update user profile with improved validation and optional fields handling
-    Following KISS principle - simple and clear logic
-    """
     profile = user.profile
 
     if not profile:
@@ -34,7 +28,6 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
     # Handle skills update
     if profile_in.skills is not None:
         # Extract skill names from SkillCreate objects
-        # Frontend now sends skills as [{"name": "Python"}, {"name": "JavaScript"}]
         skill_names = [skill.name for skill in profile_in.skills]
         profile.skills = [get_or_create_skill(db, name) for name in skill_names]
 
@@ -46,7 +39,7 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
             new_edu = models.Education(**edu_data)
             profile.educations.append(new_edu)
 
-    # Handle experiences update (now optional - can be empty)
+    # Handle experiences update (It can be empty)
     if profile_in.experiences is not None:
         profile.experiences.clear()
         # Only add experiences if the list is not empty
@@ -55,7 +48,7 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
             new_exp = models.Experience(**exp_data)
             profile.experiences.append(new_exp)
 
-    # Handle certificates update (optional - can be empty)
+    # Handle certificates update (It can be empty)
     if profile_in.certificates is not None:
         profile.certificates.clear()
         # Only add certificates if the list is not empty

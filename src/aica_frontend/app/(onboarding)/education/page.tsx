@@ -114,7 +114,8 @@ export default function Education() {
 
   async function onSubmit(values: z.infer<typeof educationFormSchema>) {
     try {
-      updateData({ educations: values.educations });
+      const cleanEducations = JSON.parse(JSON.stringify(values.educations));
+      updateData({ educations: cleanEducations });
 
       toast.success('Education Records Saved!', {
         description: `Successfully added ${

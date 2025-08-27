@@ -32,20 +32,11 @@ const experienceItemSchema = z.object({
     .max(100, 'Company name must be less than 100 characters'),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().optional(),
-  projects: z.string().optional(),
   description: z
     .array(z.string().min(1, 'Description cannot be empty'))
     .min(1, 'At least one accomplishment is required')
     .max(10, 'Maximum 10 accomplishments allowed'),
   is_current: z.boolean(),
-  key_responsibilities: z
-    .array(z.string().max(200, 'Each responsibility must be less than 200 characters'))
-    .max(10, 'Maximum 10 responsibilities allowed')
-    .optional(),
-  key_achievements: z
-    .array(z.string().max(200, 'Each achievement must be less than 200 characters'))
-    .max(10, 'Maximum 10 achievements allowed')
-    .optional(),
 });
 
 const experienceFormSchema = z.object({
@@ -92,7 +83,6 @@ export default function Experience() {
       company_name: '',
       start_date: '',
       end_date: '',
-      projects: '',
       description: [''],
       is_current: false,
     });
@@ -109,7 +99,8 @@ export default function Experience() {
     form.clearErrors();
 
     try {
-      updateData({ experiences: values.experiences });
+      const cleanExperiences = JSON.parse(JSON.stringify(values.experiences));
+      updateData({ experiences: cleanExperiences });
 
       const hasExperience = values.experiences.length > 0;
 
@@ -142,20 +133,6 @@ export default function Experience() {
     }
   }
 
-  const skipExperience = () => {
-    updateData({ experiences: [] });
-
-    toast.info('Skipping Work Experience', {
-      description:
-        'No worries! You can add work experience later from your profile.',
-      duration: 3000,
-    });
-
-    setTimeout(() => {
-      router.push('/skills');
-    }, 1000);
-  };
-
   const watchedExperiences = form.watch('experiences');
   const totalFields = watchedExperiences.reduce((acc, exp) => {
     return acc + 4 + exp.description.length;
@@ -167,14 +144,13 @@ export default function Experience() {
     if (exp.company_name?.trim()) completed++;
     if (exp.start_date?.trim()) completed++;
     if (!exp.is_current && exp.end_date?.trim()) completed++;
-    if (exp.projects?.trim()) completed++;
     if (exp.is_current) completed++; 
     completed += exp.description.filter(desc => desc?.trim()).length;
     return acc + completed;
   }, 0);
 
   const completionPercentage =
-    totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+    totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 100;
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
@@ -372,7 +348,7 @@ export default function Experience() {
                     <Button
                       type="submit"
                       disabled={
-                        form.formState.isSubmitting || completionPercentage < 100
+                        form.formState.isSubmitting || fields.length === 0 || completionPercentage < 100
                       }
                       className="w-full h-14 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
                     >

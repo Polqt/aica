@@ -149,7 +149,7 @@ export function Hero() {
                   </div>
                   <div className="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700">
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 italic">
-                      "AI-Powered Career Matching: Revolutionizing Job Discovery"
+                      &quot;AI-Powered Career Matching: Revolutionizing Job Discovery&quot;
                     </p>
                   </div>
                 </div>

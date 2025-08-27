@@ -101,19 +101,6 @@ export default function Skills() {
     });
   };
 
-  const skipSkills = () => {
-    updateData({ skills: [] });
-
-    toast.info('Skipping Skills', {
-      description: 'No worries! You can add skills later from your profile.',
-      duration: 3000,
-    });
-
-    setTimeout(() => {
-      router.push('/certificate');
-    }, 1000);
-  };
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
       {/* Sophisticated Multi-layer Background */}

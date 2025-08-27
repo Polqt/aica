@@ -8,18 +8,20 @@ class EducationBase(BaseModel):
     institution_name: str
     address: str
     degree: str
-    field_of_study: str
+    field_of_study: Optional[str] = None
     start_date: date
     end_date: date
-    description: str
+    description: Optional[str] = None
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
     def parse_dates(cls, v):
+        if isinstance(v, str) and len(v) == 7:
+            v = f"{v}-01"
         return parse_date_string(v)
 
 class EducationCreate(EducationBase):
-    end_date: date
+    pass
 
 class EducationUpdate(BaseModel):
     institution_name: Optional[str] = None

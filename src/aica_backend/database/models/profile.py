@@ -87,7 +87,6 @@ class Certificate(Base):
     name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     issuing_organization: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     issue_date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
-    expiration_date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
     credential_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     credential_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
