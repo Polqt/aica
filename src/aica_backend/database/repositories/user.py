@@ -3,8 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
 from .. import models
-from api.v1.schemas import users as user_schemas
-from core.security import get_password_hash, security_validator
+from ...api.v1.schemas import users as user_schemas
+from ...core.security import get_password_hash, security_validator
 
 
 class UserCRUD:

@@ -21,7 +21,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 export default function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
-  
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -36,6 +36,19 @@ export default function LoginForm() {
       onSubmit: async data => {
         clearApiError();
         await login(data.email, data.password);
+        // Dev fallback: persist access token from cookie to localStorage
+        try {
+          const cookie = document.cookie
+            .split('; ')
+            .find(r => r.startsWith('access_token='))
+            ?.split('=')[1];
+          if (cookie) {
+            const token = cookie.startsWith('Bearer ')
+              ? cookie.substring(7)
+              : cookie;
+            localStorage.setItem('access_token', token);
+          }
+        } catch {}
         router.push('/dashboard');
       },
       successMessage: 'Welcome back! Successfully logged in.',
@@ -100,4 +113,3 @@ export default function LoginForm() {
     </Form>
   );
 }
-

@@ -48,7 +48,7 @@ const experienceFormSchema = z.object({
 export default function Experience() {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
-  const { updateData } = useOnboarding();
+  const { updateData, submitOnboardingData } = useOnboarding();
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([0]);
 
   const form = useForm<z.infer<typeof experienceFormSchema>>({
@@ -133,6 +133,22 @@ export default function Experience() {
     }
   }
 
+  const skipExperience = async () => {
+    setApiError(null);
+    try {
+      updateData({ experiences: [] });
+      await submitOnboardingData();
+      toast.info('Skipping Work Experience', {
+        description: 'You can add experience later from your profile.',
+      });
+      router.push('/skills');
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+      setApiError(errorMessage);
+    }
+  };
+
   const watchedExperiences = form.watch('experiences');
   const totalFields = watchedExperiences.reduce((acc, exp) => {
     return acc + 4 + exp.description.length;
@@ -144,7 +160,7 @@ export default function Experience() {
     if (exp.company_name?.trim()) completed++;
     if (exp.start_date?.trim()) completed++;
     if (!exp.is_current && exp.end_date?.trim()) completed++;
-    if (exp.is_current) completed++; 
+    if (exp.is_current) completed++;
     completed += exp.description.filter(desc => desc?.trim()).length;
     return acc + completed;
   }, 0);
@@ -158,38 +174,38 @@ export default function Experience() {
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Base Gradient Layer */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/15 to-purple-50/25 dark:from-blue-900/10 dark:via-indigo-900/8 dark:to-purple-900/12"></div>
-        
+
         {/* Animated Gradient Orbs */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
+          transition={{ duration: 2, ease: 'easeOut' }}
           className="absolute left-[15%] top-[20%] h-96 w-96 rounded-full bg-gradient-to-br from-blue-300/25 to-purple-300/20 dark:from-blue-700/15 dark:to-purple-700/12 blur-3xl animate-float-slow"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+          transition={{ duration: 2, delay: 0.3, ease: 'easeOut' }}
           className="absolute right-[20%] top-[30%] h-80 w-80 rounded-full bg-gradient-to-br from-pink-300/20 to-orange-300/15 dark:from-pink-700/12 dark:to-orange-700/10 blur-3xl animate-float-medium"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.6, ease: "easeOut" }}
+          transition={{ duration: 2, delay: 0.6, ease: 'easeOut' }}
           className="absolute bottom-[25%] left-[25%] h-88 w-88 rounded-full bg-gradient-to-br from-green-300/30 to-cyan-300/20 dark:from-green-700/18 dark:to-cyan-700/15 blur-3xl animate-float-fast"
         />
-        
+
         {/* Geometric Grid Pattern */}
         <div className="absolute inset-0 opacity-15 dark:opacity-10">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         </div>
-        
+
         {/* Subtle Corner Accents */}
         <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-indigo-400/10 to-transparent rounded-full blur-xl"></div>
         <div className="absolute bottom-0 right-0 w-44 h-44 bg-gradient-to-tl from-pink-400/10 to-transparent rounded-full blur-xl"></div>
-        
+
         {/* Animated Particles - Fixed deterministic positions */}
         <div className="absolute inset-0">
           {[
@@ -219,7 +235,7 @@ export default function Experience() {
                 duration: particle.duration,
                 repeat: Infinity,
                 delay: particle.delay,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
               style={{
                 left: `${particle.left}%`,
@@ -229,7 +245,7 @@ export default function Experience() {
           ))}
         </div>
       </div>
-      
+
       <div className="max-w-4xl mx-auto">
         {/* Enhanced Header Section */}
         <motion.div
@@ -238,16 +254,16 @@ export default function Experience() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 200 }}
+            transition={{ duration: 0.8, type: 'spring', stiffness: 200 }}
             className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-xl"
           >
             <Briefcase className="w-12 h-12 text-white" />
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg animate-pulse"></div>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -266,8 +282,8 @@ export default function Experience() {
           >
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-semibold">
               Showcase your professional journey
-            </span>
-            {' '}— this information helps us match you with perfect opportunities
+            </span>{' '}
+            — this information helps us match you with perfect opportunities
           </motion.p>
         </motion.div>
 
@@ -344,11 +360,21 @@ export default function Experience() {
                     </div>
                   )}
 
-                  <div className="pt-6 border-t border-slate-200/60 dark:border-slate-700/50">
+                  <div className="pt-6 border-t border-slate-200/60 dark:border-slate-700/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={skipExperience}
+                      disabled={form.formState.isSubmitting}
+                    >
+                      Skip Experience
+                    </Button>
                     <Button
                       type="submit"
                       disabled={
-                        form.formState.isSubmitting || fields.length === 0 || completionPercentage < 100
+                        form.formState.isSubmitting ||
+                        fields.length === 0 ||
+                        completionPercentage < 100
                       }
                       className="w-full h-14 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
                     >

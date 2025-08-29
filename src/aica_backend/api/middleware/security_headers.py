@@ -2,7 +2,7 @@ from typing import Dict
 import logging
 
 
-from core.config import settings
+from ...core.config import settings
 
 logger = logging.getLogger(__name__)
 

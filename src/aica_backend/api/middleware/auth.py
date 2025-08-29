@@ -2,11 +2,11 @@ import logging
 from typing import Optional, Set
 from fastapi import Request
 
-from api.dependencies import extract_token_from_request
-from database import models
-from core.config import settings
-from database.repositories.user import UserCRUD
-from database.session import SessionLocal
+from ..dependencies import extract_token_from_request
+from ...database import models
+from ...core.config import settings
+from ...database.repositories.user import UserCRUD
+from ...database.session import SessionLocal
 from jose import jwt, JWTError
 
 logger = logging.getLogger(__name__)

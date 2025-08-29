@@ -2,8 +2,10 @@ from fastapi import HTTPException, status, Request
 from fastapi.security.utils import get_authorization_scheme_param
 from typing import Optional
 
-from database.session import SessionLocal
-from database import models
+from ..database.session import SessionLocal
+from ..database import models
+from ..database.repositories.user import UserCRUD
+from ..core.security import token_manager
 
 def get_db():
     db = SessionLocal()
@@ -27,22 +29,26 @@ def extract_token_from_request(request: Request) -> Optional[str]:
     return None
     
 def get_current_user(request: Request) -> models.User:
-    if not getattr(request.state, 'is_authenticated', False) or not hasattr(request.state, 'user'):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={'WWW-Authenticate': 'Bearer'},
-        )
-    
-    user = getattr(request.state, 'user', None)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={'WWW-Authenticate': 'Bearer'},
-        )
-    
-    return user
+    # Middleware-provided user
+    if getattr(request.state, 'is_authenticated', False) and hasattr(request.state, 'user'):
+        user = getattr(request.state, 'user', None)
+        if user:
+            return user
+    # Fallback: verify token directly
+    token = extract_token_from_request(request)
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated", headers={'WWW-Authenticate': 'Bearer'})
+    payload = token_manager.verify_token(token, token_type="access")
+    if not payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token", headers={'WWW-Authenticate': 'Bearer'})
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload", headers={'WWW-Authenticate': 'Bearer'})
+    with SessionLocal() as db:
+        user = UserCRUD.get_user_by_email(db, email=email)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found", headers={'WWW-Authenticate': 'Bearer'})
+        return user
 
 def get_optional_current_user(request: Request) -> Optional[models.User]:
     if getattr(request.state, 'is_authenticated', False) and hasattr(request.state, 'user'):

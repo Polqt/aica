@@ -21,6 +21,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import AnimatedBackground from '@/components/AnimatedBackground';
 
 const skillFormSchema = z.object({
   skills: z.array(
@@ -32,7 +33,7 @@ const skillFormSchema = z.object({
 
 export default function Skills() {
   const router = useRouter();
-  const { updateData } = useOnboarding();
+  const { updateData, submitOnboardingData } = useOnboarding();
   const [apiError, setApiError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof skillFormSchema>>({
@@ -50,8 +51,11 @@ export default function Skills() {
 
   const watchedSkills = form.watch('skills');
   const totalFields = watchedSkills.length;
-  const completedFields = watchedSkills.filter(skill => skill.name?.trim()).length;
-  const completionPercentage = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+  const completedFields = watchedSkills.filter(skill =>
+    skill.name?.trim(),
+  ).length;
+  const completionPercentage =
+    totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
 
   async function onSubmit(values: z.infer<typeof skillFormSchema>) {
     setApiError(null);
@@ -61,11 +65,11 @@ export default function Skills() {
       const skillNames = values.skills.map(skill => skill.name);
 
       updateData({ skills: skillNames });
+      // Persist current onboarding state to backend so skipping later steps still saves profile
+      await submitOnboardingData();
 
       toast.success('Skills Saved!', {
-        description: `Successfully added ${
-          values.skills.length
-        } skill${
+        description: `Successfully added ${values.skills.length} skill${
           values.skills.length > 1 ? 's' : ''
         }. Let's add your certificates next.`,
         duration: 3000,
@@ -103,82 +107,7 @@ export default function Skills() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
-      {/* Sophisticated Multi-layer Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        {/* Base Gradient Layer */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-indigo-50/15 to-purple-50/25 dark:from-blue-900/10 dark:via-indigo-900/8 dark:to-purple-900/12"></div>
-        
-        {/* Animated Gradient Orbs */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-          className="absolute left-[15%] top-[20%] h-96 w-96 rounded-full bg-gradient-to-br from-blue-300/25 to-purple-300/20 dark:from-blue-700/15 dark:to-purple-700/12 blur-3xl animate-float-slow"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
-          className="absolute right-[20%] top-[30%] h-80 w-80 rounded-full bg-gradient-to-br from-pink-300/20 to-orange-300/15 dark:from-pink-700/12 dark:to-orange-700/10 blur-3xl animate-float-medium"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, delay: 0.6, ease: "easeOut" }}
-          className="absolute bottom-[25%] left-[25%] h-88 w-88 rounded-full bg-gradient-to-br from-green-300/30 to-cyan-300/20 dark:from-green-700/18 dark:to-cyan-700/15 blur-3xl animate-float-fast"
-        />
-        
-        {/* Geometric Grid Pattern */}
-        <div className="absolute inset-0 opacity-15 dark:opacity-10">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        </div>
-        
-        {/* Subtle Corner Accents */}
-        <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-transparent rounded-full blur-xl"></div>
-        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-purple-400/10 to-transparent rounded-full blur-xl"></div>
-        <div className="absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-tr from-indigo-400/10 to-transparent rounded-full blur-xl"></div>
-        <div className="absolute bottom-0 right-0 w-44 h-44 bg-gradient-to-tl from-pink-400/10 to-transparent rounded-full blur-xl"></div>
-        
-        {/* Animated Particles - Fixed deterministic positions */}
-        <div className="absolute inset-0">
-          {[
-            { left: 10, top: 20, duration: 4, delay: 0.5 },
-            { left: 80, top: 30, duration: 5, delay: 1.0 },
-            { left: 25, top: 70, duration: 6, delay: 1.5 },
-            { left: 70, top: 15, duration: 3, delay: 0.2 },
-            { left: 40, top: 50, duration: 5, delay: 0.8 },
-            { left: 90, top: 60, duration: 4, delay: 1.2 },
-            { left: 15, top: 40, duration: 7, delay: 1.8 },
-            { left: 60, top: 80, duration: 4, delay: 0.3 },
-          ].map((particle, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-gradient-to-r from-blue-400/40 to-purple-400/30 rounded-full"
-              initial={{
-                opacity: 0,
-                x: particle.left - 50,
-                y: particle.top - 50,
-              }}
-              animate={{
-                opacity: [0, 0.6, 0],
-                x: [particle.left - 50, particle.left - 30, particle.left - 70],
-                y: [particle.top - 50, particle.top - 30, particle.top - 70],
-              }}
-              transition={{
-                duration: particle.duration,
-                repeat: Infinity,
-                delay: particle.delay,
-                ease: "easeInOut",
-              }}
-              style={{
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
+      <AnimatedBackground />
       <div className="max-w-4xl mx-auto">
         {/* Enhanced Header Section */}
         <motion.div
@@ -187,16 +116,16 @@ export default function Skills() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, type: "spring", stiffness: 200 }}
+            transition={{ duration: 0.8, type: 'spring', stiffness: 200 }}
             className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-xl"
           >
             <Code className="w-12 h-12 text-white" />
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-lg animate-pulse"></div>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -215,8 +144,8 @@ export default function Skills() {
           >
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent font-semibold">
               Showcase your technical prowess
-            </span>
-            {' '}— highlight the skills that make you stand out
+            </span>{' '}
+            — highlight the skills that make you stand out
           </motion.p>
         </motion.div>
 
@@ -238,9 +167,13 @@ export default function Skills() {
                   </h3>
                   <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
                     <li>• Include both technical and soft skills</li>
-                    <li>• List skills in order of proficiency (strongest first)</li>
+                    <li>
+                      • List skills in order of proficiency (strongest first)
+                    </li>
                     <li>• Add programming languages, frameworks, and tools</li>
-                    <li>• Include industry-specific skills and certifications</li>
+                    <li>
+                      • Include industry-specific skills and certifications
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -324,7 +257,8 @@ export default function Skills() {
                       <Button
                         type="submit"
                         disabled={
-                          form.formState.isSubmitting || completionPercentage < 100
+                          form.formState.isSubmitting ||
+                          completionPercentage < 100
                         }
                         className="w-full h-14 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
                       >

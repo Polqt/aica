@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDING_DIMENSION: int = 384
     VECTOR_SIMILARITY_THRESHOLD: float = 0.75
+    VECTOR_BACKEND: str = "pgvector"  # Options: pgvector, faiss
     
     # Scraping Configuration (ADDED MISSING FIELDS)
     SCRAPING_ENABLED: bool = True

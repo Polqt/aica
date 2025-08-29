@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, constr, Field, field_validator
 from datetime import datetime, date
-from utils.date_validator import parse_date_string
+from ....utils.date_validator import parse_date_string
 
 # Education
 class EducationBase(BaseModel):

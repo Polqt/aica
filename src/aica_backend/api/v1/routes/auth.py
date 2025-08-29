@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request,Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from database.repositories.user import UserCRUD
-from core.security import verify_password, token_manager, security_validator
-from core.rate_limiter import rate_limiter
-from core.config import settings
+from ....database.repositories.user import UserCRUD
+from ....core.security import verify_password, token_manager, security_validator
+from ....core.rate_limiter import rate_limiter
+from ....core.config import settings
 from .. import schemas
 from ... import dependencies
-from database import models
+from ....database import models
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ def _create_auth_response(user: models.User, response: Response) -> dict:
     cookie_settings = {
         "httponly": True,
         "secure": settings.ENVIRONMENT == "production",
-        "samesite": "strict",
+        "samesite": "lax",
     }
     
     response.set_cookie(
@@ -58,7 +58,7 @@ def clear_auth_cookies(response: Response):
     cookie_settings = {
         "httponly": True,
         "secure": settings.ENVIRONMENT == "production",
-        "samesite": "strict",
+        "samesite": "lax",
     }
     
     response.delete_cookie("access_token", path="/", **cookie_settings)

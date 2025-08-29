@@ -2,7 +2,7 @@ export class HttpClient {
   private baseURL: string;
   private timeout: number;
 
-  constructor(baseURL: string, timeout: number = 5000) {
+  constructor(baseURL: string, timeout: number = 15000) {
     this.baseURL = baseURL.replace(/\/+$/, '');
     this.timeout = timeout;
   }
@@ -14,9 +14,9 @@ export class HttpClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (includeAuth) {
@@ -40,8 +40,22 @@ export class HttpClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Unknown error');
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({} as unknown));
+          const msg =
+            (errorData.detail &&
+              (Array.isArray(errorData.detail)
+                ? errorData.detail[0]?.msg
+                : errorData.detail)) ||
+            errorData.message ||
+            errorData.error ||
+            `HTTP ${response.status}`;
+          throw new Error(typeof msg === 'string' ? msg : 'Request failed');
+        } else {
+          const text = await response.text().catch(() => '');
+          throw new Error(text || `HTTP ${response.status}`);
+        }
       }
 
       return await response.json();
@@ -57,6 +71,17 @@ export class HttpClient {
   private getTokenFromCookie(): string | null {
     if (typeof document === 'undefined') return null;
 
+    // Prioritize localStorage as it's explicitly set by AuthContext on login.
+    // This addresses potential timing issues where cookies might not be immediately available or updated.
+    try {
+      const lsToken = localStorage.getItem('access_token');
+      if (lsToken) {
+        return lsToken;
+      }
+    } catch {
+      // If localStorage is not accessible, proceed to check cookies.
+    }
+
     const cookieToken = document.cookie
       .split('; ')
       .find(row => row.startsWith('access_token='))
@@ -65,7 +90,6 @@ export class HttpClient {
     if (cookieToken && cookieToken.startsWith('Bearer ')) {
       return cookieToken.substring(7);
     }
-
     return null;
   }
 
@@ -133,7 +157,7 @@ export class HttpClient {
       headers,
       body: formData,
       credentials: 'include',
-    })
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -141,6 +165,6 @@ export class HttpClient {
       throw new Error(errorMessage);
     }
 
-    return await response.json()
+    return await response.json();
   }
 }

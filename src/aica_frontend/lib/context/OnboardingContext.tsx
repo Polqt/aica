@@ -12,7 +12,9 @@ type OnboardingData = Omit<Partial<ProfileUpdate>, 'skills'> & {
 interface OnboardingContextProps {
   data: OnboardingData;
   updateData: (partial: OnboardingData) => void;
-  submitOnboardingData: () => Promise<{ success: boolean }>;
+  submitOnboardingData: (
+    partial?: OnboardingData,
+  ) => Promise<{ success: boolean }>;
   clearData: () => void;
 }
 
@@ -44,45 +46,78 @@ export const OnboardingProvider = ({
     return dateString;
   };
 
-  const submitOnboardingData = async () => {
+  const submitOnboardingData = async (partial?: OnboardingData) => {
     try {
+      const source = { ...data, ...(partial || {}) } as OnboardingData;
+
+      const skills = (source.skills || [])
+        .map(s => (typeof s === 'string' ? { name: s } : s))
+        .filter(s => s && typeof s.name === 'string' && s.name.trim() !== '');
+
+      const educations = (source.educations || [])
+        .filter(
+          e =>
+            e &&
+            e.institution_name &&
+            e.institution_name.trim() !== '' &&
+            e.address &&
+            e.address.trim() !== '' &&
+            e.degree &&
+            e.degree.trim() !== '' &&
+            e.start_date &&
+            e.end_date,
+        )
+        .map(e => ({
+          ...e,
+          start_date: formatDate(e.start_date)!,
+          end_date: formatDate(e.end_date)!,
+        }));
+
+      const experiences = (source.experiences || [])
+        .filter(
+          ex =>
+            ex &&
+            ex.job_title &&
+            ex.job_title.trim() !== '' &&
+            ex.company_name &&
+            ex.company_name.trim() !== '' &&
+            ex.start_date,
+        )
+        .map(ex => ({
+          ...ex,
+          start_date: formatDate(ex.start_date)!,
+          end_date: ex.end_date ? formatDate(ex.end_date) : undefined,
+        }));
+
+      const certificates = (source.certificates || [])
+        .filter(
+          c =>
+            c &&
+            c.name &&
+            c.name.trim() !== '' &&
+            c.issuing_organization &&
+            c.issuing_organization.trim() !== '',
+        )
+        .map(c => ({
+          ...c,
+          issue_date: c.issue_date ? formatDate(c.issue_date) : undefined,
+        }));
+
       const transformedData: ProfileUpdate = {
-        ...data,
-
-        skills:
-          data.skills?.map(skill =>
-            typeof skill === 'string' ? { name: skill } : skill,
-          ) || [],
-
-        educations: data.educations?.map(edu => ({
-          ...edu,
-          start_date: formatDate(edu.start_date)!,
-          end_date: formatDate(edu.end_date)!,
-        })),
-
-        experiences: data.experiences?.map(exp => ({
-          ...exp,
-          start_date: formatDate(exp.start_date)!,
-          end_date: exp.end_date ? formatDate(exp.end_date) : undefined,
-        })),
-
-        certificates: data.certificates?.map(cert => ({
-          ...cert,
-          issue_date: cert.issue_date ? formatDate(cert.issue_date) : undefined,
-        })),
+        ...(source as ProfileUpdate),
+        skills,
+        educations,
+        experiences,
+        certificates,
       };
 
-      console.log(
-        'Transformed data for backend:',
-        JSON.stringify(transformedData, null, 2),
-      );
       await apiClient.profile.update(transformedData);
 
       toast.success('Profile Updated!', {
         description: 'Your profile has been saved successfully.',
       });
 
-      clearData();
+      // Keep data until final step navigation completes
       return { success: true };
     } catch (error) {
       console.error('Failed to submit onboarding data:', error);

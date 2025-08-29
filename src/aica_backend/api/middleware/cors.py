@@ -1,4 +1,4 @@
-from core.config import settings
+from ...core.config import settings
 
 class CORSConfig:
     def get_config(self):
@@ -14,18 +14,14 @@ class CORSConfig:
     def _get_allowed_origins(self):
         """Define allowed origins for CORS based on environment"""
         if settings.ENVIRONMENT == "production":
-            # In production, use specific domains
             return settings.ALLOWED_ORIGINS
         else:
-            # In development, allow localhost with different ports
-            return [
+            return list(set([
                 "http://localhost:3000",
-                "http://localhost:3001", 
+                "http://localhost:3001",
                 "http://127.0.0.1:3000",
                 "http://127.0.0.1:3001",
-                # Add your frontend URL here
-                "http://localhost:3000"
-            ]
+            ]))
     
     def _get_allowed_methods(self):
         """Define allowed HTTP methods"""

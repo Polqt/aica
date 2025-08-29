@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from ..base_class import Base
 from typing import List, Optional, Dict, Any
 
-from core.config import settings
+from ...core.config import settings
 
 class JobPosting(Base):
     __tablename__ = "job_postings"

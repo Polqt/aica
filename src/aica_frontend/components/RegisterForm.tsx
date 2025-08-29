@@ -22,7 +22,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setUser, login } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -40,17 +40,16 @@ export default function RegisterForm() {
         clearApiError();
 
         try {
-          const authResponse = await apiClient.auth.register({
+          const registeredUser = await apiClient.auth.register({
             email: data.email,
             password: data.password,
           });
 
-          console.log('Registration successful:', authResponse);
-
-          setUser(authResponse);
+          setUser(registeredUser);
+          await login(data.email, data.password);
           router.push('/profile');
         } catch (error) {
-          console.error('Registration error: ', error)
+          console.error('Registration error: ', error);
           throw error;
         }
       },

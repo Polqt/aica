@@ -7,7 +7,12 @@ import {
 } from '../types/api';
 import { ProfileUpdate, Profile } from '../types/profile';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  (typeof window !== 'undefined'
+    ? (window.__API_BASE_URL__ as string | undefined)
+    : undefined) ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:8000';
 
 class ApiClient {
   private http: HttpClient;

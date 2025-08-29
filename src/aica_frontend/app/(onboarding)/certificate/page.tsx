@@ -147,18 +147,27 @@ export default function Certificate() {
     }
   }
 
-  const skipCertificates = () => {
+  const skipCertificates = async () => {
     updateData({ certificates: [] });
-
-    toast.info('Skipping Certificates', {
-      description:
-        'No worries! You can add certificates later from your profile.',
-      duration: 3000,
-    });
-
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
+    try {
+      await submitOnboardingData();
+      toast.info('Skipping Certificates', {
+        description:
+          'No worries! You can add certificates later from your profile.',
+        duration: 3000,
+      });
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unexpected error occurred';
+      setApiError(errorMessage);
+      toast.error('Profile Save Failed', {
+        description: errorMessage,
+        duration: 5000,
+      });
+    }
   };
 
   const watchedCertificates = form.watch('certificates');

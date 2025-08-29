@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from .. import models
-from api.v1.schemas import profiles as profile_schemas
+from ...api.v1.schemas import profiles as profile_schemas
 
 
 def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
@@ -12,10 +12,10 @@ def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
     return skill
 
 def update_profile(db: Session, user: models.User, profile_in: profile_schemas.ProfileUpdate) -> models.Profile:
-    profile = user.profile
-
+    # Rehydrate/resolve profile via the current db session to avoid detached instances
+    profile = db.query(models.Profile).filter(models.Profile.user_id == user.id).first()
     if not profile:
-        profile = models.Profile(user=user)
+        profile = models.Profile(user_id=user.id)
         db.add(profile)
 
     # Update basic profile fields (excluding relations)
@@ -42,7 +42,6 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
     # Handle experiences update (It can be empty)
     if profile_in.experiences is not None:
         profile.experiences.clear()
-        # Only add experiences if the list is not empty
         for exp in profile_in.experiences:
             exp_data = exp.model_dump(exclude={'profile_id'})
             new_exp = models.Experience(**exp_data)
@@ -51,7 +50,6 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
     # Handle certificates update (It can be empty)
     if profile_in.certificates is not None:
         profile.certificates.clear()
-        # Only add certificates if the list is not empty
         for cert in profile_in.certificates:
             cert_data = cert.model_dump(exclude={'profile_id'})
             new_cert = models.Certificate(**cert_data)

@@ -121,7 +121,7 @@ class EmbeddingService:
                             embedding2: np.ndarray) -> float:
         """
             Calculate cosine similarity between two embeddings.
-            Returns to cosine similarity score (0-1)
+            Returns cosine similarity score (0-1)
         """
         
         try:
@@ -142,18 +142,18 @@ class EmbeddingService:
                           top_k: int = 10) -> List[tuple]:
         
         """
-            Find ya na di ang mosst similar embeddings to query.
-            Returns a list of tuples containing the index and similarity score of the most similar embeddings.
+            Find most similar embeddings to query.
+            Returns a list of (index, similarity) tuples sorted by similarity desc.
         """
         
         if not candidate_embeddings:
             return []
         
         similarities = []
-        
         for i, candidate in enumerate(candidate_embeddings):
             similarity = self.calculate_similarity(query_embedding, candidate)
             similarities.append((i, similarity))
+        similarities.sort(key=lambda x: x[1], reverse=True)
         return similarities[:top_k]
     
     def _preprocess_text(self, text: str) -> str:
@@ -222,6 +222,4 @@ def encode_text(text: str) -> np.ndarray:
 def encodee_skills(skills: List[str]) -> np.ndarray:
     return embedding_service.encode_skills(skills)
 
-def calculate_similarity(emb1: np.ndarray, emb2: np.ndarray) -> float:
-    return embedding_service.calculate_similarity(emb1, emb2)
-        
+
