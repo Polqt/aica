@@ -116,7 +116,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
 };
 
 export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [, setHovered] = useState<number | null>(null);
   const pathname = usePathname();
 
   // Add Home item only
@@ -217,9 +217,7 @@ export const MobileNavMenu = ({
   children,
   className,
   isOpen,
-  onClose,
 }: MobileNavMenuProps) => {
-  const pathname = usePathname();
   
   return (
     <AnimatePresence>

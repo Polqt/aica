@@ -1,55 +1,50 @@
+# Core Web Framework
 fastapi
 uvicorn[standard]
 
+# Database
 sqlalchemy
 psycopg2-binary
-
-pydantic[email]
-python-dotenv
-
-passlib[bcrypt]
-bcrypt
-python-jose[cryptography]
-
-pydantic-settings
-python-multipart
-
-pydantic
-celery[redis]
-slowapi
-redis
-gevent
-crawl4ai
-sentence-transformers
-
-langchain
-langchain-community
-langchain-huggingface
-langchain-experimental
-
-ollama
 pgvector
 
-# AI/ML Dependencies
-numpy
-faiss-cpu
-spacy
-scikit-learn
-nltk
+# Data Validation
+pydantic
+pydantic-settings
+pydantic[email]
 
-# Text Processing
-beautifulsoup4
-lxml
-html5lib
-unicodedata2
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
 
-# HTTP and Scraping
-requests
+# HTTP Clients
 httpx
 aiohttp
-selenium
+requests
+
+# Web Scraping
+beautifulsoup4
+crawl4ai
+lxml
+
+# AI/ML Core
+sentence-transformers
+numpy
+ollama
+
+# LangChain for RAG
+langchain
+langchain-community
+
+# Vector Storage
+faiss-cpu
 
 # Utilities
+python-dotenv
+python-multipart
 python-dateutil
 pytz
 tqdm
+slowapi
+redis
+celery[redis]

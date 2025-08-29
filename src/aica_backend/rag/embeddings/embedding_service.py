@@ -219,7 +219,7 @@ embedding_service = EmbeddingService()
 def encode_text(text: str) -> np.ndarray:
     return embedding_service.encode_text(text)
 
-def encodee_skills(skills: List[str]) -> np.ndarray:
+def encode_skills(skills: List[str]) -> np.ndarray:
     return embedding_service.encode_skills(skills)
 
 

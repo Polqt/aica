@@ -11,11 +11,12 @@ import {
   Experience,
   Certificate,
   ProfileFlags,
+  ProfileCompletionStatus,
 } from '../types/profile';
 
 const API_BASE_URL =
   (typeof window !== 'undefined'
-    ? ((window as any).__API_BASE_URL__ as string | undefined)
+    ? ((window as Window & { __API_BASE_URL__?: string }).__API_BASE_URL__ as string | undefined)
     : undefined) ||
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:8000';
@@ -76,6 +77,10 @@ class ApiClient {
 
     getFlags: async (): Promise<ProfileFlags> => {
       return this.http.get<ProfileFlags>('/profile/flags');
+    },
+
+    getCompletionStatus: async (): Promise<ProfileCompletionStatus> => {
+      return this.http.get<ProfileCompletionStatus>('/profile/completion-status');
     },
   };
 }

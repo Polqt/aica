@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from ....core.security import security_validator, verify_password
 from ....database.repositories.user import UserCRUD
+from ....database.repositories import profile
 from ....database import models
 from .. import schemas
 from ... import dependencies
@@ -36,9 +37,28 @@ def create_user(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create account"
             )
-        
+
+        # Create initial empty profile for the user
+        try:
+            initial_profile = models.Profile(
+                user_id=new_user.id,
+                first_name="",
+                last_name="",
+                professional_title="",
+                contact_number="",
+                address="",
+                summary=""
+            )
+            db.add(initial_profile)
+            db.commit()
+            db.refresh(new_user)  # Refresh to include the profile relationship
+        except Exception as e:
+            print(f"Failed to create initial profile: {str(e)}")
+            # Don't fail registration if profile creation fails
+            db.rollback()
+
         _create_auth_response(new_user, response)
-        
+
         return new_user
     except ValueError as e:
         raise HTTPException(

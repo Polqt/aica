@@ -174,4 +174,11 @@ class ProfileSummary(BaseModel):
 class ProfileFlags(BaseModel):
     has_experiences: bool
     has_certificates: bool
+
+class ProfileCompletionStatus(BaseModel):
+    """Schema for profile completion status tracking"""
+    is_profile_created: bool
+    completed_steps: List[str]  # ["profile", "education", "skills", "experience", "certificates"]
+    next_required_step: str  # "profile", "education", "skills", "experience", "certificates", or "complete"
+    overall_completion_percentage: int  # 0-100
     

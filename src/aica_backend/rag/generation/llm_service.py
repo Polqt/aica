@@ -5,7 +5,6 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from ...core.config import settings
-from ...ai.generation.prompt_templates import PromptTemplates
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ class LLMService:
         self.base_url = settings.OLLAMA_BASE_URL
         self.model_name = settings.OLLAMA_MODEL_NAME
         self.timeout = settings.OLLAMA_TIMEOUT
-        self.prompt_templates = PromptTemplates()
+        self.prompt_templates = prompt_templates
 
     async def generate_job_match_explanation(self,
                                             user_skills: List[str],

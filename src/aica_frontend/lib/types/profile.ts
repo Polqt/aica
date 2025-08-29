@@ -86,3 +86,10 @@ export interface ProfileFlags {
   has_experiences: boolean;
   has_certificates: boolean;
 }
+
+export interface ProfileCompletionStatus {
+  is_profile_created: boolean;
+  completed_steps: string[]; // ["profile", "education", "skills", "experience", "certificates"]
+  next_required_step: string; // "profile", "education", "skills", "experience", "certificates", or "complete"
+  overall_completion_percentage: number; // 0-100
+}

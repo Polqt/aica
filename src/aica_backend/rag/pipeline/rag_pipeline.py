@@ -4,9 +4,17 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from langchain_community.vectorstores import PGVector
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.llms import Ollama
+
 from ..embeddings.embedding_service import embedding_service
 from ..embeddings.store_factory import get_vector_store
 from ..generation.llm_service import llm_service
+from ...core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +23,127 @@ class RAGPipeline:
         self.embedding_service = embedding_service
         self.vector_store = get_vector_store()
         self.llm_service = llm_service
+
+        # Initialize LangChain components
+        self._setup_langchain_components()
+
+    def _setup_langchain_components(self):
+        """Setup LangChain components for RAG pipeline."""
+        try:
+            # Initialize embeddings
+            self.embeddings = HuggingFaceEmbeddings(
+                model_name=settings.EMBEDDING_MODEL_NAME
+            )
+
+            # Initialize LLM
+            self.llm = Ollama(
+                model=settings.OLLAMA_MODEL_NAME,
+                base_url=settings.OLLAMA_BASE_URL,
+                temperature=0.1
+            )
+
+            # Setup prompt templates
+            self._setup_prompts()
+
+        except Exception as e:
+            logger.error(f"Error setting up LangChain components: {e}")
+            # Fallback to existing services
+            self.embeddings = None
+            self.llm = None
+
+    def _setup_prompts(self):
+        """Setup reusable prompt templates."""
+        self.job_match_prompt = PromptTemplate(
+            input_variables=["user_skills", "job_title", "company", "job_description", "similarity_score"],
+            template="""
+            Analyze the compatibility between a user's skills and a job posting.
+
+            User Skills: {user_skills}
+            Job Title: {job_title}
+            Company: {company}
+            Job Description: {job_description}
+            Similarity Score: {similarity_score}
+
+            Provide a detailed analysis including:
+            1. Overall match strength (Excellent/Good/Fair/Weak)
+            2. Key matching skills
+            3. Missing skills gaps
+            4. Specific recommendations
+
+            Format your response as JSON with keys: match_strength, matching_skills, skill_gaps, recommendations
+            """
+        )
+
+        self.skill_extraction_prompt = PromptTemplate(
+            input_variables=["job_description"],
+            template="""
+            Extract technical and soft skills from the following job description.
+            Focus on programming languages, frameworks, tools, and soft skills.
+
+            Job Description: {job_description}
+
+            Return a JSON object with:
+            - technical_skills: array of technical skills
+            - soft_skills: array of soft skills
+            - categories: object with skill categories
+            """
+        )
+
+    async def extract_job_skills_langchain(self, job_description: str) -> Dict[str, Any]:
+        """
+        Extract skills from job description using LangChain.
+
+        Args:
+            job_description: The job description text
+
+        Returns:
+            Dictionary with technical_skills, soft_skills, and categories
+        """
+        try:
+            if not self.llm:
+                # Fallback to existing service
+                return await self._extract_skills_fallback(job_description)
+
+            # Create the chain
+            chain = self.skill_extraction_prompt | self.llm | JsonOutputParser()
+
+            # Run the chain
+            result = await chain.ainvoke({"job_description": job_description})
+
+            return {
+                "technical_skills": result.get("technical_skills", []),
+                "soft_skills": result.get("soft_skills", []),
+                "categories": result.get("categories", {})
+            }
+
+        except Exception as e:
+            logger.error(f"Error extracting skills with LangChain: {e}")
+            return await self._extract_skills_fallback(job_description)
+
+    async def _extract_skills_fallback(self, job_description: str) -> Dict[str, Any]:
+        """Fallback skill extraction method."""
+        # Simple pattern-based extraction
+        from ...utils.common import clean_text
+
+        text = clean_text(job_description).lower()
+
+        # Common technical skills
+        tech_skills = []
+        tech_patterns = [
+            'python', 'java', 'javascript', 'react', 'node.js', 'django', 'flask',
+            'sql', 'postgresql', 'mongodb', 'machine learning', 'ai', 'nlp',
+            'docker', 'kubernetes', 'aws', 'git', 'linux', 'html', 'css'
+        ]
+
+        for skill in tech_patterns:
+            if skill in text:
+                tech_skills.append(skill.title())
+
+        return {
+            "technical_skills": tech_skills,
+            "soft_skills": ["Communication", "Problem Solving"],  # Default soft skills
+            "categories": {"technical": tech_skills, "soft": ["Communication", "Problem Solving"]}
+        }
 
     async def find_matching_jobs(self,
                                 session: AsyncSession,

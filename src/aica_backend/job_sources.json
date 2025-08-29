@@ -41,7 +41,7 @@
                 "https://remoteok.com/remote-dev-jobs",
                 "https://remoteok.com/remote-engineer-jobs"
             ],
-            "wait_for_selector": "body",
+            "wait_for_selector": "tr.job",
             "wait_for_timeout": 30000,
             "browser_config": {
                 "stealth": true,
@@ -50,13 +50,13 @@
             "actions_before_run": [
                 {
                     "action": "wait",
-                    "duration": 8000,
-                    "description": "Wait 8 seconds for page to fully load."
+                    "duration": 20000,
+                    "description": "Wait 20 seconds for page to fully load."
                 },
                 {
                     "action": "scroll",
                     "selector": "body",
-                    "count": 3,
+                    "count": 5,
                     "description": "Scroll to load more content."
                 }
             ]

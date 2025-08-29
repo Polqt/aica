@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from database.models import JobPosting, PipelineRun, ScrapingSession
 from scraping.providers.factory import ScrapingProviderFactory
+from utils.common import handle_service_error, create_success_response, AppError
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,12 @@ class ScrapingService:
                 'headless': True,
                 'rate_limit_delay': 2,
                 'max_retries': 5
+            },
+            'beautifulsoup': {
+                'active': True,
+                'rate_limit_delay': 1,
+                'max_retries': 3,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
         }
         
@@ -52,22 +59,17 @@ class ScrapingService:
             pipeline_run.total_jobs_processed = results["total_processed"]
             self.db.commit()
             
-            return {
-                "success": True,
+            return create_success_response({
                 "pipeline_run_id": pipeline_run.id,
                 "results": results
-            }
+            })
         except Exception as e:
             logger.error(f"Error during scraping pipeline: {e}")
             pipeline_run.completed_at = datetime.now()
             pipeline_run.error_count += 1
             self.db.commit()
-            
-            return {
-                "success": False,
-                "pipeline_run_id": pipeline_run.id,
-                "error": str(e)
-            }
+
+            return handle_service_error(e, "Scraping pipeline failed")
             
     async def _execute_scraping(self, pipeline_run_id: int, urls: List[str]) -> Dict[str, Any]:
         all_jobs = []
@@ -130,7 +132,7 @@ class ScrapingService:
         return {
             "total_scraped": total_scraped,
             "total_processed": total_processed,
-            "jobs": all_jobs[100]
+            "jobs": all_jobs
         }
         
     async def _save_jobs(self, jobs: List[Dict[str, Any]]) -> int:

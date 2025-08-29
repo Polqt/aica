@@ -1,11 +1,13 @@
 from typing import Dict, Any
 from .base import BaseProvider
 from .crawl4ai_provider import Crawl4AIProvider
+from .beautifulsoup_provider import BeautifulSoupProvider
 
 class ScrapingProviderFactory:
-    
+
     _providers = {
         'crawl4ai': Crawl4AIProvider,
+        'beautifulsoup': BeautifulSoupProvider,
     }
     
     @classmethod

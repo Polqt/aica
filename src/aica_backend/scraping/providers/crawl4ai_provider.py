@@ -143,7 +143,7 @@ class Crawl4AIProvider(BaseProvider):
         try:
             data = json.loads(extracted_content) if isinstance(extracted_content, str) else extracted_content
 
-            job_list = data.get('jobs', [])
+            job_list = data.get('jobs', []) if isinstance(data, dict) else []
 
             for job_data in job_list:
                 if isinstance(job_data, dict) and job_data.get('is_tech_job'):

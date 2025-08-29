@@ -1,6 +1,6 @@
 # AICA Backend - AI Career Assistant
 
-A modular, AI-powered backend system for ethical job scraping, intelligent matching, and resume building.
+A modular, AI-powered backend system for ethical job scraping, intelligent matching, and resume building. Refactored following YAGNI, KISS, DRY, and CLEAN CODE principles for optimal maintainability and performance.
 
 ## 🏗️ Architecture Overview
 
@@ -8,41 +8,52 @@ The AICA Backend follows a clean, modular architecture with clear separation of 
 
 ```
 src/aica_backend/
-├── api/                    # FastAPI application layer
+├── ai/                    # Modular AI components (NEW)
+│   ├── skill_extraction.py # Skill extraction from job descriptions
+│   ├── job_matching.py    # AI-powered job matching algorithms
+│   ├── embeddings.py      # Embedding operations interface
+│   └── generation.py      # Text generation services
+├── api/                   # FastAPI application layer
 │   ├── v1/endpoints/      # API endpoints (auth, jobs, matching, resume, pipeline)
 │   ├── v1/schemas/        # Pydantic models for API validation
 │   ├── middleware/        # Custom middleware (CORS, security, rate limiting)
-│   └── dependencies.py   # Dependency injection
-├── services/              # Business logic layer (NEW)
-│   ├── scraping/         # Job scraping services
-│   ├── ai/               # AI/ML services (skill extraction, RAG, matching)
-│   ├── profile_service.py # Profile management
-│   ├── resume_service.py  # Resume building
-│   └── pipeline_service.py # Complete pipeline orchestration
-├── db/                    # Database layer
-│   ├── models.py         # SQLAlchemy models
+│   └── dependencies.py    # Dependency injection
+├── core/                  # Configuration and utilities
+├── database/              # Database layer
+│   ├── models/           # SQLAlchemy models
+│   ├── repositories/     # Data access layer
 │   ├── session.py        # Database connection
 │   └── base_class.py     # Base model class
-├── crud/                  # Data access layer
-├── core/                  # Configuration and utilities
-├── workers/               # Celery background tasks
-│   └── tasks/            # Task definitions
+├── rag/                   # Retrieval-Augmented Generation
+│   ├── embeddings/       # Vector embeddings and storage
+│   ├── generation/       # LLM text generation
+│   └── pipeline/         # RAG orchestration pipeline
+├── scraping/              # Ethical web scraping
+│   ├── providers/        # Scraping provider implementations
+│   └── config.py         # Scraping configuration
+├── services/              # Business logic layer
+│   ├── scraping_service.py      # Job scraping orchestration
+│   └── job_matching_service.py  # Job matching business logic
+├── utils/                 # Consolidated utilities
+│   ├── common.py         # Common utility functions (DRY)
+│   ├── rate_limiter.py   # Simple rate limiting
+│   └── robots_checker.py # Robots.txt compliance
 └── main.py               # Application entry point
 ```
 
 ## ✨ Key Features
 
 ### 🔍 Ethical Job Scraping
-- **Rate-limited scraping** from approved sources (JobStreet Philippines)
-- **Structured data extraction** using BeautifulSoup and custom selectors
-- **Content cleaning and validation**
-- **Duplicate detection** and deduplication
+- **Dual scraping providers**: BeautifulSoup (lightweight) and Crawl4AI (advanced)
+- **Rate-limited scraping** with robots.txt compliance
+- **Structured data extraction** with fallback mechanisms
+- **Content cleaning and validation** with duplicate detection
 
 ### 🤖 AI-Powered Skills Matching
-- **Local NLP processing** using Sentence Transformers (no paid APIs)
-- **Skill extraction** from job descriptions using pattern matching
-- **Vector embeddings** for semantic similarity search
-- **Job-profile matching** with similarity scoring
+- **Modular AI components** with clear separation of concerns
+- **Hybrid skill extraction**: Pattern matching + LLM-based extraction
+- **Optimized pgvector integration** with performance indexes
+- **Advanced similarity algorithms** with multiple scoring methods
 
 ### 📄 Resume Builder
 - **Multiple templates** (Modern, Classic, Creative, Minimal)
@@ -50,17 +61,53 @@ src/aica_backend/
 - **Job-specific optimization** with skill gap analysis
 - **Multiple export formats** (JSON, TXT, HTML)
 
-### 🔄 RAG Pipeline
-- **Job explanations** with contextual insights
-- **Skill gap analysis** with learning recommendations
-- **Career advice** generation
-- **Similar job discovery**
+### 🔄 Enhanced RAG Pipeline
+- **LangChain integration** for better orchestration
+- **Modular pipeline components** for scalability
+- **Contextual job explanations** with AI insights
+- **Intelligent skill gap analysis** and recommendations
 
-### 📊 Pipeline Management
-- **Complete workflow orchestration** from scraping to matching
-- **Background processing** with Celery
-- **Progress tracking** and error handling
-- **Performance metrics** and analytics
+### 📊 Improved Pipeline Management
+- **Streamlined workflow orchestration** following KISS principles
+- **Consistent error handling** across all services
+- **Performance monitoring** with health checks
+- **Batch processing capabilities** for efficiency
+
+## 🔧 Refactoring & Best Practices Applied
+
+This codebase has been refactored following software engineering best practices:
+
+### ✅ YAGNI (You Aren't Gonna Need It)
+- Removed over-engineered features like complex circuit breakers and extensive metrics
+- Simplified configuration by removing unused settings
+- Streamlined dependencies to only what's necessary
+
+### ✅ KISS (Keep It Simple, Stupid)
+- Simplified base provider from 265 lines to 35 lines
+- Created simple, focused utility functions
+- Reduced configuration complexity
+
+### ✅ DRY (Don't Repeat Yourself)
+- Consolidated duplicate utility functions into `utils/common.py`
+- Created reusable error handling patterns
+- Unified response formatting across services
+
+### ✅ CLEAN CODE Principles
+- Clear separation of concerns with modular AI components
+- Consistent error handling and response formatting
+- Meaningful naming and comprehensive documentation
+- Single responsibility principle applied throughout
+
+### 🚀 Performance Optimizations
+- Optimized pgvector integration with connection pooling
+- Added batch processing capabilities
+- Created performance indexes for vector similarity search
+- Improved async/await patterns throughout
+
+### 🔒 Ethical & Zero-Cost Approach
+- Maintained ethical scraping practices with robots.txt compliance
+- Used only free, open-source tools (Sentence Transformers, pgvector, LangChain)
+- No paid API dependencies for core functionality
 
 ## 🚀 Quick Start
 
@@ -131,66 +178,60 @@ Once running, access the interactive API documentation:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-## 🔧 Service Layer Architecture
+## 🔧 Modular Architecture
 
-### ScrapingService
+### AI Components
 ```python
-from services import ScrapingService
+from ai import skill_extraction_service, job_matching_ai_service, generation_service
 
-service = ScrapingService()
+# Extract skills from job description
+skills = await skill_extraction_service.extract_skills_from_job(job_description)
 
-# Scrape jobs from a site
-jobs = await service.scrape_site("jobstreet", extract_details=True, max_jobs=10)
-
-# Extract content from a specific URL
-content = await service.extract_job_content("https://...")
-```
-
-### JobMatchingService
-```python
-from services import JobMatchingService
-
-matching_service = JobMatchingService()
-
-# Get job recommendations for a user
-recommendations = matching_service.get_job_recommendations(
-    user_id=1, db=db, limit=10
-)
-
-# Find similar jobs
-matches = matching_service.find_matching_jobs(profile, db)
-```
-
-### RAGService
-```python
-from services import RAGService
-
-rag_service = RAGService()
-
-# Explain a job posting
-explanation = rag_service.explain_job_posting(job, user_profile)
-
-# Analyze skill gaps
-analysis = rag_service.analyze_skill_gap(job, profile)
+# Calculate match score
+score = await job_matching_ai_service.calculate_match_score(user_skills, job_skills)
 
 # Generate career advice
-advice = rag_service.generate_career_advice(job, profile)
+advice = await generation_service.generate_career_advice(user_profile, matches)
 ```
 
-### PipelineService
+### Service Layer
 ```python
-from services import PipelineService
+from services.scraping_service import ScrapingService
+from services.job_matching_service import JobMatchingService
 
-pipeline = PipelineService()
+# Scraping with dual providers
+scraping_service = ScrapingService()
+jobs = await scraping_service.start_scraping_pipeline(urls)
 
-# Run complete pipeline
-result = await pipeline.run_full_pipeline(db, site_names=["jobstreet"])
+# Job matching with RAG
+matching_service = JobMatchingService()
+matches = await matching_service.find_job_matches(user_id, db)
+```
 
-# Get pipeline status
-status = pipeline.get_pipeline_status(db)
+### RAG Pipeline
+```python
+from rag.pipeline.rag_pipeline import rag_pipeline
 
-# Get performance metrics
-metrics = pipeline.get_pipeline_metrics(db, days=30)
+# Enhanced RAG with LangChain integration
+matches = await rag_pipeline.find_matching_jobs(
+    session=db,
+    user_id=user_id,
+    user_skills=user_skills,
+    generate_explanation=True
+)
+
+# Extract skills using LangChain
+skills = await rag_pipeline.extract_job_skills_langchain(job_description)
+```
+
+### Vector Store
+```python
+from rag.embeddings.vector_store import vector_store
+
+# Optimized pgvector operations
+await vector_store.store_job_embeddings_batch(session, job_embeddings)
+await vector_store.create_performance_indexes(session)
+health = await vector_store.health_check()
 ```
 
 ## 🎯 API Endpoints

@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
-import { ProfileUpdate, SkillCreate } from '../types/profile';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { ProfileUpdate, SkillCreate, ProfileCompletionStatus } from '../types/profile';
 import { toast } from 'sonner';
 import { apiClient } from '../services/api-client';
 
@@ -16,6 +16,9 @@ interface OnboardingContextProps {
     partial?: OnboardingData,
   ) => Promise<{ success: boolean }>;
   clearData: () => void;
+  completionStatus: ProfileCompletionStatus | null;
+  refreshCompletionStatus: () => Promise<void>;
+  isLoadingStatus: boolean;
 }
 
 const OnboardingContext = createContext<OnboardingContextProps | undefined>(
@@ -28,12 +31,32 @@ export const OnboardingProvider = ({
   children: React.ReactNode;
 }) => {
   const [data, setData] = useState<OnboardingData>({});
+  const [completionStatus, setCompletionStatus] = useState<ProfileCompletionStatus | null>(null);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
+
+  // Load completion status on mount
+  useEffect(() => {
+    refreshCompletionStatus();
+  }, []);
 
   const updateData = (partial: OnboardingData) => {
     setData(prev => ({
       ...prev,
       ...partial,
     }));
+  };
+
+  const refreshCompletionStatus = async () => {
+    try {
+      setIsLoadingStatus(true);
+      const status = await apiClient.profile.getCompletionStatus();
+      setCompletionStatus(status);
+    } catch (error) {
+      console.error('Failed to fetch completion status:', error);
+      // Don't show error toast for status checks
+    } finally {
+      setIsLoadingStatus(false);
+    }
   };
 
   const clearData = () => setData({});
@@ -117,6 +140,9 @@ export const OnboardingProvider = ({
         description: 'Your profile has been saved successfully.',
       });
 
+      // Refresh completion status after successful update
+      await refreshCompletionStatus();
+
       // Keep data until final step navigation completes
       return { success: true };
     } catch (error) {
@@ -136,7 +162,15 @@ export const OnboardingProvider = ({
 
   return (
     <OnboardingContext.Provider
-      value={{ data, updateData, submitOnboardingData, clearData }}
+      value={{
+        data,
+        updateData,
+        submitOnboardingData,
+        clearData,
+        completionStatus,
+        refreshCompletionStatus,
+        isLoadingStatus
+      }}
     >
       {children}
     </OnboardingContext.Provider>

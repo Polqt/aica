@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useOnboarding } from '@/lib/context/OnboardingContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 import PhoneInput from 'react-phone-input-2';
@@ -42,7 +42,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import AnimatedBackground from '@/components/AnimatedBackground';
+import OnboardingLayout from '@/components/OnboardingLayout';
 
 const profileFormSchema = z.object({
   first_name: z
@@ -126,7 +126,17 @@ export default function Profile() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const { updateData } = useOnboarding();
+  const { updateData, completionStatus, refreshCompletionStatus } = useOnboarding();
+
+  // Redirect if profile is already completed
+  useEffect(() => {
+    if (completionStatus?.completed_steps.includes('profile')) {
+      const nextStep = completionStatus.next_required_step;
+      if (nextStep !== 'complete' && nextStep !== 'profile') {
+        router.push(`/${nextStep}`);
+      }
+    }
+  }, [completionStatus, router]);
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -151,9 +161,12 @@ export default function Profile() {
     },
   ).length;
   const totalRequiredFields = 6;
-  const completionPercentage = Math.round(
+  const formCompletionPercentage = Math.round(
     (completedFields / totalRequiredFields) * 100,
   );
+
+  // Use context completion status if available, otherwise fall back to form completion
+  const displayCompletionPercentage = completionStatus?.overall_completion_percentage ?? formCompletionPercentage;
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -206,8 +219,15 @@ export default function Profile() {
         duration: 3000,
       });
 
-      setTimeout(() => {
-        router.push('/education');
+      // Wait for completion status to refresh, then navigate
+      setTimeout(async () => {
+        await refreshCompletionStatus();
+        const nextStep = completionStatus?.next_required_step;
+        if (nextStep && nextStep !== 'complete' && nextStep !== 'profile') {
+          router.push(`/${nextStep}`);
+        } else {
+          router.push('/education'); // fallback
+        }
       }, 1000);
     } catch (error) {
       const errorMessage =
@@ -223,8 +243,13 @@ export default function Profile() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-purple-50/30 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/15 py-8 px-4 overflow-hidden">
-      <AnimatedBackground />
+    <OnboardingLayout
+      currentStep="profile"
+      title="Complete Your Profile"
+      description="Let's get to know you better — this information helps us match you with perfect opportunities"
+      stepNumber={1}
+      totalSteps={5}
+    >
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -276,7 +301,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
                     <span className="text-white font-semibold text-sm">
-                      {completionPercentage}%
+                      {displayCompletionPercentage}%
                     </span>
                   </div>
                   <div>
@@ -299,16 +324,16 @@ export default function Profile() {
               <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${completionPercentage}%` }}
+                  style={{ width: `${displayCompletionPercentage}%` }}
                 />
               </div>
 
-              {completionPercentage < 100 && (
+              {displayCompletionPercentage < 100 && (
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Complete all required fields to continue to the next step
                 </p>
               )}
-              {completionPercentage === 100 && (
+              {displayCompletionPercentage === 100 && (
                 <p className="text-xs text-green-600 dark:text-green-400 font-medium">
                   ✓ All required fields completed! Ready to continue
                 </p>
@@ -613,7 +638,7 @@ export default function Profile() {
                       type="submit"
                       disabled={
                         form.formState.isSubmitting ||
-                        completionPercentage < 100
+                        displayCompletionPercentage < 100
                       }
                       className="w-full h-14 text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
                     >
@@ -636,6 +661,6 @@ export default function Profile() {
           </Card>
         </motion.div>
       </div>
-    </div>
+    </OnboardingLayout>
   );
 }
