@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     SCRAPING_TIMEOUT: int = 120
     
     # Crawl4AI Configuration (ADDED MISSING FIELDS)
-    CRAWL4AI_HEADLESS: bool = True
+    CRAWL4AI_HEADLESS: bool = False
     CRAWL4AI_BROWSER_TYPE: str = "chromium"
     CRAWL4AI_USER_AGENT: str = "AICA-JobBot/1.0"
     

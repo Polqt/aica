@@ -1,10 +1,12 @@
 import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import String, DateTime, Date, Text, JSON, Integer, Float
+from sqlalchemy import Boolean, String, DateTime, Date, Text, JSON, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from ..base_class import Base
 from typing import List, Optional, Dict, Any
+
+from core.config import settings
 
 class JobPosting(Base):
     __tablename__ = "job_postings"
@@ -53,11 +55,14 @@ class JobPosting(Base):
     application_deadline: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)
     
     # AI/ML fields
-    embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(768), nullable=True)  
+    skills_embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
+    description_embedding: Mapped[Optional[List[float]]] = mapped_column(Vector(settings.EMBEDDING_DIMENSION), nullable=True)
+    
     extraction_quality_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     
     # Status and processing
     status: Mapped[str] = mapped_column(String(20), default="raw", index=True, nullable=False)  # raw, processed, embedded, failed
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     
     # Timestamps
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -69,3 +74,4 @@ class JobPosting(Base):
         onupdate=datetime.datetime.now,
         nullable=False
     )
+    

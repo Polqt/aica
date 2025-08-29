@@ -1,6 +1,6 @@
 from sqlalchemy import case
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from .base import BaseCRUD
 from .. import models
@@ -14,29 +14,25 @@ class JobCRUD(BaseCRUD[JobPosting, job_schemas.JobCreate, job_schemas.JobUpdate]
             models.JobPosting.source_url == url
         ).first()
 
-    def get_job_by_id(self, db: Session, job_id: int) -> Optional[models.JobPosting]:
+    def get_job(self, db: Session, job_id: int) -> Optional[models.JobPosting]:
         return db.query(models.JobPosting).filter(models.JobPosting.id == job_id).first()
 
-    def create_job_posting(self, db: Session, url: str, site: str) -> models.JobPosting:
-        db_job = models.JobPosting(
-            source_url=url,
-            source_site=site,
-            status='raw',
-        )
+    def create_job_posting(self, db: Session, job_data: Dict[str, Any]) -> models.JobPosting:
+        db_job = models.JobPosting(**job_data)
         db.add(db_job)
         db.commit()
         db.refresh(db_job)
         return db_job
     
     # Prevent duplicate for scraping
-    def get_or_create_job(self, db: Session, url: str, site: str) -> tuple[models.JobPosting, bool]:
-        existing_job = self.get_job_by_source_url(db, url)
+    def get_or_create_job(self, db: Session, job_data: Dict[str, Any]) -> tuple[models.JobPosting, bool]:
+        existing_job = self.get_job_by_source_url(db, job_data['source_url'])
         if existing_job:
             return existing_job, False
-        return self.create_job_posting(db, url, site), True
+        return self.create_job_posting(db, job_data), True
 
     def get_jobs_by_status(self, db: Session, status: str) -> List[models.JobPosting]:
-        return db.query(models.JobPosting).filter(models.JobPosting.status == status).all()
+        return db.query(models.JobPosting).filter(models.JobPosting.status == status, models.JobPosting.is_active == True).all()
 
     # For LLM extraction
     def update_job_with_enrichment_data(

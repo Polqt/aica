@@ -1,29 +1,37 @@
 {
-    "llm_config": {
-        "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
-        "schema_path": "scraping/prompts/job_extraction_schema.json"
-    },
     "sources": {
         "jobstreet": {
+            "active": true,
+            "llm_config": {
+                "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
+                "schema_path": "scraping/prompts/job_extraction_schema.json"
+            },
             "base_urls": [
-                "https://www.jobstreet.com.ph/jobs/software-developer",
-                "https://www.jobstreet.com.ph/jobs/data-scientist",
-                "https://www.jobstreet.com.ph/jobs/web-developer",
-                "https://www.jobstreet.com.ph/jobs/mobile-developer"
+                "https://www.jobstreet.com.ph/jobs/software-developer"
             ],
             "pagination_template": "?page={page_num}",
-            "wait_for_selector": "css:[data-automation=\"jobListing\"]"
+            "actions_before_run": [
+                {
+                    "action": "wait_for",
+                    "selector": "css:div[data-testid='cookie-policy-banner']",
+                    "timeout": 15000,
+                    "description": "Wait for the cookie banner to be visible."
+                },
+                {
+                    "action": "click",
+                    "selector": "css:button#accept-button",
+                    "description": "Click the 'Accept all cookies' button."
+                },
+                {
+                    "action": "wait",
+                    "duration": 2000,
+                    "description": "Wait 2 seconds for the page to update after the click."
+                }
+            ],
+            "wait_for_selector": "css:article[data-card-type='job-card']"
         },
         "remoteok": {
-            "base_urls": [
-                "https://remoteok.com/remote-dev-jobs",
-                "https://remoteok.com/remote-engineer-jobs",
-                "https://remoteok.com/remote-senior-jobs",
-                "https://remoteok.com/remote-sys-admin-jobs",
-                "https://remoteok.com/remote-exec-jobs"
-            ],
-            "pagination_template": "?page={page_num}",
-            "wait_for_selector": "css:[data-automation=\"jobListing\"]"
+            "active": false
         }
     }
 }
