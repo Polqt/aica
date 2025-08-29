@@ -170,3 +170,8 @@ class ProfileSummary(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ProfileFlags(BaseModel):
+    has_experiences: bool
+    has_certificates: bool
+    

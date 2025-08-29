@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from .. import models
 from ...api.v1.schemas import profiles as profile_schemas
+from sqlalchemy import update
 
 
 def get_or_create_skill(db: Session, skill_name: str) -> models.Skill:
@@ -30,6 +31,19 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
         # Extract skill names from SkillCreate objects
         skill_names = [skill.name for skill in profile_in.skills]
         profile.skills = [get_or_create_skill(db, name) for name in skill_names]
+
+        # Ensure profile_skill_link rows carry user_id for this profile
+        db.flush()  # ensure relationship rows are present
+        db.execute(
+            update(models.ProfileSkillLink)
+            .where(models.ProfileSkillLink.profile_id == profile.id)
+            .values(user_id=user.id)
+        )
+
+        # Maintain user_scoped skills as a simple array keyed by user_id
+        db.query(models.UserSkill).filter(models.UserSkill.user_id == user.id).delete()
+        for name in skill_names:
+            db.add(models.UserSkill(user_id=user.id, name=name))
 
     # Handle educations update (required field)
     if profile_in.educations is not None:

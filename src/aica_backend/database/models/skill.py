@@ -20,4 +20,13 @@ class ProfileSkillLink(Base):
 
     profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
     skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), primary_key=True)
+    # Denormalized convenience to directly link to the owning user
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     proficiency_level: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+
+
+class UserSkill(Base):
+    __tablename__ = "user_skills"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), primary_key=True, index=True)

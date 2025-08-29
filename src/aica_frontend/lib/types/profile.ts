@@ -81,3 +81,8 @@ export interface Profile {
   skills: Skill[];
   certificates: Certificate[];
 }
+
+export interface ProfileFlags {
+  has_experiences: boolean;
+  has_certificates: boolean;
+}

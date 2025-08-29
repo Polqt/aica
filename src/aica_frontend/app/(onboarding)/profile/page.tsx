@@ -384,7 +384,7 @@ export default function Profile() {
                       )}
                     />
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div className="text-center">
                       <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
@@ -474,8 +474,7 @@ export default function Profile() {
                       )}
                     />
                   </div>
-
-                  {/* Contact Information Section */}
+                  
                   <div className="space-y-6">
                     <div className="text-center">
                       <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">

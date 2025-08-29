@@ -1,40 +1,32 @@
 {
-    "type": "object",
-    "properties": {
-        "jobs": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "job_title": { "type": "string" },
-                    "company_name": { "type": "string" },
-                    "location": { "type": "string" },
-                    "employment_type": { "type": "string" },
-                    "experience_level": { "type": "string" },
-                    "job_description": { "type": "string", "description": "A brief summary of the job role." },
-                    "qualifications": {
-                        "type": "object",
-                        "properties": {
-                            "required_skills": {
-                                "type": "array",
-                                "items": { "type": "string" },
-                                "description": "List of specific technical skills, languages, or frameworks."
-                            },
-                            "full_text": {
-                                "type": "string",
-                                "description": "The full text of the qualifications or requirements section."
-                            }
-                        }
-                    },
-                    "job_url": {
-                        "type": "string",
-                        "description": "The direct and unique URL to the detailed job posting page."
-                    },
-                    "is_tech_job": { "type": "boolean" }
-                },
-                "required": ["job_title", "company_name", "job_url", "is_tech_job"]
-            }
-        }
-    },
-    "required": ["jobs"]
+  "type": "object",
+  "properties": {
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "job_title": { "type": "string" },
+          "company_name": { "type": "string" },
+          "location": { "type": "string" },
+          "employment_type": { "type": "string" },
+          "qualifications": {
+            "type": "object",
+            "properties": {
+              "full_text": { "type": "string" },
+              "required_skills": { "type": "array", "items": { "type": "string" } },
+              "experience_level": { "type": "string" },
+              "proficiency_level": { "type": "string" }
+            },
+            "required": ["full_text"]
+          },
+          "job_description": { "type": "string" },
+          "job_url": { "type": "string" },
+          "is_tech_job": { "type": "boolean" }
+        },
+        "required": ["job_title", "company_name", "job_url", "is_tech_job", "qualifications"]
+      }
+    }
+  },
+  "required": ["jobs"]
 }

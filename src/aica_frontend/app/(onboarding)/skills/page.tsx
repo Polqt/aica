@@ -10,7 +10,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import z from 'zod';
 import {
   Plus,
@@ -22,6 +21,11 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import {
+  computePercentage,
+  showToastError,
+  showToastSuccess,
+} from '@/lib/utils';
 
 const skillFormSchema = z.object({
   skills: z.array(
@@ -55,7 +59,7 @@ export default function Skills() {
     skill.name?.trim(),
   ).length;
   const completionPercentage =
-    totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+    totalFields > 0 ? computePercentage(completedFields, totalFields) : 0;
 
   async function onSubmit(values: z.infer<typeof skillFormSchema>) {
     setApiError(null);
@@ -68,12 +72,12 @@ export default function Skills() {
       // Persist current onboarding state to backend so skipping later steps still saves profile
       await submitOnboardingData();
 
-      toast.success('Skills Saved!', {
-        description: `Successfully added ${values.skills.length} skill${
+      showToastSuccess(
+        'Skills Saved!',
+        `Successfully added ${values.skills.length} skill${
           values.skills.length > 1 ? 's' : ''
         }. Let's add your certificates next.`,
-        duration: 3000,
-      });
+      );
 
       setTimeout(() => {
         router.push('/certificate');
@@ -83,26 +87,22 @@ export default function Skills() {
         error instanceof Error ? error.message : 'An unexpected error occurred';
 
       setApiError(errorMessage);
-      toast.error('Skills Update Failed', {
-        description: errorMessage,
-        duration: 5000,
-      });
+      showToastError('Skills Update Failed', errorMessage);
     }
   }
 
   const addSkill = () => {
     if (fields.length >= 20) {
-      toast.error('Maximum limit reached', {
-        description: 'You can add up to 20 skills only.',
-      });
+      showToastError(
+        'Maximum limit reached',
+        'You can add up to 20 skills only.',
+      );
       return;
     }
 
     append({ name: '' });
 
-    toast.success('New skill added!', {
-      description: 'Add your skill name.',
-    });
+    showToastSuccess('New skill added!', 'Add your skill name.');
   };
 
   return (

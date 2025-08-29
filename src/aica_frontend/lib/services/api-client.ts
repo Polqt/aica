@@ -5,11 +5,17 @@ import {
   AuthResponse,
   User,
 } from '../types/api';
-import { ProfileUpdate, Profile } from '../types/profile';
+import {
+  ProfileUpdate,
+  Profile,
+  Experience,
+  Certificate,
+  ProfileFlags,
+} from '../types/profile';
 
 const API_BASE_URL =
   (typeof window !== 'undefined'
-    ? (window.__API_BASE_URL__ as string | undefined)
+    ? ((window as any).__API_BASE_URL__ as string | undefined)
     : undefined) ||
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:8000';
@@ -58,6 +64,18 @@ class ApiClient {
 
     update: async (data: ProfileUpdate): Promise<Profile> => {
       return this.http.put<Profile>('/profile', data);
+    },
+
+    getExperiences: async (): Promise<Experience[]> => {
+      return this.http.get<Experience[]>('/profile/experiences');
+    },
+
+    getCertificates: async (): Promise<Certificate[]> => {
+      return this.http.get<Certificate[]>('/profile/certificates');
+    },
+
+    getFlags: async (): Promise<ProfileFlags> => {
+      return this.http.get<ProfileFlags>('/profile/flags');
     },
   };
 }

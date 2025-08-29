@@ -1,6 +1,6 @@
 from .user import User
 from .profile import Profile, Education, Experience, Certificate
-from .skill import Skill, ProfileSkillLink
+from .skill import Skill, ProfileSkillLink, UserSkill
 from .job import JobPosting
 from .pipeline import PipelineRun, ScrapingSession, ProcessingError
 
@@ -14,6 +14,7 @@ __all__ = [
     
     "Skill",
     "ProfileSkillLink",
+    "UserSkill",
     
     "JobPosting",
     

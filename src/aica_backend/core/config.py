@@ -57,7 +57,11 @@ class Settings(BaseSettings):
     # Crawl4AI Configuration (ADDED MISSING FIELDS)
     CRAWL4AI_HEADLESS: bool = False
     CRAWL4AI_BROWSER_TYPE: str = "chromium"
-    CRAWL4AI_USER_AGENT: str = "AICA-JobBot/1.0"
+    CRAWL4AI_USER_AGENT: str = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/117.0.0.0 Safari/537.36"
+    )
     
     # Pipeline Settings
     SCRAPING_BATCH_SIZE: int = 100

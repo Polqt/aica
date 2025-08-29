@@ -1,37 +1,65 @@
 {
     "sources": {
         "jobstreet": {
+            "active": false,
+            "llm_config": {
+                "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
+                "schema_path": "scraping/prompts/job_extraction_schema.json"
+            },
+            "base_urls": [
+                "https://ph.jobstreet.com/jobs-in-information-communication-technology"
+            ],
+            "pagination_template": "?page={page_num}",
+            "browser_config": {
+                "headless": true,
+                "stealth": true,
+                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/5.37.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+                "proxy": {
+                    "server": "wss://YOUR_SCRAPING_PROXY_WEBSOCKET_URL"
+                }
+            },
+            "actions_before_run": [
+                {
+                    "action": "wait",
+                    "duration": 5000,
+                    "description": "Wait 5 seconds for proxy to connect and page to load."
+                }
+            ],
+            "wait_for_selector": "css:div[data-testid='job-card']",
+            "scroll": true,
+            "scroll_count": 5,
+            "wait_for_timeout": 180000
+        },
+        "remoteok": {
             "active": true,
             "llm_config": {
                 "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
                 "schema_path": "scraping/prompts/job_extraction_schema.json"
             },
             "base_urls": [
-                "https://www.jobstreet.com.ph/jobs/software-developer"
+                "https://remoteok.com/remote-tech-jobs",
+                "https://remoteok.com/remote-dev-jobs",
+                "https://remoteok.com/remote-engineer-jobs"
             ],
-            "pagination_template": "?page={page_num}",
+            "wait_for_selector": "body",
+            "wait_for_timeout": 30000,
+            "browser_config": {
+                "stealth": true,
+                "headless": false
+            },
             "actions_before_run": [
                 {
-                    "action": "wait_for",
-                    "selector": "css:div[data-testid='cookie-policy-banner']",
-                    "timeout": 15000,
-                    "description": "Wait for the cookie banner to be visible."
-                },
-                {
-                    "action": "click",
-                    "selector": "css:button#accept-button",
-                    "description": "Click the 'Accept all cookies' button."
-                },
-                {
                     "action": "wait",
-                    "duration": 2000,
-                    "description": "Wait 2 seconds for the page to update after the click."
+                    "duration": 8000,
+                    "description": "Wait 8 seconds for page to fully load."
+                },
+                {
+                    "action": "scroll",
+                    "selector": "body",
+                    "count": 3,
+                    "description": "Scroll to load more content."
                 }
-            ],
-            "wait_for_selector": "css:article[data-card-type='job-card']"
-        },
-        "remoteok": {
-            "active": false
+            ]
         }
     }
 }
