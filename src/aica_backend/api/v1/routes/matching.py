@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
+from typing import Dict, Any
 from ... import dependencies
 from ....database import models
 from ....rag.embeddings.embedding_service import embedding_service

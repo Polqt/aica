@@ -9,7 +9,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_community.vectorstores import PGVector
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 
 from ..embeddings.embedding_service import embedding_service
 from ..embeddings.store_factory import get_vector_store
@@ -36,7 +36,7 @@ class RAGPipeline:
             )
 
             # Initialize LLM
-            self.llm = Ollama(
+            self.llm = OllamaLLM(
                 model=settings.OLLAMA_MODEL_NAME,
                 base_url=settings.OLLAMA_BASE_URL,
                 temperature=0.1

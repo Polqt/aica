@@ -72,3 +72,41 @@ class JobCRUD(BaseCRUD[JobPosting, job_schemas.JobCreate, job_schemas.JobUpdate]
         return db.query(models.JobPosting).filter(models.JobPosting.id.in_(job_ids)).order_by(ordering).all()
 
 crud_jobs = JobCRUD(models.JobPosting)
+
+
+class JobRepository:
+    """Repository for job-related operations combining multiple data sources."""
+
+    def __init__(self):
+        from .user import UserCRUD
+        from .profile import get_profile
+        self.user_crud = UserCRUD()
+        self.get_profile = get_profile
+
+    def get_user_profile(self, db: Session, user_id: int):
+        """Get user profile with skills."""
+        user = self.user_crud.get_user_by_id(db, user_id)
+        if not user:
+            return None
+
+        profile = self.get_profile(user)
+        if not profile:
+            return None
+
+        return {
+            'id': profile.id,
+            'user_id': profile.user_id,
+            'skills': [skill.name for skill in profile.skills] if profile.skills else [],
+            'experience_level': profile.experience_level,
+            'preferred_job_types': profile.preferred_job_types or []
+        }
+
+    def get_recent_jobs(self, db: Session, limit: int = 20):
+        """Get recent jobs ordered by creation date."""
+        return db.query(models.JobPosting).filter(
+            models.JobPosting.is_active == True
+        ).order_by(models.JobPosting.created_at.desc()).limit(limit).all()
+
+    def get_by_id(self, db: Session, job_id: int):
+        """Get job by ID."""
+        return crud_jobs.get(db, job_id)

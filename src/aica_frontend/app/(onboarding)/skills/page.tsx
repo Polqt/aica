@@ -17,7 +17,6 @@ import {
   ArrowRight,
   TrendingUp,
   Lightbulb,
-  AlertCircle,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -38,7 +37,7 @@ const skillFormSchema = z.object({
 export default function Skills() {
   const router = useRouter();
   const { updateData, submitOnboardingData } = useOnboarding();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [, setApiError] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof skillFormSchema>>({
     resolver: zodResolver(skillFormSchema),
@@ -242,17 +241,6 @@ export default function Skills() {
                         </Button>
                       </CardContent>
                     </Card>
-
-                    {/* Error Display */}
-                    {apiError && (
-                      <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                        <p className="text-sm text-red-600 dark:text-red-400">
-                          {apiError}
-                        </p>
-                      </div>
-                    )}
-
                     <div className="pt-6 border-t border-slate-200/60 dark:border-slate-700/50">
                       <Button
                         type="submit"

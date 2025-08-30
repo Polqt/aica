@@ -70,8 +70,6 @@ export class HttpClient {
 
   private getTokenFromCookie(): string | null {
     if (typeof document === 'undefined') return null;
-
-    // Prioritize localStorage as it's explicitly set by AuthContext on login.
     // This addresses potential timing issues where cookies might not be immediately available or updated.
     try {
       const lsToken = localStorage.getItem('access_token');
@@ -82,14 +80,21 @@ export class HttpClient {
       // If localStorage is not accessible, proceed to check cookies.
     }
 
+    // Check for access_token cookie (set by backend)
     const cookieToken = document.cookie
       .split('; ')
       .find(row => row.startsWith('access_token='))
       ?.split('=')[1];
 
-    if (cookieToken && cookieToken.startsWith('Bearer ')) {
-      return cookieToken.substring(7);
+    if (cookieToken) {
+      // Backend sets cookie as "Bearer <token>", so extract the token part
+      if (cookieToken.startsWith('Bearer ')) {
+        return cookieToken.substring(7);
+      }
+      // If it's just the token without Bearer, return as is
+      return cookieToken;
     }
+
     return null;
   }
 

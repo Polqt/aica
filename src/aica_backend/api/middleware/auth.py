@@ -52,13 +52,22 @@ class AuthMiddleware:
     
     async def _validate_token(self, token: str) -> Optional[models.User]:
         if not token:
+            logger.warning("No token provided for validation")
             return None
         try:
+            logger.info(f"Validating token in middleware")
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             email: str = payload.get("sub")
             if not email:
+                logger.warning("No email found in token payload")
                 return None
             with SessionLocal() as db:
-                return UserCRUD.get_user_by_email(db, email=email)
-        except JWTError:
+                user = UserCRUD.get_user_by_email(db, email=email)
+                if user:
+                    logger.info(f"User validated in middleware: {user.email}")
+                else:
+                    logger.warning(f"User not found in database: {email}")
+                return user
+        except JWTError as e:
+            logger.error(f"JWT validation error in middleware: {str(e)}")
             return None

@@ -75,3 +75,11 @@ def update_profile(db: Session, user: models.User, profile_in: profile_schemas.P
 
 def get_profile(user: models.User) -> models.Profile:
     return user.profile
+
+
+class ProfileRepository:
+    """Repository for profile-related operations."""
+
+    def get_by_user_id(self, db: Session, user_id: int):
+        """Get profile by user ID."""
+        return db.query(models.Profile).filter(models.Profile.user_id == user_id).first()

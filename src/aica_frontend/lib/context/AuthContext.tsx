@@ -31,24 +31,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = user !== null;
 
   useEffect(() => {
-    // Reuse fetchUser to avoid duplicating logic
-    fetchUser().finally(() => setIsLoading(false));
+    // Only fetch user if there's a token available
+    const initializeAuth = async () => {
+      try {
+        // Check if we have a token before making the request
+        const hasToken = typeof window !== 'undefined' && (
+          localStorage.getItem('access_token') ||
+          document.cookie.includes('access_token=')
+        );
+        
+        if (hasToken) {
+          await fetchUser();
+        } else {
+          setUser(null);
+        }
+      } catch {
+        // Silent fail on initial load - user just isn't authenticated
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    initializeAuth();
   }, []);
 
   const fetchUser = async (): Promise<void> => {
     try {
       const currentUser = await apiClient.auth.getCurrentUser();
       setUser(currentUser);
-    } catch {
+    } catch (error) {
       setUser(null);
-      throw new Error('Failed to fetch user data');
+      const message = error instanceof Error ? error.message : 'Failed to fetch user data';
+      throw new Error(message);
     }
   };
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
       const auth = await apiClient.auth.login({ email, password });
-      // Persist access token for subsequent Authorization header (dev-friendly)
       try {
         if (auth?.access_token) {
           localStorage.setItem('access_token', auth.access_token);
@@ -69,6 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'Logout request failed, but you have been logged out locally',
       );
     } finally {
+      try {
+        localStorage.removeItem('access_token');
+      } catch {}
       setUser(null);
     }
   };

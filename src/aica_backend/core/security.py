@@ -1,11 +1,14 @@
 import secrets
 import re
+import logging
 
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, Tuple
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from .config import settings
+
+logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
@@ -90,17 +93,29 @@ class TokenManager:
     def verify_token(self, token: str, token_type: str = "access") -> Optional[Dict[str, Any]]:
         """Verify and decode a JWT token."""
         try:
+            logger.info(f"Verifying token of type: {token_type}")
+            
             if self.is_token_blacklisted(token):
+                logger.warning("Token is blacklisted")
                 return None
             
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            logger.info(f"Token decoded successfully. Payload type: {payload.get('type')}")
             
             if payload.get("type") != token_type:
+                logger.warning(f"Token type mismatch. Expected: {token_type}, Got: {payload.get('type')}")
                 return None
             
             return payload
             
-        except (jwt.ExpiredSignatureError, JWTError):
+        except jwt.ExpiredSignatureError as e:
+            logger.warning(f"Token expired: {str(e)}")
+            return None
+        except JWTError as e:
+            logger.error(f"JWT Error: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error during token verification: {str(e)}")
             return None
     
     def blacklist_token(self, token: str) -> None:

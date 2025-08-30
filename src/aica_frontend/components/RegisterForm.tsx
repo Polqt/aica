@@ -34,7 +34,7 @@ export default function RegisterForm() {
     mode: 'onChange',
   });
 
-  const { handleSubmit, isSubmitting, apiError, clearApiError } =
+  const { handleSubmit, isSubmitting, clearApiError } =
     useFormSubmission<RegisterFormData>({
       onSubmit: async data => {
         clearApiError();
@@ -123,15 +123,6 @@ export default function RegisterForm() {
             </FormItem>
           )}
         />
-
-        {apiError && (
-          <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
-            <div className="text-sm text-red-700 dark:text-red-300">
-              {apiError}
-            </div>
-          </div>
-        )}
-
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </Button>

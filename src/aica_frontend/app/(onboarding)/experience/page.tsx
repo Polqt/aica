@@ -15,7 +15,6 @@ import ExperienceCard from '@/components/ExperienceCard';
 import {
   Plus,
   Briefcase,
-  AlertCircle,
   ArrowRight,
   TrendingUp,
 } from 'lucide-react';
@@ -54,7 +53,7 @@ const experienceFormSchema = z.object({
 
 export default function Experience() {
   const router = useRouter();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [, setApiError] = useState<string | null>(null);
   const { updateData, submitOnboardingData } = useOnboarding();
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([0]);
 
@@ -274,17 +273,6 @@ export default function Experience() {
                       </Button>
                     </CardContent>
                   </Card>
-
-                  {/* Error Display */}
-                  {apiError && (
-                    <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        {apiError}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="pt-6 border-t border-slate-200/60 dark:border-slate-700/50 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button
                       type="button"

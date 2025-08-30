@@ -4,9 +4,9 @@ from typing import Dict, Any, List
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from database.models import JobPosting, PipelineRun, ScrapingSession
-from scraping.providers.factory import ScrapingProviderFactory
-from utils.common import handle_service_error, create_success_response, AppError
+from ..database.models import JobPosting, PipelineRun, ScrapingSession
+from ..scraping.providers.factory import ScrapingProviderFactory
+from ..utils.common import handle_service_error, create_success_response, AppError
 
 logger = logging.getLogger(__name__)
 

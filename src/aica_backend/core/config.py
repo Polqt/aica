@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    MAX_LOGIN_ATTEMPTS: int = 5
+    LOCKOUT_DURATION_MINUTES: int = 15
     
     # Password Security
     PASSWORD_HASH_ROUNDS: int = 12
@@ -64,7 +66,7 @@ class Settings(BaseSettings):
     # Basic Configuration
     LOG_LEVEL: str = "INFO"
     ENVIRONMENT: str = "development"
-    DEBUG: bool = True
+    DEBUG: str = "true"
 
     class Config:
         env_file = str(PROJECT_ROOT / ".env")
