@@ -1,7 +1,7 @@
 {
     "sources": {
         "jobstreet": {
-            "active": false,
+            "active": true,
             "llm_config": {
                 "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
                 "schema_path": "scraping/prompts/job_extraction_schema.json"
@@ -29,37 +29,6 @@
             "scroll": true,
             "scroll_count": 5,
             "wait_for_timeout": 180000
-        },
-        "remoteok": {
-            "active": true,
-            "llm_config": {
-                "prompt_path": "scraping/prompts/job_extraction_prompt.txt",
-                "schema_path": "scraping/prompts/job_extraction_schema.json"
-            },
-            "base_urls": [
-                "https://remoteok.com/remote-tech-jobs",
-                "https://remoteok.com/remote-dev-jobs",
-                "https://remoteok.com/remote-engineer-jobs"
-            ],
-            "wait_for_selector": "tr.job",
-            "wait_for_timeout": 30000,
-            "browser_config": {
-                "stealth": true,
-                "headless": false
-            },
-            "actions_before_run": [
-                {
-                    "action": "wait",
-                    "duration": 20000,
-                    "description": "Wait 20 seconds for page to fully load."
-                },
-                {
-                    "action": "scroll",
-                    "selector": "body",
-                    "count": 5,
-                    "description": "Scroll to load more content."
-                }
-            ]
         }
     }
 }

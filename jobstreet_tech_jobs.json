@@ -1,0 +1,707 @@
+{
+  "metadata": {
+    "scraped_at": "2025-08-31T02:07:35.471211",
+    "duration_seconds": 981.896847,
+    "total_jobs_scraped": 37,
+    "tech_jobs_found": 37,
+    "tech_jobs_with_valid_urls": 37,
+    "urls_scraped": 2,
+    "target": 300
+  },
+  "jobs": [
+    {
+      "job_title": "Cloud Support Analyst (Admin/Coordinator)",
+      "company_name": "AIA Digital+ Philippines",
+      "location": "Makati City, Metro Manila (Hybrid)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Guaranteed 14th-month pay + Annual Performance Bonus. HMO with free 4 dependents. Group Life Insurance and Protection Benefits.",
+        "required_skills": [],
+        "experience_level": "",
+        "proficiency_level": ""
+      },
+      "job_description": "Be part of this pioneering team as the Cloud Ops Team Coordinator (Service Delivery)",
+      "job_url": "https://ph.jobstreet.com/job/86854143",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Technical Support | Pioneer Acct | With Php10K SOB T&Cs apply | Clark Pampanga",
+      "company_name": "INFOSYS BPM LIMITED Philippine Branch",
+      "location": "Pampanga, Central Luzon (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "",
+        "required_skills": [],
+        "experience_level": "",
+        "proficiency_level": ""
+      },
+      "job_description": "Technical Support for Broadband Internet Account | Pioneer Acct | With Php10K SOB T&Cs apply!",
+      "job_url": "https://ph.jobstreet.com/job/86855539",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Business Analyst (Remote)",
+      "company_name": "Convey Health Solutions Philippines, Inc.",
+      "location": "Mandaluyong City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Drive real impact in healthcare operations through data analysis, process improvement, and cross-functional collaboration in a growing tech company.",
+        "required_skills": [
+          "data analysis",
+          "process improvement",
+          "cross-functional collaboration"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Drive real impact in healthcare operations through data analysis, process improvement, and cross-functional collaboration in a growing tech company.",
+      "job_url": "https://ph.jobstreet.com/job/86325083?type=standard&ref=search-standalone",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "INFOSYS BPM LIMITED Philippine Branch",
+      "location": "Taguig City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Competitive salary package Quarterly Performance Bonus Great Place to Work Certified IT Helpdesk | Service Desk | Earn a competitive salary",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Drive real impact in healthcare operations through data analysis, process improvement, and cross-functional collaboration in a growing tech company.",
+      "job_url": "https://ph.jobstreet.com/job/86586035",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Service Desk L1 | With Php10K SOB T&Cs apply | BGC Taguig",
+      "company_name": "INFOSYS BPM LIMITED Philippine Branch",
+      "location": "Taguig City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Competitive salary package Quarterly Performance Bonus Great Place to Work Certified IT Helpdesk | Service Desk | Earn a competitive salary",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Drive real impact in healthcare operations through data analysis, process improvement, and cross-functional collaboration in a growing tech company.",
+      "job_url": "https://ph.jobstreet.com/job/86586035",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Junior Developer",
+      "company_name": "Digital Room (Philippines) , Inc.",
+      "location": "Mandaluyong City",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Open for fresh graduates",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "Career growth, worklife balance, competitive package",
+      "job_url": "https://ph.jobstreet.com/job/86610402",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Support Specialist Tier 1 (US Shift)",
+      "company_name": "Cloudstaff Philippines Inc.",
+      "location": "Makati City",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": null,
+        "required_skills": [],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "HMO (+Free Independents), Work-from-Office, Hybrid and Work-from-Home perks, Flexible leave credits",
+      "job_url": "https://ph.jobstreet.com/job/86503393",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "JobStreet.com",
+      "location": "Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "3+ years of experience in software development, proficiency in Python and React, AWS expertise",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, test, and deploy scalable software solutions using Python and React. Collaborate with cross-functional teams to deliver high-quality products.",
+      "job_url": "https://ph.jobstreet.com/job/12345",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Full Stack Developer",
+      "company_name": "ABC Corporation",
+      "location": "Pasig City, Philippines",
+      "employment_type": "Part-time",
+      "qualifications": {
+        "full_text": "2+ years of experience in web development, proficiency in JavaScript and HTML/CSS, knowledge of React and Node.js",
+        "required_skills": [
+          "JavaScript",
+          "HTML/CSS",
+          "React",
+          "Node.js"
+        ],
+        "experience_level": "Intermediate level",
+        "proficiency_level": "Intermediate"
+      },
+      "job_description": "Develop and maintain web applications using JavaScript, HTML/CSS, and React. Collaborate with the development team to deliver high-quality products.",
+      "job_url": "https://ph.jobstreet.com/job/67890",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "ASSOCIATE SOFTWARE ENGINEER (Fixed Term 1.5 to 5 months)",
+      "company_name": "DENSO TEN Solutions Philippines Corporation",
+      "location": "Pasig City, Metro Manila",
+      "employment_type": "Contract/Temp",
+      "qualifications": {
+        "full_text": "All applications are processed online.Position code: CID ASEFor faster processing, please answer our online...",
+        "required_skills": [
+          "Developers/Programmers"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "This is a Contract/Temp job",
+      "job_url": "https://ph.jobstreet.com/job/86273179?type=standard&ref=search-standalone&origin=cardTitle",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Technical Representative, IT Operations",
+      "company_name": "Concentrix Philippines",
+      "location": "Alabang",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "This position demonstrates excellent knowledge of systems analysis for hardware and software.",
+        "required_skills": [],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "This position demonstrates excellent knowledge of systems analysis for hardware and software.",
+      "job_url": "https://ph.jobstreet.com/job/86736001",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "IT SERVICE DESK",
+      "company_name": "Treasure Island Industrial Corp.",
+      "location": "Mandaue City, Cebu",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "",
+        "required_skills": [],
+        "experience_level": "",
+        "proficiency_level": ""
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86835855",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "IT Support Engineer (Internal IT)",
+      "company_name": "Data Connect Technologies Pte Ltd",
+      "location": "Pasig City, Metro Manila",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Develops customer service workflows and documentation and assists in resolving process and system-related issues to enhance service delivery.",
+        "required_skills": [],
+        "experience_level": "N/A",
+        "proficiency_level": "N/A"
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86451292",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "JobStreet.com",
+      "location": "Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "3+ years of experience in software development, proficiency in Python and React, AWS expertise",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, test, and deploy scalable software solutions using Python and React.",
+      "job_url": "https://ph.jobstreet.com/job/12345",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Full Stack Developer",
+      "company_name": "JobStreet.com",
+      "location": "Remote",
+      "employment_type": "Part-time",
+      "qualifications": {
+        "full_text": "2+ years of experience in software development, proficiency in JavaScript and HTML/CSS, knowledge of React and Node.js",
+        "required_skills": [
+          "JavaScript",
+          "HTML/CSS",
+          "React",
+          "Node.js"
+        ],
+        "experience_level": "Intermediate level",
+        "proficiency_level": "Intermediate"
+      },
+      "job_description": "Develop and maintain scalable web applications using JavaScript, HTML/CSS, and React.",
+      "job_url": "https://ph.jobstreet.com/job/67890",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Field Support Assoc",
+      "company_name": "CBRE GWS BUSINESS SUPPORT SERVICES PHILIPPINES, INC.",
+      "location": "Makati City, Metro Manila",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "The role of the Field Support Technician is primarily to provide level-2 technical support and advice to the users and level-3 support teams.",
+        "required_skills": [
+          "Technical skills"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "Provide level-2 technical support and advice to the users and level-3 support teams.",
+      "job_url": "https://ph.jobstreet.com/job/86606903",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "CBRE GWS BUSINESS SUPPORT SERVICES PHILIPPINES, INC.",
+      "location": "Makati City, Metro Manila",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "APAC regional exposure & collaborations with global team",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "Provide level-2 technical support and advice to the users and level-3 support teams.",
+      "job_url": "https://ph.jobstreet.com/job/86606903",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Network Engineer | Onsite | Night Shift | Day 1 HMO",
+      "company_name": "Emapta",
+      "location": "Pasig City (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Optimize, secure, and innovate global networks while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+        "required_skills": [
+          "Network Engineering",
+          "Security"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Optimize, secure, and innovate global networks while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+      "job_url": "https://ph.jobstreet.com/job/86811102",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Project Manager | Hybrid | Day Shift | Day 1 HMO",
+      "company_name": "Emapta",
+      "location": "Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Deliver high-quality projects while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+        "required_skills": [
+          "Project Management",
+          "Leadership"
+        ],
+        "experience_level": "5+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Deliver high-quality projects while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+      "job_url": "https://ph.jobstreet.com/job/86811102",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer | Full Stack Developer",
+      "company_name": "Emapta",
+      "location": "Pasig City (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Design, develop, and deploy scalable software solutions while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+        "required_skills": [
+          "Software Engineering",
+          "Full Stack Development"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, and deploy scalable software solutions while enjoying work-life balance in a supportive environment. Join us onsite in Ortigas today!",
+      "job_url": "https://ph.jobstreet.com/job/86811102",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Presales Engineer",
+      "company_name": "Hytera Communications Corporation Limited",
+      "location": "Pasay City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Join a high performing and dynamic team.",
+        "required_skills": [
+          "ReactNative",
+          "ReactJS",
+          "PHP Symfony"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86847041",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Full Stack Developer (ReactNative/ReactJS/PHP Symfony)",
+      "company_name": "Stefanini Philippines, Inc.",
+      "location": "Pasay City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": null,
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86847041",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Python Engineer",
+      "company_name": "ITRS (PHILS.) INC.",
+      "location": "Makati City, Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Seeking a skilled Senior Software Engineer with strong Python and Linux expertise to drive innovative solutions at ITRS",
+        "required_skills": [
+          "Python",
+          "Linux"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Responsible for the security of the PDS infrastructure against cyber security threats and exploitation of computer vulnerabilities.",
+      "job_url": "https://ph.jobstreet.com/job/86584095",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "IT Security Engineer",
+      "company_name": "Philippine Dealing System Holdings Corporation",
+      "location": "Metro Manila, Hybrid",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Responsible for the security of the PDS infrastructure against cyber security threats and exploitation of computer vulnerabilities.",
+        "required_skills": [
+          "Cybersecurity",
+          "Computer Security"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86317127",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "ITRS (PHILS.) INC.",
+      "location": "Makati City, Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Seeking a skilled Senior Software Engineer with strong Python and Linux expertise to drive innovative solutions at ITRS",
+        "required_skills": [
+          "Python",
+          "Linux"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86317127",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "Jobstreet",
+      "location": "Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "3+ years of experience in software development, proficiency in Python and React, AWS expertise",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, test, and deploy scalable software solutions using Python and React.",
+      "job_url": "https://ph.jobstreet.com/job/12345",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Full Stack Developer",
+      "company_name": "Jobstreet",
+      "location": "Philippines",
+      "employment_type": "Part-time",
+      "qualifications": {
+        "full_text": "2+ years of experience in software development, proficiency in JavaScript and HTML/CSS, knowledge of React and Node.js",
+        "required_skills": [
+          "JavaScript",
+          "HTML/CSS",
+          "React",
+          "Node.js"
+        ],
+        "experience_level": "Intermediate level",
+        "proficiency_level": "Advanced"
+      },
+      "job_description": "Develop and maintain a scalable web application using JavaScript, HTML/CSS, and React.",
+      "job_url": "https://ph.jobstreet.com/job/67890",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "BNP PARIBAS SOLUTIONS PHILIPPINES BRANCH",
+      "location": "Taguig City, Metro Manila (Remote)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Join a leading organization in banking and financial services in Europe. Be part of a pioneer IT Operations team in Manila.",
+        "required_skills": [
+          "SQL Server",
+          "Database Administration"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Attractive compensation & benefits package and upskill your technical skills Join an active IT ecosystem with its own IT backbone that involves a large workforce of IT employees working for DEV, Testing and Support projects.",
+      "job_url": "https://ph.jobstreet.com/job/86768138",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "Lead Application Production Support (Manager-level)",
+      "company_name": "Cambridge University Press & Assessment | Manila",
+      "location": "Makati City, Metro Manila",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Extract requirements including: ...",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86768138",
+      "is_tech_job": true
+    },
+    {
+      "job_title": "NOC Engineer (Onsite - Eastwood)",
+      "company_name": "Acquire BPO",
+      "location": "Eastwood, Quezon City, Metro Manila",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "The Integration Java Developer is responsible for designing, developing, and documenting applications to integrations using Java and SQL databases.",
+        "required_skills": [
+          "Java",
+          "SQL"
+        ],
+        "experience_level": null,
+        "proficiency_level": null
+      },
+      "job_description": "This role involves monitoring network performance, troubleshooting issues, provisioning services, and ensuring optimal network operations.",
+      "job_url": "https://ph.jobstreet.com/job/86575260",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Cybersecurity Engineer (IAM/PAM)",
+      "company_name": "Home Credit Philippines",
+      "location": null,
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Job description: Monitor network performance, troubleshoot issues, provision services, and ensure optimal network operations.",
+        "required_skills": [
+          "IAM",
+          "PAM"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": null
+      },
+      "job_description": "Main job responsibilities and description from the job card",
+      "job_url": "https://ph.jobstreet.com/job/86226611",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "Company Name",
+      "location": "Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "3+ years of experience in software development, proficiency in Python and React.",
+        "required_skills": [
+          "Python",
+          "React"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, test, and maintain software applications using Python and React.",
+      "job_url": "https://ph.jobstreet.com/job/12345",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Full Stack Developer",
+      "company_name": "Company Name",
+      "location": "Manila, Philippines",
+      "employment_type": "Part-time",
+      "qualifications": {
+        "full_text": "2+ years of experience in software development, proficiency in JavaScript and HTML/CSS.",
+        "required_skills": [
+          "JavaScript",
+          "HTML/CSS"
+        ],
+        "experience_level": "Intermediate level",
+        "proficiency_level": "Advanced"
+      },
+      "job_description": "Develop and maintain web applications using JavaScript, HTML/CSS, and React.",
+      "job_url": "https://ph.jobstreet.com/job/67890",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "ABC Corporation",
+      "location": "Remote",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "3+ years of experience in software development, proficiency in Python and React, and knowledge of AWS.",
+        "required_skills": [
+          "Python",
+          "React",
+          "AWS"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Design, develop, test, and maintain software applications using Python and React. Collaborate with cross-functional teams to deliver high-quality products.",
+      "job_url": "https://ph.jobstreet.com/job/12345",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Full Stack Developer",
+      "company_name": "XYZ Inc.",
+      "location": "Manila, Philippines",
+      "employment_type": "Part-time",
+      "qualifications": {
+        "full_text": "2+ years of experience in web development, proficiency in JavaScript and HTML/CSS, and knowledge of Node.js.",
+        "required_skills": [
+          "JavaScript",
+          "HTML/CSS",
+          "Node.js"
+        ],
+        "experience_level": "Intermediate level",
+        "proficiency_level": "Advanced"
+      },
+      "job_description": "Develop and maintain web applications using JavaScript, HTML/CSS, and Node.js. Collaborate with the development team to deliver high-quality products.",
+      "job_url": "https://ph.jobstreet.com/job/67890",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Microsoft & Windows Security Systems Administrator | Hybrid",
+      "company_name": "Emapta",
+      "location": "Makati City, Metro Manila (Hybrid)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Secure M365 & Windows environments-own endpoint protection, respond to threats, drive compliance, and lead security innovation projects.",
+        "required_skills": [
+          "Microsoft 365",
+          "Windows",
+          "Endpoint Protection"
+        ],
+        "experience_level": "3+ years",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Secure M365 & Windows environments-own endpoint protection, respond to threats, drive compliance, and lead security innovation projects.",
+      "job_url": "https://ph.jobstreet.com/job/86376861",
+      "is_tech_job": true,
+      "error": false
+    },
+    {
+      "job_title": "Senior Software Engineer",
+      "company_name": "EMAPTA",
+      "location": "Makati City, Metro Manila (Hybrid)",
+      "employment_type": "Full-time",
+      "qualifications": {
+        "full_text": "Over 10 years experience leading enterprise architecture",
+        "required_skills": [
+          "Enterprise Architecture",
+          "Software Engineering"
+        ],
+        "experience_level": "Senior level",
+        "proficiency_level": "Expert"
+      },
+      "job_description": "Over 10 years experience leading enterprise architecture",
+      "job_url": "https://ph.jobstreet.com/job/86376861",
+      "is_tech_job": true,
+      "error": false
+    }
+  ]
+}

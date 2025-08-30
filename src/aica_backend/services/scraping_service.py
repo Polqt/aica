@@ -1,8 +1,11 @@
 import logging
+import json
+import os
 
 from typing import Dict, Any, List
 from datetime import datetime
 from sqlalchemy.orm import Session
+from pathlib import Path
 
 from ..database.models import JobPosting, PipelineRun, ScrapingSession
 from ..scraping.providers.factory import ScrapingProviderFactory
@@ -17,29 +20,50 @@ class ScrapingService:
         self._initialize_providers()
         
     def _initialize_providers(self):
-        provider_configs = {
-            'crawl4ai': {
+        logger.info("ScrapingService: Initializing providers from job_sources.json")
+
+        # Load job sources configuration
+        job_sources_path = Path(__file__).parent.parent / "job_sources.json"
+        try:
+            with open(job_sources_path, 'r') as f:
+                job_sources_config = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logger.error(f"Failed to load job_sources.json: {e}")
+            return
+
+        sources = job_sources_config.get('sources', {})
+
+        for source_name, source_config in sources.items():
+            if not source_config.get('active', False):
+                logger.info(f"ScrapingService: Skipping inactive source: {source_name}")
+                continue
+
+            logger.info(f"ScrapingService: Initializing provider for source: {source_name}")
+
+            # Create provider config with source-specific settings
+            provider_config = {
+                'name': source_name,
                 'active': True,
-                'headless': True,
-                'rate_limit_delay': 2,
-                'max_retries': 5
-            },
-            'beautifulsoup': {
-                'active': True,
-                'rate_limit_delay': 1,
-                'max_retries': 3,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                'llm_config': source_config.get('llm_config', {}),
+                'base_urls': source_config.get('base_urls', []),
+                'pagination_template': source_config.get('pagination_template', ''),
+                'browser_config': source_config.get('browser_config', {}),
+                'actions_before_run': source_config.get('actions_before_run', []),
+                'wait_for_selector': source_config.get('wait_for_selector', ''),
+                'scroll': source_config.get('scroll', False),
+                'scroll_count': source_config.get('scroll_count', 5),
+                'wait_for_timeout': source_config.get('wait_for_timeout', 30000),
+                'rate_limit_delay': 2,  # Default rate limiting
+                'max_retries': 3
             }
-        }
-        
-        for name, config in provider_configs.items():
-            if config.get('active', False):
-                try:
-                    provider = ScrapingProviderFactory.create_provider(name, config)
-                    self.providers[name] = provider
-                    logger.info(f"Initialized provider: {name}")
-                except Exception as e:
-                    logger.error(f"Failed to initialize provider {name}: {e}")
+
+            try:
+                # Use crawl4ai provider for all sources for now
+                provider = ScrapingProviderFactory.create_provider('crawl4ai', provider_config)
+                self.providers[source_name] = provider
+                logger.info(f"Initialized provider for source: {source_name}")
+            except Exception as e:
+                logger.error(f"Failed to initialize provider for {source_name}: {e}")
                     
     async def start_scraping_pipeline(self, urls: List[str]) -> Dict[str, Any]:
         pipeline_run = PipelineRun(
@@ -140,7 +164,7 @@ class ScrapingService:
         
         for job_data in jobs:
             try:
-                existing =self.db.query(JobPosting).filter(
+                existing = self.db.query(JobPosting).filter(
                     JobPosting.source_url == job_data.get('source_url')
                 ).first()
                 
@@ -150,15 +174,16 @@ class ScrapingService:
                 
                 job_posting = JobPosting(
                     source_url=job_data.get('source_url', ''),
-                    source_site=job_data.get('provider', 'unknown'),
+                    source_site=job_data.get('source_site', 'unknown'),
                     job_title=job_data.get('job_title'),
                     company_name=job_data.get('company_name'),
                     location=job_data.get('location'),
                     employment_type=job_data.get('employment_type'),
                     experience_level=job_data.get('experience_level'),
-                    full_text=job_data.get('job_description'),
-                    technical_skills=job_data.get('required_skills', []),
-                    soft_skills=job_data.get('preferred_skills', []),
+                    full_text=job_data.get('full_text'),
+                    technical_skills=job_data.get('all_skills', []),
+                    all_skills=job_data.get('all_skills', []),
+                    tech_category=job_data.get('tech_category'),
                     status="raw"
                 )
                 

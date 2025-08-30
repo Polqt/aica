@@ -45,10 +45,9 @@ class JobPosting(Base):
     all_skills: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
     skill_categories: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     requirements: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    
+
     # Additional job details
     benefits: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    requirements: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
     
     # Dates
     posting_date: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)

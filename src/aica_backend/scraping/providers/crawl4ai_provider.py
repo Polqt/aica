@@ -1,11 +1,9 @@
 import asyncio
 import json
 import logging
-import time
-
 from typing import List, Dict, Any, Optional
-from urllib.parse import urljoin
 from pathlib import Path
+from urllib.parse import urljoin, urlparse
 
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from crawl4ai.async_configs import LLMConfig
@@ -13,7 +11,7 @@ from crawl4ai.extraction_strategy import LLMExtractionStrategy
 
 from .base import BaseProvider
 from ...core.config import settings
-from ...utils import scraping as scrape_utils
+from ...utils.robots_checker import SimpleRobotsChecker
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +22,23 @@ class Crawl4AIProvider(BaseProvider):
         self.browser_config = self._create_browser_config()
         self.rate_limit_delay = settings.SCRAPING_RATE_LIMIT_DELAY
         self.max_retries = settings.SCRAPING_MAX_RETRIES
+        self.robots_checker = SimpleRobotsChecker(user_agent=self.browser_config.user_agent)
+        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
     def _create_browser_config(self) -> BrowserConfig:
         return BrowserConfig(
             headless=self.site_config.get('browser_config', {}).get('headless', settings.CRAWL4AI_HEADLESS),
             browser_type=settings.CRAWL4AI_BROWSER_TYPE,
-            user_agent=settings.CRAWL4AI_USER_AGENT
+            user_agent=self.site_config.get('browser_config', {}).get('user_agent', settings.CRAWL4AI_USER_AGENT),
+            verbose=False  # Disable verbose logging to avoid encoding issues
         )
 
     @staticmethod
     def _load_json_from_file(file_path: str) -> Dict[str, Any]:
         try:
-            with open(Path(file_path), 'r') as f:
+            base_path = Path(__file__).parent.parent.parent  
+            full_path = base_path / file_path
+            with open(full_path, 'r') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logger.error(f"Error loading JSON from {file_path}: {str(e)}")
@@ -44,7 +47,9 @@ class Crawl4AIProvider(BaseProvider):
     @staticmethod
     def _load_text_from_file(file_path: str) -> str:
         try:
-            with open(Path(file_path), 'r') as f:
+            base_path = Path(__file__).parent.parent.parent  
+            full_path = base_path / file_path
+            with open(full_path, 'r') as f:
                 return f.read()
         except FileNotFoundError as e:
             logging.error(f"Error loading text from {file_path}: {str(e)}")
@@ -68,24 +73,57 @@ class Crawl4AIProvider(BaseProvider):
             instruction=instruction,
         )
 
-    def scrape_job_listings(self) -> List[Dict[str, Any]]:
-        return asyncio.run(self._scrape_site())
-
     async def _scrape_site(self) -> List[Dict[str, Any]]:
         all_jobs = []
         paginated_urls = self._get_paginated_urls(max_pages=2)
 
         async with AsyncWebCrawler(config=self.browser_config) as crawler:
-            # Process URLs one by one to avoid overwhelming the server
             for url in paginated_urls:
                 jobs = await self._scrape_single_url(crawler, url)
                 if jobs:
                     all_jobs.extend(jobs)
-                # Add delay between requests
                 await asyncio.sleep(self.rate_limit_delay)
 
-        unique_jobs = self._remove_duplicates(all_jobs)
-        return unique_jobs
+        return self._remove_duplicates(all_jobs)
+
+    async def scrape_jobs(self, urls: List[str]) -> List[Dict[str, Any]]:
+        """Scrape job listings from given URLs."""
+        logger.info(f"Crawl4AIProvider: Starting scrape_jobs with {len(urls)} URLs")
+        return await self._scrape_site_from_urls(urls)
+
+    async def get_supported_sites(self) -> List[str]:
+        """Get list of supported site domains."""
+        return ["jobstreet.com", "remoteok.com"]
+
+    async def test_connection(self) -> Dict[str, Any]:
+        """Test connection to provider services."""
+        try:
+            async with AsyncWebCrawler(config=self.browser_config) as crawler:
+                return {"status": "success", "message": "Connection successful"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    async def _scrape_site_from_urls(self, urls: List[str]) -> List[Dict[str, Any]]:
+        """Scrape from provided URLs."""
+        all_jobs = []
+
+        for url in urls:
+            if not await self.robots_checker.can_fetch(url):
+                continue
+
+            crawl_delay = await self.robots_checker.get_crawl_delay(url) or self.rate_limit_delay
+            actual_delay = max(self.rate_limit_delay, crawl_delay)
+
+            async with AsyncWebCrawler(config=self.browser_config) as crawler:
+                jobs = await self._scrape_single_url(crawler, url)
+                if jobs:
+                    all_jobs.extend(jobs)
+                    if "jobstreet" in url.lower() and len(all_jobs) >= 300:
+                        break
+
+            await asyncio.sleep(actual_delay)
+
+        return self._remove_duplicates(all_jobs)
 
     def _get_paginated_urls(self, max_pages: int = 5) -> List[str]:
         urls = []
@@ -102,108 +140,91 @@ class Crawl4AIProvider(BaseProvider):
         """Scrape a single URL with simplified configuration."""
         for attempt in range(self.max_retries):
             try:
-                logger.info(f"Attempting to scrape {url} (attempt {attempt + 1}/{self.max_retries})")
-                
-                # Simplified run config - start with basics
                 run_config = CrawlerRunConfig(
                     extraction_strategy=self._create_extraction_strategy(),
                     wait_for=self.site_config.get('wait_for_selector', 'body'),
                     page_timeout=self.site_config.get('wait_for_timeout', 30000),
-                    cache_mode=CacheMode.BYPASS
+                    cache_mode=CacheMode.BYPASS,
+                    log_console=False,
+                    screenshot=False
                 )
 
                 result = await crawler.arun(url=url, config=run_config)
 
                 if result.success and result.extracted_content:
-                    logger.info(f"Successfully scraped {url}")
                     return self._process_extracted_content(result.extracted_content, url)
-                else:
-                    logger.warning(f"Attempt {attempt + 1} failed for {url}: {result.error_message}")
-                    
-                    # If this is not the last attempt, wait before retrying
-                    if attempt < self.max_retries - 1:
-                        wait_time = (attempt + 1) * 2  # Exponential backoff
-                        logger.info(f"Waiting {wait_time} seconds before retry...")
-                        await asyncio.sleep(wait_time)
-                        
-            except Exception as e:
-                logger.error(f"Error on attempt {attempt + 1} for {url}: {str(e)}")
+
                 if attempt < self.max_retries - 1:
-                    wait_time = (attempt + 1) * 2
-                    logger.info(f"Waiting {wait_time} seconds before retry...")
-                    await asyncio.sleep(wait_time)
-                else:
-                    logger.error(f"All {self.max_retries} attempts failed for {url}")
+                    await asyncio.sleep((attempt + 1) * 2)
+
+            except Exception as e:
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep((attempt + 1) * 2)
 
         return []
 
     def _process_extracted_content(self, extracted_content: Any, source_url: str) -> List[Dict[str, Any]]:
+        """Process extracted content and return list of jobs matching schema."""
         jobs = []
 
         try:
-            data = json.loads(extracted_content) if isinstance(extracted_content, str) else extracted_content
+            if isinstance(extracted_content, str):
+                data = json.loads(extracted_content)
+            else:
+                data = extracted_content
 
-            job_list = data.get('jobs', []) if isinstance(data, dict) else []
+            job_list = data.get('jobs', []) if isinstance(data, dict) else data if isinstance(data, list) else []
 
             for job_data in job_list:
-                if isinstance(job_data, dict) and job_data.get('is_tech_job'):
-                    cleaned_job = self._clean_job_data(job_data, source_url)
-                    if cleaned_job:
-                        jobs.append(cleaned_job)
-                        
-        except (json.JSONDecodeError, TypeError, KeyError) as e:
-            logger.error(f"Error processing extracted content from {source_url}: {str(e)}")
-            logger.debug(f"Extracted content preview: {str(extracted_content)[:500]}...")
+                if isinstance(job_data, dict) and job_data.get('is_tech_job', False):
+                    if job_data.get('job_title') and job_data.get('company_name'):
+                        job_url = job_data.get('job_url')
+                        if job_url:
+                            job_url = self._validate_and_clean_url(job_url, source_url)
+                            job_data['job_url'] = job_url
 
-        logger.info(f"Processed {len(jobs)} tech jobs from {source_url}")
+                        if "jobstreet" in source_url.lower():
+                            if job_url and self._is_valid_jobstreet_url(job_url):
+                                jobs.append(job_data)
+                        else:
+                            jobs.append(job_data)
+
+        except (json.JSONDecodeError, TypeError, KeyError):
+            return []
+
         return jobs
 
-    def _clean_job_data(self, job_data: Dict[str, Any], source_url: str) -> Optional[Dict[str, Any]]:
-        try:
-            job_title = scrape_utils.clean_text(job_data.get('job_title', ''))
-            company_name = scrape_utils.clean_text(job_data.get('company_name', ''))
-            qualifications = job_data.get('qualifications', {})
-            skills = qualifications.get('required_skills', [])
-
-            if not job_title or not company_name:
-                logger.debug(f"Skipping job due to missing title or company: {job_title} | {company_name}")
-                return None
-
-            raw_job_url = job_data.get('job_url')
-            absolute_job_url = urljoin(source_url, raw_job_url) if raw_job_url else None
-
-            return {
-                'source_url': absolute_job_url,
-                'source_site': self.name,
-                'job_title': job_title,
-                'company_name': company_name,
-                'full_text': scrape_utils.clean_text(job_data.get('job_description', '')) +
-                    "\n" + scrape_utils.clean_text(qualifications.get('full_text', '')),
-                'location': scrape_utils.clean_text(job_data.get('location', '')),
-                'employment_type': scrape_utils.normalize_employment_type(job_data.get('employment_type')),
-                'experience_level': scrape_utils.normalize_experience_level(job_data.get('experience_level')),
-                'all_skills': scrape_utils.clean_skills_array(skills),
-                'tech_category': scrape_utils.categorize_tech_job(job_title, " ".join(skills)),
-                'status': 'raw'
-            }
-        except Exception as e:
-            logger.error(f"Error cleaning job data from {source_url}: {str(e)}")
+    def _validate_and_clean_url(self, url: str, source_url: str) -> Optional[str]:
+        """Validate and clean extracted URLs."""
+        if not url:
             return None
 
-    def _get_job_key(self, job: Dict[str, Any]) -> str:
-        title = job.get('job_title', '').lower().strip()
-        company = job.get('company_name', '').lower().strip()
-        return f"{title}|{company}"
+        url = url.strip()
+
+        if url.startswith('/'):
+            url = urljoin(source_url, url)
+        elif not url.startswith('http'):
+            url = urljoin(source_url, url)
+
+        try:
+            parsed = urlparse(url)
+            return url if parsed.scheme and parsed.netloc else None
+        except Exception:
+            return None
+
+    def _is_valid_jobstreet_url(self, url: str) -> bool:
+        """Check if URL is a valid JobStreet job URL."""
+        return bool(url and "jobstreet.com" in url.lower() and "/job/" in url)
 
     def _remove_duplicates(self, jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Remove duplicate jobs based on title and company."""
         seen_keys = set()
         unique_jobs = []
 
         for job in jobs:
-            job_key = self._get_job_key(job)
+            job_key = f"{job.get('job_title', '').lower()}|{job.get('company_name', '').lower()}"
             if job_key not in seen_keys:
                 seen_keys.add(job_key)
                 unique_jobs.append(job)
 
-        logger.info(f"Removed {len(jobs) - len(unique_jobs)} duplicate jobs")
         return unique_jobs
